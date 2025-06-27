@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-// import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-export default function AuditPlan() {
+export default function AuditPlan({ status, setStatus }) {
 
   const auditTeamOptions = [
   { value: "Alice", label: "Alice" },
@@ -19,13 +18,13 @@ const [location, setLocation] = useState('');
 const [leadAuditor, setLeadAuditor] = useState('');
 // You already have selectedAuditTeam
 const [plannedDate, setPlannedDate] = useState('');
-const [status, setStatus] = useState('');
+// const [status, setStatus] = useState('');
 const [actualDate, setActualDate] = useState('');
 const [criteria, setCriteria] = useState('');
 const [scope, setScope] = useState('');
 
 
-const [selectedAuditTeam, setSelectedAuditTeam] = useState([]); // Initialize as empty array for multiselect
+  const [selectedAuditTeam, setSelectedAuditTeam] = useState([]); // Initialize as empty array for multiselect
     // Your handler function to update the state
   const handleAuditTeamChange = (event) => {
     const values = Array.from(event.target.selectedOptions, option => option.value);
@@ -33,7 +32,7 @@ const [selectedAuditTeam, setSelectedAuditTeam] = useState([]); // Initialize as
   };
 
     // Example function to submit contact form data
-const submitAuditPlanForm = async (AuditPlanData) => {
+  const submitAuditPlanForm = async (AuditPlanData) => {
     try {
       const response = await fetch('http://localhost:5000/api/AuditPlan', {
         method: 'POST',
@@ -154,7 +153,7 @@ const handleCancel = () => {
                                         required
                                         className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                                         font-semibold focus:border-orange-500 focus:outline-none"
-                                        // readOnly
+                                        readOnly
                                     />
                               </div>
 
@@ -167,7 +166,7 @@ const handleCancel = () => {
                                        id="audit-type"
                                        value={auditType}
                                        onChange={e => setAuditType(e.target.value)}
-                                       defaultValue=""
+                                      //  defaultValue=""
                                        required
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                                        font-semibold focus:border-orange-500 focus:outline-none">
@@ -188,7 +187,7 @@ const handleCancel = () => {
                                        id="standards"
                                        value={standards}
                                        onChange={e => setStandards(e.target.value)}
-                                       defaultValue=""
+                                      //  defaultValue=""
                                        required
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                                        font-semibold focus:border-orange-500 focus:outline-none">
@@ -213,7 +212,7 @@ const handleCancel = () => {
                                        id="location-audit"
                                        value={location}
                                        onChange={e => setLocation(e.target.value)}
-                                       defaultValue=""
+                                      //  defaultValue=""
                                        required
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
                                        font-semibold focus:border-orange-500 focus:outline-none">
@@ -254,12 +253,13 @@ const handleCancel = () => {
                                        name="auditTeam"
                                        id="audit-team"
                                        required
-                                       options={auditTeamOptions}
+                                       multiple
+                                      //  options={auditTeamOptions}
                                        value={selectedAuditTeam}
                                        onChange={handleAuditTeamChange}
                                       //  className="mt-2"
-                                       classNamePrefix="react-select"
-                                       placeholder="Select Audit Team"
+                                      //  classNamePrefix="react-select"
+                                      //  placeholder="Select Audit Team"
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
                                        font-semibold focus:border-orange-500 focus:outline-none"
                                       >
@@ -300,7 +300,7 @@ const handleCancel = () => {
                                        value={status}
                                        onChange={e => setStatus(e.target.value)}
                                        required
-                                       defaultValue=""
+                                      //  defaultValue=""
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
                                        font-semibold focus:border-orange-500 focus:outline-none">
                                         <option value="" disabled>

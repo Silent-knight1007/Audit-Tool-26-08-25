@@ -1,35 +1,85 @@
-// const express = require('express');
-// const router = express.Router();
-// const AuditPlan = require('../models/AuditPlan');
+const express = require('express');
+const router = express.Router();
+const AuditPlan = require('../models/AuditPlan'); // Adjust path if needed
+
+router.post('/', async (req, res) => {
+  try {
+    const newAudit = new AuditPlan(req.body);
+    await newAudit.save();
+    res.status(201).json({ id: newAudit.auditId });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to create audit' });
+  }
+});
 
 // router.post('/', async (req, res) => {
 //   try {
-//     const auditPlan = new AuditPlan(req.body);
-//     await auditPlan.save();
-//     res.status(200).json({ message: 'AuditPlan saved' });
+//     // Generate next auditId
+//     const lastAudit = await AuditPlan.findOne().sort({ auditId: -1 });
+//     let newId = 'AUD001';
+//     if (lastAudit && lastAudit.auditId) {
+//       const lastIdNum = parseInt(lastAudit.auditId.replace('AUD', ''));
+//       newId = `AUD${(lastIdNum + 1).toString().padStart(3, '0')}`;
+//     }
+//     // Save new audit
+//     const newAudit = new AuditPlan({
+//       ...req.body,
+//       auditId: newId,
+//       status: req.body.status || 'Planned'
+//     });
+//     await newAudit.save();
+//     res.status(201).json({ id: newId });
+//   } catch (err) {
+//     res.status(500).json({ error: 'Failed to create audit' });
+//   }
+// });
+
+
+// // 🔸 POST: Save new AuditPlan
+// router.post('/', async (req, res) => {
+//   try {
+//     const audit = new AuditPlan(req.body);
+//     await audit.save();
+//     res.status(200).json({ message: 'Audit Plan saved' });
 //   } catch (err) {
 //     res.status(500).json({ error: err.message });
 //   }
 // });
 
-// module.exports = router;
+// // Create a new audit with auto-generated ID
+// router.post('/api/audits', async (req, res) => {
 
-const express = require('express');
-const router = express.Router();
-const AuditPlan = require('../models/AuditPlan'); // Adjust path if needed
+//   try {
+//     // Get the last audit to determine next ID
+//     const lastAudit = await AuditPlan.findOne().sort({ auditId: -1 });
+    
+//     let newId = 'AUD001'; // Default first ID
+    
+//     if (lastAudit && lastAudit.auditId) {
+//       // Extract the number part and increment
+//       const lastIdNum = parseInt(lastAudit.auditId.replace('AUD', ''));
+//       newId = `AUD${(lastIdNum + 1).toString().padStart(3, '0')}`;
+//     }
+    
+//     // Create a new audit with the generated ID
+//     const newAudit = new AuditPlan({
+//       auditId: newId,
+//       // Other default fields can be set here
+//       status: 'Planned'
+//     });
+    
+//     await newAudit.save();
+//     res.status(201).json({ id: newId });
+//   } catch (err) {
+//     console.error('Error creating audit:', err);
+//     res.status(500).json({ error: 'Failed to create audit' });
+//   }
+// });
 
-// 🔸 POST: Save new AuditPlan
-router.post('/', async (req, res) => {
-  try {
-    const audit = new AuditPlan(req.body);
-    await audit.save();
-    res.status(200).json({ message: 'Audit Plan saved' });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 // 🔸 GET: Fetch all Audit Plans
+
+
 router.get('/', async (req, res) => {
   try {
     const audits = await AuditPlan.find();
@@ -38,34 +88,6 @@ router.get('/', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
-// // 🔸 GET: Fetch a single Audit Plan by ID
-// router.get('/:id', async (req, res) => {
-//   try {
-//     const audit = await AuditPlan.findById(req.params.id);
-//     if (!audit) {
-//       return res.status(404).json({ message: 'Audit Plan not found' });
-//     }
-//     res.json(audit);
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// });
-
-// // 🔸 PUT: Update an Audit Plan by ID
-// router.put('/:id', async (req, res) => {
-//   try {
-//     const audit = await AuditPlan.findByIdAndUpdate(req.params.id, req.body, { new: true });
-//     if (!audit) {
-//       return res.status(404).json({ message: 'Audit Plan not found' });
-//     }
-//     res.json({ message: 'Audit Plan updated', audit });
-//   } catch (err) {
-//     res.status(500).json({ message: err.message });
-//   }
-// });
-
-
 
 // 🔸 DELETE: Delete multiple Audit Plans
 router.delete('/', async (req, res) => {

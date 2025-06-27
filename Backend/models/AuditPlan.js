@@ -1,30 +1,42 @@
-// const mongoose = require('mongoose');
-
-// const auditplanSchema = new mongoose.Schema({
-//   name: String,
-//   email: String,
-//   message: String,
-  
-// });
-
-// module.exports = mongoose.model('Audit', auditplanSchema);
-
 const mongoose = require('mongoose');
 
+// Counter schema/model
+const counterSchema = new mongoose.Schema({
+  _id: { type: String, required: true },
+  seq: { type: Number, default: 0 }
+});
+const Counter = mongoose.model('Counter', counterSchema);
+
+// Audit Plan schema/model
 const auditplanSchema = new mongoose.Schema({
-  auditId: String, 
+  auditId: { type: String, unique: true }, // Ensure uniqueness
   auditType: String,
   standards: String,
   location: String,
   leadAuditor: String,
-  auditTeam: [{type:String}],
+  auditTeam: [{ type: String }],
   plannedDate: Date,
   status: String,
   actualDate: Date,
-  criteria:String,
-  scope:String
-  });
+  criteria: String,
+  scope: String
+});
+
+// Auto-generate AUDxxx ID before saving
+auditplanSchema.pre('save', async function (next) {
+  if (!this.isNew) return next();
+
+  try {
+    const counter = await Counter.findByIdAndUpdate(
+      { _id: 'auditId' },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true }
+    );
+    this.auditId = `AUD${counter.seq.toString().padStart(3, '0')}`;
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 module.exports = mongoose.models.Audit || mongoose.model('Audit', auditplanSchema);
-
-

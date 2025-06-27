@@ -4,12 +4,14 @@ const cors = require('cors');
 require('dotenv').config();
 
 const Audit = require('./models/AuditPlan'); // ✅ adjust path if needed
-const auditPlanRoutes = require('./routes/AuditPlan');
 const NonConformity = require('./models/NonConformity');
+const auditPlanRouter = require('./routes/AuditPlan'); // Adjust path as needed
+
 
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/api/audits', auditPlanRouter);
 
 const PORT = process.env.PORT || 5000;
 
