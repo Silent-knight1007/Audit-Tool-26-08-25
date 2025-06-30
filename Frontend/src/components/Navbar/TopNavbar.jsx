@@ -20,22 +20,6 @@ export default function Navbar({ onMenuClick }) {
 
       {/* Logo */}
       <img src={CompanyLogo} alt="Company Logo" className="h-8" />
-
-      {/* Auth Buttons */}
-      <div className="flex items-center space-x-2">
-        <a
-          href="#"
-          className="text-gray-800 hover:bg-gray-50 font-medium rounded-lg text-sm px-4 py-2 focus:outline-none"
-        >
-          Log in
-        </a>
-        <a
-          href="#"
-          className="text-white bg-orange-700 hover:bg-orange-800 font-medium rounded-lg text-sm px-4 py-2 focus:outline-none"
-        >
-          Get started
-        </a>
-      </div>
     </header>
   );
 }

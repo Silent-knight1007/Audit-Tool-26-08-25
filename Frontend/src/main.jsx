@@ -41,8 +41,7 @@ const router = createBrowserRouter(
       <Route path='user/:userid' element={<User />} />
        <Route path='xyz' element={<AuditPlan />} />
        <Route path='abc' element={<NonConformity />} />
-    </Route>
-    
+    </Route> 
   )
 )
 

@@ -1,5 +1,6 @@
 import React from "react"
 import { FaCogs, FaClipboardCheck, FaChartBar, FaShieldAlt, FaUsers } from "react-icons/fa"
+import { useNavigate } from 'react-router-dom';
 
 // Audit Management Info Blocks
 const auditInfo = [
@@ -13,11 +14,6 @@ const auditInfo = [
     content:
        "Audit management software is a digital tool that automates and streamlines the entire audit lifecycle. It helps organizations plan, execute, document, and report audits efficiently, reducing manual work and minimizing errors.",
   },
-  // {
-  //   title: "How Does Audit Management Software Work?",
-  //   content:
-  //     "The software provides features for scheduling audits, assigning roles, collecting evidence, tracking findings, and generating reports. It often includes dashboards, notifications, and integration with other business systems.",
-  // },
   {
     title: "Core Features",
     content:
@@ -59,6 +55,9 @@ const features = [
 ];
 
 export default function Home() {
+
+const navigate = useNavigate();
+
   return (
     <div className="w-full min-h-screen bg-white">
       {/* Hero Section */}
@@ -68,7 +67,7 @@ export default function Home() {
           <p className="text-xl text-gray-700 mb-8">
             The complete solution for automated audit management and compliance.
           </p>
-          <button className="bg-orange-700 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-orange-800 transition">
+          <button className="bg-orange-700 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-orange-800 transition" onClick={() => navigate('/authpanel')}>
             Get Started
           </button>
         </div>
@@ -134,7 +133,6 @@ export default function Home() {
       </section>
 
       {/* (Optional) Testimonials or Logos Section */}
-      {/* ... */}
     </div>
   );
 }
