@@ -1,4 +1,7 @@
 import React from 'react';
+import CompanyLogo from '../../assets/CompanyLogo.png'
+
+
 
 export default function Navbar({ onMenuClick }) {
   return (
@@ -14,8 +17,10 @@ export default function Navbar({ onMenuClick }) {
           <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
         </svg>
       </button>
+
       {/* Logo */}
-      <span className="font-bold text-xl text-orange-700">Your Logo</span>
+      <img src={CompanyLogo} alt="Company Logo" className="h-8" />
+
       {/* Auth Buttons */}
       <div className="flex items-center space-x-2">
         <a

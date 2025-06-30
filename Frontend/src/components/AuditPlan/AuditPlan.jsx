@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from 'axios';  
+import {useNavigate} from 'react-router-dom';
 
 export default function AuditPlan({ status, setStatus }) {
 
@@ -22,6 +23,8 @@ const [plannedDate, setPlannedDate] = useState('');
 const [actualDate, setActualDate] = useState('');
 const [criteria, setCriteria] = useState('');
 const [scope, setScope] = useState('');
+const navigate = useNavigate();
+
 
 
   const [selectedAuditTeam, setSelectedAuditTeam] = useState([]); // Initialize as empty array for multiselect
@@ -42,7 +45,7 @@ const [scope, setScope] = useState('');
       const result = await response.json();
       if(response.ok){
         alert('Audit Plan form submitted successfully!');
-        //  navigate('/AuditTable');  // 👈 Redirect to table page
+         navigate('/AuditPlan');  // 👈 Redirect to table page
       } else {
         alert('Failed to submit Audit Plan form: ' + result.error);
       }

@@ -7,23 +7,23 @@ const AuditPlanButton = () => {
 
         const [auditId, setAuditId] = useState('');
 
-    const handleCreate = async () => {
-          try {
-        const response = await fetch('http://localhost:5000/api/audits', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ /* any other audit fields */ })
-        });
-        if (response.ok) {
-        const data = await response.json();
-        setAuditId(data.id); // Show AUD001, etc.
-        } else {
-        console.error('Server error:', response.status);
-        }
-        } catch (err) {
-        console.error("Failed to create audit:", err);
-        }
-    };
+    // const handleCreate = async () => {
+    //       try {
+    //     const response = await fetch('http://localhost:5000/api/audits', {
+    //         method: 'POST',
+    //         headers: { 'Content-Type': 'application/json' },
+    //         body: JSON.stringify({ /* any other audit fields */ })
+    //     });
+    //     if (response.ok) {
+    //     const data = await response.json();
+    //     setAuditId(data.id); // Show AUD001, etc.
+    //     } else {
+    //     console.error('Server error:', response.status);
+    //     }
+    //     } catch (err) {
+    //     console.error("Failed to create audit:", err);
+    //     }
+    // };
 
 
     // const handleCreate = async () => {
@@ -62,7 +62,7 @@ const AuditPlanButton = () => {
         <div>
             <Link to="/xyz" className="inline-block items-center mr-10">
                 <button className=" md:w-25 bg-orange-700 hover:bg-blue-dark text-white font-bold text-l py-3 px-6 rounded-lg mt-5 mb-5 ml-2
-                    // hover:bg-orange-600 transition ease-in-out duration-300" onClick={handleCreate} >
+                    // hover:bg-orange-600 transition ease-in-out duration-300">
                        Create New Audit
                 </button>
             </Link>

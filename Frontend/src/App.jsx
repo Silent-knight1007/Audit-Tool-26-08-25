@@ -36,7 +36,6 @@ export default function App() {
           <Route path='abc' element={<NonConformity />} />
           {/* ...other routes */}
         </Routes>
-        
       </div>
     </div>
     <Footer />
