@@ -67,7 +67,7 @@ const navigate = useNavigate();
           <p className="text-xl text-gray-700 mb-8">
             The complete solution for automated audit management and compliance.
           </p>
-          <button className="bg-orange-700 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-orange-800 transition" onClick={() => navigate('/authpanel')}>
+          <button className="bg-orange-700 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-orange-800 transition" onClick={() => navigate('/login')}>
             Get Started
           </button>
         </div>
