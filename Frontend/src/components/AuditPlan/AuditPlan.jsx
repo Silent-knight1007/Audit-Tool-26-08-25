@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';  
 import {useNavigate} from 'react-router-dom';
 
-export default function AuditPlan({ status, setStatus }) {
+export default function AuditPlan() {
 
   const auditTeamOptions = [
   { value: "Alice", label: "Alice" },
@@ -14,12 +14,12 @@ export default function AuditPlan({ status, setStatus }) {
 
 const [auditId, setAuditId] = useState('');
 const [auditType, setAuditType] = useState('');
-const [standards, setStandards] = useState('');
+const [standards, setStandards] = useState([]);
 const [location, setLocation] = useState('');
 const [leadAuditor, setLeadAuditor] = useState('');
 // You already have selectedAuditTeam
 const [plannedDate, setPlannedDate] = useState('');
-// const [status, setStatus] = useState('');
+const [status, setStatus] = useState('');
 const [actualDate, setActualDate] = useState('');
 const [criteria, setCriteria] = useState('');
 const [scope, setScope] = useState('');
@@ -70,27 +70,6 @@ const navigate = useNavigate();
     criteria,
     scope,
   };submitAuditPlanForm(AuditPlanData);};
-
-
-  // useEffect((id) => {
-  //   // Fetch the existing data by ID (replace with your fetch logic)
-  //   fetchDataById(id).then(data => setFormData(data));
-  // }, [id]);
-
-  // if (!formData) return <div>Loading...</div>;
-  // if (id) {
-  //   // Editing
-  //   axios.put(`http://localhost:5000/api/AuditPlan/${id}`, AuditPlanData)
-  //     .then(() => {
-  //       alert('Audit updated successfully!');
-  //       navigate('/'); // Redirects to the table page
-  //       // Optionally redirect
-  //     })
-  //     .catch(() => alert('Failed to update audit'));
-  // } else {
-  //   // Creating new
-  // }
-
 
 const handleCancel = () => {
   if (window.confirm("Are you sure you want to cancel filling the form?")) {

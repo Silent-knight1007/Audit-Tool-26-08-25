@@ -1,12 +1,33 @@
 import Multiselect from 'multiselect-react-dropdown';
 import React, { useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 
 
 export default function NonConformity() {
+    const navigate = useNavigate();
+    const [ncId, setNcId] = useState('');
+    const [ncDescription, setNcDescription] = useState('');
+    const [ncClauseNo, setNcClauseNo] = useState('');
+    const [ncType, setNcType] = useState('');
+    const [dueDate, setDueDate] = useState('');
+    const [department, setDepartment] = useState('');
+    const [responsibleperson, setResponsibleperson] = useState('');
+    const [responsiblepersonmail, setResponsiblepersonmail] = useState('');
+    const [nclocation, setNclocation] = useState('');
+    const [ncCorrectiveAction, setNcCorrectiveAction] = useState('');
+    const [ncPreventiveAction, setNcPreventiveAction] = useState('');
+    const [ncRootCause, setNcRootCause] = useState('');
+    const [ncstatus, setNcstatus] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formError, setFormError] = useState('');
+
+
 
     // Example function to submit contact form data
-const submitNonConformityForm = async (NonConformityData) => {
-    try {
+  const submitNonConformityForm = async (NonConformityData) => {
+    try 
+    {
       const response = await fetch('http://localhost:5000/api/NonConformity', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -15,51 +36,105 @@ const submitNonConformityForm = async (NonConformityData) => {
       const result = await response.json();
       if(response.ok){
         alert('NonConformity form submitted successfully!');
+        navigate('/NonConformity');
       } else {
         alert('Failed to submit NonConformity form: ' + result.error);
       }
-    } catch (error) {
+    } 
+    catch (error) 
+    {
       alert('Error submitting NonConformity form: ' + error.message);
     }
   };
 
+  // Show confirmation popup
   const handleNonConformityFormSubmit = (e) => {
-    e.preventDefault();
-    const NonConformityData = {
-      ncId: e.target.ncId.value,
-      ncDescription: e.target.ncDescription.value,
-      ncClauseNo: e.target.ncClauseNo.value,
-      ncType: e.target.ncType.value,
-      dueDate: e.target.dueDate.value,
-      department: e.target.department.value,
-      responsibleperson: e.target.responsibleperson.value,
-      responsiblepersonmail: e.target.responsiblepersonmail.value,
-      nclocation: e.target.nclocation.value,
-      ncCorrectiveAction: e.target.ncCorrectiveAction.value,
-      ncPreventiveAction: e.target.ncPreventiveAction.value,
-      ncRootCause: e.target.ncRootCause.value,
-      ncstatus: e.target.ncstatus.value,
-    };
-    submitNonConformityForm(NonConformityData);
+  e.preventDefault();
+  setFormError('');
+
+  // Basic validation (you can expand this as needed)
+  if (
+    !ncDescription ||
+    !ncClauseNo ||
+    !ncType ||
+    !dueDate ||
+    !department ||
+    !responsibleperson ||
+    !responsiblepersonmail ||
+    !nclocation ||
+    !ncCorrectiveAction ||
+    !ncPreventiveAction ||
+    !ncRootCause ||
+    !ncstatus
+  ) {
+    setFormError('Please fill in all required fields.');
+    return;
+  }
+
+  if (!window.confirm("Are you sure you want to save the NonConformity form?")) {
+    return;
+  }
+
+  setIsSubmitting(true);
+
+  const NonConformityData = {
+    ncDescription,
+    ncClauseNo,
+    ncType,
+    dueDate,
+    department,
+    responsibleperson,
+    responsiblepersonmail,
+    nclocation,
+    ncCorrectiveAction,
+    ncPreventiveAction,
+    ncRootCause,
+    ncstatus,
   };
 
-  const handleCancel = () => {
-  if (window.confirm("Are you sure you want to cancel filling the form?")) {
-    setncId('');
-    setncDescription('');
-    setncClauseNo('');
-    setncType('');
-    setdueDate('');
-    setdepartment([]);
-    setresponsibleperson('');
-    setresponsiblepersonmail('');
-    setlocation('');
-    setncCorrectiveAction('');
-    setncPreventiveAction('');
-    setncRootCause('');
-    setncstatus('');
-  }
+  submitNonConformityForm(NonConformityData).finally(() => setIsSubmitting(false));
 };
+
+
+  // Cancel handler
+  const handleCancel = () => {
+    if (window.confirm("Are you sure you want to cancel filling the form?")) {
+      setNcId('');
+      setNcDescription('');
+      setNcClauseNo('');
+      setNcType('');
+      setDueDate('');
+      setDepartment('');
+      setResponsibleperson('');
+      setResponsiblepersonmail('');
+      setNclocation('');
+      setNcCorrectiveAction('');
+      setNcPreventiveAction('');
+      setNcRootCause('');
+      setNcstatus('');
+    }
+  };
+
+// const handleNonConformityFormSubmit = (e) => {
+  //   e.preventDefault();
+  //   const NonConformityData = {
+  //     ncId: e.target.ncId.value,
+  //     ncDescription: e.target.ncDescription.value,
+  //     ncClauseNo: e.target.ncClauseNo.value,
+  //     ncType: e.target.ncType.value,
+  //     dueDate: e.target.dueDate.value,
+  //     department: e.target.department.value,
+  //     responsibleperson: e.target.responsibleperson.value,
+  //     responsiblepersonmail: e.target.responsiblepersonmail.value,
+  //     nclocation: e.target.nclocation.value,
+  //     ncCorrectiveAction: e.target.ncCorrectiveAction.value,
+  //     ncPreventiveAction: e.target.ncPreventiveAction.value,
+  //     ncRootCause: e.target.ncRootCause.value,
+  //     ncstatus: e.target.ncstatus.value,
+  //   };
+  //   submitNonConformityForm(NonConformityData);
+  // };
+
   
     return (
         <div className="relative flex items-top justify-center min-h-[700px] bg-white sm:items-center sm:pt-0">
@@ -68,29 +143,34 @@ const submitNonConformityForm = async (NonConformityData) => {
                     <div className="flex justify-center items-center min-h-screen bg-gray-0">
                         <form className="p-1 flex flex-col justify-center" onSubmit={handleNonConformityFormSubmit}>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-                              <div className="flex flex-col  ">
-                                    <label htmlFor="ncId" className="text-medium font-medium text-gray-700">
-                                          NonConformityId  <span className="text-red-500 text-xl mt-1">*</span>
-                                    </label>
-                                    <input
-                                        type="text"
-                                        name="ncId"
-                                        id="ncId"
-                                        placeholder="Enter NonConformity ID"
-                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
-                                        font-semibold focus:border-orange-500 focus:outline-none"
-                                    />
+                              <div className="flex flex-col">
+                                <label htmlFor="ncId" className="text-medium font-medium text-gray-700">
+                                  NonConformityId
+                                </label>
+                                <input
+                                  type="text"
+                                  name="ncId"
+                                  id="ncId"
+                                  value={ncId}
+                                  disabled
+                                  placeholder="Will be generated after save"
+                                  className="w-100 mt-2 py-3 px-3 rounded-lg bg-gray-100 border border-gray-400 text-gray-800 font-semibold"
+                                />
                               </div>
 
                               <div className="flex flex-col  ">
                                     <label htmlFor="ncDescription" className="text-medium font-medium text-gray-700">
                                        Description  <span className="text-red-500 text-xl mt-1">*</span>
                                     </label>
-                                    <input
-                                        type="text"
+                                    <textarea
+                                        value={ncDescription}
+                                        onChange={e => setNcDescription(e.target.value)}
+                                        maxLength={1000}
+                                        rows={4}
                                         name="ncDescription"
                                         id="ncDescription"
                                         placeholder="Enter Description"
+                                        required
                                         className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                                         font-semibold focus:border-orange-500 focus:outline-none"
                                     />
@@ -100,10 +180,14 @@ const submitNonConformityForm = async (NonConformityData) => {
                                     <label htmlFor="ncClauseNo" className="text-medium font-medium text-gray-700">
                                       Clause Number  <span className="text-red-500 text-xl mt-1">*</span>
                                     </label>
-                                    <input
-                                        type="text"
+                                    <textarea
+                                        value={ncClauseNo}
+                                        onChange={e => setNcClauseNo(e.target.value)}
+                                        maxLength={1000}
+                                        rows={4}
                                         name="ncClauseNo"
                                         id="ncClauseNo"
+                                        required
                                         placeholder="Enter Clause No"
                                         className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                                         font-semibold focus:border-orange-500 focus:outline-none"
@@ -117,6 +201,7 @@ const submitNonConformityForm = async (NonConformityData) => {
                                     <select
                                        name="ncType"
                                        id="nc-type"
+                                       required
                                        defaultValue=""
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                                        font-semibold focus:border-orange-500 focus:outline-none">
@@ -135,6 +220,7 @@ const submitNonConformityForm = async (NonConformityData) => {
                                 </label>
                                 <input
                                   type="date"
+                                  required
                                   name="dueDate"
                                   id="due-date"
                                   className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
@@ -149,6 +235,7 @@ const submitNonConformityForm = async (NonConformityData) => {
                                     <select
                                        name="department"
                                        id="department"
+                                       required
                                        defaultValue=""
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                                        font-semibold focus:border-orange-500 focus:outline-none">
@@ -171,6 +258,7 @@ const submitNonConformityForm = async (NonConformityData) => {
                                     <select
                                        name="responsibleperson"
                                        id="responsible-person"
+                                       required
                                        defaultValue=""
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                                        font-semibold focus:border-orange-500 focus:outline-none">
@@ -191,6 +279,7 @@ const submitNonConformityForm = async (NonConformityData) => {
                                        name="responsiblepersonmail"
                                        id="responsible-person-mail"
                                        defaultValue=""
+                                       required
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                                        font-semibold focus:border-orange-500 focus:outline-none">
                                        <option value="" disabled>
@@ -209,6 +298,7 @@ const submitNonConformityForm = async (NonConformityData) => {
                                     <select
                                        name="location"
                                        id="nclocation"
+                                       required
                                        defaultValue=""
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
                                        font-semibold focus:border-orange-500 focus:outline-none">
@@ -228,9 +318,13 @@ const submitNonConformityForm = async (NonConformityData) => {
                                     <label htmlFor="ncCorrectiveAction" className="text-medium font-medium text-gray-700">
                                        Corrective Action  <span className="text-red-500 text-xl mt-1">*</span>
                                     </label>
-                                    <input
-                                        type="text"
+                                    <textarea
+                                        value={ncCorrectiveAction}
+                                        onChange={e => setNcCorrectiveAction(e.target.value)}
+                                        maxLength={1000}
+                                        rows={4}
                                         name="ncCorrectiveAction"
+                                        required
                                         id="ncCorrectiveAction"
                                         placeholder="Enter Corrective Action"
                                         className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
@@ -242,8 +336,12 @@ const submitNonConformityForm = async (NonConformityData) => {
                                     <label htmlFor="ncPreventiveAction" className="text-medium font-medium text-gray-700">
                                        Preventive Action  <span className="text-red-500 text-xl mt-1">*</span>
                                     </label>
-                                    <input
-                                        type="text"
+                                    <textarea
+                                        value={ncPreventiveAction}
+                                        maxLength={1000}
+                                        rows={4}
+                                        onChange={e => setNcPreventiveAction(e.target.value)}
+                                        required
                                         name="ncPreventiveAction"
                                         id="ncPreventiveAction"
                                         placeholder="Enter Preventive Action"
@@ -256,10 +354,14 @@ const submitNonConformityForm = async (NonConformityData) => {
                                     <label htmlFor="ncRootCause" className="text-medium font-medium text-gray-700">
                                        Root Cause  <span className="text-red-500 text-xl mt-1">*</span>
                                     </label>
-                                    <input
-                                        type="text"
+                                    <textarea
+                                        value={ncRootCause}
                                         name="ncRootCause"
                                         id="ncRootCause"
+                                        onChange={e => setNcRootCause(e.target.value)}
+                                        maxLength={1000}
+                                        rows={4}
+                                        required
                                         placeholder="Enter Root Cause"
                                         className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                                         font-semibold focus:border-orange-500 focus:outline-none"
@@ -273,6 +375,7 @@ const submitNonConformityForm = async (NonConformityData) => {
                                     <select
                                        name="ncstatus"
                                        id="ncstatus"
+                                       required
                                        defaultValue=""
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
                                        font-semibold focus:border-orange-500 focus:outline-none">
@@ -331,11 +434,12 @@ const submitNonConformityForm = async (NonConformityData) => {
                                 </div>
                                 </div>  */}
 
-                              <button
+                             <button
                                 type="submit"
-                                className="w-32 bg-orange-700 hover:bg-blue-dark text-white font-bold py-2 px-6 rounded-lg mt-10 
-                                hover:bg-orange-600 transition ease-in-out duration-300">
-                                Save
+                                disabled={isSubmitting}
+                                className="w-32 bg-orange-700 hover:bg-blue-dark text-white font-bold py-2 px-6 rounded-lg 
+                                 mt-10 hover:bg-orange-600 transition ease-in-out duration-300">
+                                {isSubmitting ? 'Saving...' : 'Save'}
                               </button>
 
                               <button type="button" onClick={handleCancel}
@@ -344,8 +448,10 @@ const submitNonConformityForm = async (NonConformityData) => {
                                 Cancel
                               </button>
 
-
                             </div>
+                            {formError && (
+                            <div className="mb-4 text-red-600 font-semibold">{formError}</div>
+                            )}
                         </form>
                     </div>
                 </div>

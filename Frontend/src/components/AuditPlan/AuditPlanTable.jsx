@@ -29,6 +29,11 @@ const AuditTable = () => {
 
   };
 
+  const navigate = useNavigate();
+  const handleClick=()=>{
+    navigate('/abc')
+  }
+
   const handleDeleteSelected = async (ids = selectedIds) => {
   if (!window.confirm("Are you sure you want to delete?")) return;
 
@@ -77,6 +82,7 @@ const AuditTable = () => {
             <th className="border p-2">Actual Date</th>
             <th className="border p-2">Audit Criteria</th>
             <th className="border p-2">Audit Scope</th>
+            <th className="border p-2">button idhar ahega </th>
           </tr>
         </thead>
         <tbody>
@@ -106,6 +112,14 @@ const AuditTable = () => {
               <td className="border p-2">{new Date(audit.actualDate).toLocaleDateString()}</td>
               <td className="border p-2">{audit.criteria}</td>
               <td className="border p-2">{audit.scope}</td>
+              <td className="border p-2">
+                {audit.status === "Executed"
+                &&
+              <button onClick={handleClick} className="md:w-25 bg-orange-700 hover:bg-blue-dark text-white font-bold text-l py-3 px-6 rounded-lg mt-5 mb-5 ml-2
+               hover:bg-orange-600 transition ease-in-out duration-300">
+                Add Non Conformity
+              </button>}
+                 </td>
             </tr>
           ))}
         </tbody>

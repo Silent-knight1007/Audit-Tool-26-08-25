@@ -206,52 +206,52 @@ export default function AuthPanel() {
 
   // --- UI ---
   return (
-    <div className="min-h-screen flex justify-center items-start bg-gradient-to-br from-[#0a0a23] to-[#1a1a40] p-4 pt-24">
+    <div className="min-h-screen flex justify-center items-start bg-white p-4 pt-24">
       <div className="w-full max-w-md mx-auto">
         <div className="relative">
           {/* ----- Sign In Form ----- */}
           {!showRegister && !showForgot && (
             <form
-              className="bg-[#23213a] p-8 rounded-2xl shadow-2xl w-full transition-all duration-500 animate-fade-in"
+              className="bg-white border-2 border-red-800 p-8 rounded-2xl shadow-xl w-full transition-all duration-500 animate-fade-in"
               onSubmit={handleLoginSubmit}
               autoComplete="off"
             >
-              <h2 className="text-2xl font-bold text-center mb-6 text-blue-400">Sign In</h2>
+              <h2 className="text-3xl font-bold text-center mb-6 text-red-700">Sign In</h2>
               <div className="mb-3">
-                <label className="block text-gray-300 mb-1" htmlFor="login-email">
+                <label className="block text-red-700 mb-1 font-bold" htmlFor="login-email">
                   Email
                 </label>
                 <input
                   id="login-email"
                   type="email"
-                  className={`w-full px-4 py-2 rounded bg-[#1a1a40] text-white border ${loginEmailError ? "border-red-500" : "border-gray-600"} focus:outline-none focus:border-blue-400 transition`}
+                  className={`w-full px-4 py-2 bg-white-700 rounded text-black font-bold border ${loginEmailError ? "border-red-700" : "border-red-700"} focus:outline-none focus:border-red-700 transition`}
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
                   required
                 />
                 {loginEmailError && (
-                  <div className="text-red-400 text-sm mt-1">{loginEmailError}</div>
+                  <div className="text-red-600 text-sm mt-1">{loginEmailError}</div>
                 )}
               </div>
               <div className="mb-3">
-                <label className="block text-gray-300 mb-1" htmlFor="login-password">
+                <label className="block text-red-700 mb-1 font-bold" htmlFor="login-password">
                   Password
                 </label>
                 <input
                   id="login-password"
                   type="password"
-                  className={`w-full px-4 py-2 rounded bg-[#1a1a40] text-white border ${loginPasswordError ? "border-red-500" : "border-gray-600"} focus:outline-none focus:border-blue-400 transition`}
+                  className={`w-full px-4 py-2 rounded bg-white-700 text-black font-bold border ${loginPasswordError ? "border-red-700" : "border-red-700"} focus:outline-none focus:border-red-700 transition`}
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
                   required
                 />
                 {loginPasswordError && (
-                  <div className="text-red-400 text-sm mt-1">{loginPasswordError}</div>
+                  <div className="text-red-600 text-lg mt-1">{loginPasswordError}</div>
                 )}
               </div>
               <button
                 type="submit"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded transition mb-2">
+                className="w-full bg-red-700 text-lg hover:bg-red-500 text-black font-bold py-2 rounded transition mb-2">
                 Login
               </button>
               
@@ -265,14 +265,14 @@ export default function AuthPanel() {
               <div className="flex justify-between items-center text-sm mt-2">
                 <button
                   type="button"
-                  className="text-blue-300 hover:text-blue-400 underline transition"
+                  className="text-red-700 hover:text-red-700 underline transition font-bold"
                   onClick={() => setShowForgot(true)}
                 >
                   Forgot Password?
                 </button>
                 <button
                   type="button"
-                  className="text-blue-300 hover:text-blue-400 underline transition"
+                  className="text-red-700 hover:text-red-700 underline transition font-bold"
                   onClick={() => {
                     setShowRegister(true);
                     setLoginMsg("");
@@ -287,37 +287,37 @@ export default function AuthPanel() {
           {/* ----- Forgot Password Form ----- */}
           {showForgot && (
             <form
-              className="bg-[#23213a] p-8 rounded-2xl shadow-2xl w-full transition-all duration-500 animate-fade-in"
+              className="bg-white border-2 border-red-600 p-8 rounded-2xl shadow-2xl w-full transition-all duration-500 animate-fade-in"
               onSubmit={handleForgotSubmit}
               autoComplete="off"
             >
-              <h2 className="text-2xl font-bold text-center mb-6 text-blue-400">Forgot Password</h2>
+              <h2 className="text-2xl font-bold text-center mb-6 text-red-600">Forgot Password</h2>
               <div className="mb-3">
-                <label className="block text-gray-300 mb-1" htmlFor="forgot-email">
+                <label className="block text-gray-900 mb-1" htmlFor="forgot-email">
                   Enter your @onextel.com email
                 </label>
                 <input
                   id="forgot-email"
                   type="email"
-                  className={`w-full px-4 py-2 rounded bg-[#1a1a40] text-white border ${forgotEmailError ? "border-red-500" : "border-gray-600"} focus:outline-none focus:border-blue-400 transition`}
+                  className={`w-full px-4 py-2 rounded bg-[#1a1a40] text-white border ${forgotEmailError ? "border-red-700" : "border-gray-600"} focus:outline-none focus:border-red-700 transition`}
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
                   required
                 />
                 {forgotEmailError && (
-                  <div className="text-red-400 text-sm mt-1">{forgotEmailError}</div>
+                  <div className="text-red-600 text-sm mt-1">{forgotEmailError}</div>
                 )}
               </div>
               <button
                 type="submit"
-                className="w-full bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded transition mb-2"
+                className="w-full bg-red-700 hover:bg-red-700 text-white font-semibold py-2 rounded transition mb-2"
               >
                 Send Reset Link
               </button>
               <div className="text-center">
                 <button
                   type="button"
-                  className="text-blue-300 hover:text-blue-400 underline transition"
+                  className="text-red-600 hover:text-red-600 underline transition"
                   onClick={() => setShowForgot(false)}
                 >
                   Back to Sign In
@@ -334,13 +334,13 @@ export default function AuthPanel() {
           {/* ----- Register Form ----- */}
           {showRegister && !showForgot && (
             <form
-              className="bg-[#23213a] p-10 rounded-2xl shadow-2xl w-full transition-all duration-500 animate-fade-in"
+              className="bg-white border-2 border-red-700 p-8 rounded-2xl shadow-2xl w-full transition-all duration-500 animate-fade-in"
               onSubmit={handleRegisterSubmit}
               autoComplete="off"
             >
               <h2
                 ref={registerHeadingRef}
-                className="text-2xl font-bold text-center mb-6 text-pink-400 cursor-pointer"
+                className="text-3xl font-bold text-center mb-6 text-red-700 cursor-pointer"
                 tabIndex={0}
                 onClick={() =>
                   registerHeadingRef.current &&
@@ -353,29 +353,29 @@ export default function AuthPanel() {
                 First Time Login
               </h2>
               <div className="mb-3">
-                <label className="block text-gray-300 mb-1" htmlFor="register-email">
+                <label className="block text-red-700 font-bold mb-1" htmlFor="register-email">
                   Email
                 </label>
                 <input
                   id="register-email"
                   type="email"
-                  className={`w-full px-4 py-2 rounded bg-[#1a1a40] text-white border ${registerEmailError ? "border-red-500" : "border-gray-600"} focus:outline-none focus:border-pink-400 transition`}
+                  className={`w-full px-4 py-2 rounded bg-white-700 text-black font-bold border ${registerEmailError ? "border-red-700" : "border-red-700"} focus:outline-none focus:border-red-700 transition`}
                   value={registerEmail}
                   onChange={handleRegisterEmailChange}
                   required
                 />
                 {registerEmailError && (
-                  <div className="text-red-400 text-sm mt-1">{registerEmailError}</div>
+                  <div className="text-red-700 text-sm mt-1">{registerEmailError}</div>
                 )}
               </div>
               <div className="mb-3">
-                <label className="block text-gray-300 mb-1" htmlFor="register-password">
+                <label className="block text-red-700 font-bold mb-1" htmlFor="register-password">
                   Password
                 </label>
                 <input
                   id="register-password"
                   type="password"
-                  className={`w-full px-4 py-2 rounded bg-[#1a1a40] text-white border ${registerPasswordError ? "border-red-500" : "border-gray-600"} focus:outline-none focus:border-pink-400 transition`}
+                  className={`w-full px-4 py-2 rounded bg-white-700 text-black font-bold border ${registerPasswordError ? "border-red-700" : "border-red-700"} focus:outline-none focus:border-red-700 transition`}
                   value={registerPassword}
                   onChange={(e) => {
                     setRegisterPassword(e.target.value);
@@ -385,13 +385,13 @@ export default function AuthPanel() {
                 />
               </div>
               <div className="mb-3">
-                <label className="block text-gray-300 mb-1" htmlFor="register-confirm-password">
+                <label className="block text-red-700 font-bold mb-1" htmlFor="register-confirm-password">
                   Confirm Password
                 </label>
                 <input
                   id="register-confirm-password"
                   type="password"
-                  className={`w-full px-4 py-2 rounded bg-[#1a1a40] text-white border ${registerPasswordError ? "border-red-500" : "border-gray-600"} focus:outline-none focus:border-pink-400 transition`}
+                  className={`w-full px-4 py-2 rounded bg-white-700 text-black font-black border ${registerPasswordError ? "border-red-700" : "border-red-700"} focus:outline-none focus:border-red-700 transition`}
                   value={registerConfirmPassword}
                   onChange={(e) => {
                     setRegisterConfirmPassword(e.target.value);
@@ -400,19 +400,19 @@ export default function AuthPanel() {
                   required
                 />
                 {registerPasswordError && (
-                  <div className="text-red-400 text-sm mt-1">{registerPasswordError}</div>
+                  <div className="text-red-600 text-lg mt-1">{registerPasswordError}</div>
                 )}
               </div>
               <button
                 type="submit"
-                className="w-full bg-pink-500 hover:bg-pink-600 text-white font-semibold py-2 rounded transition mb-2"
+                className="w-full bg-red-700 hover:bg-red-500 text-lg text-black font-bold py-2 rounded transition mb-2"
               >
                 Register
               </button>
               <div className="text-center">
                 <button
                   type="button"
-                  className="text-pink-300 hover:text-pink-400 underline transition"
+                  className="text-red-700 hover:text-red-500 font-bold underline transition"
                   onClick={() => {
                     setShowRegister(false);
                     setRegisterMsg("");
