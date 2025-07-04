@@ -1,8 +1,6 @@
-import Multiselect from 'multiselect-react-dropdown';
-import React, { useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-
+import Multiselect from 'multiselect-react-dropdown'
+import React, { useRef, useState, useEffect } from "react"
+import { useNavigate } from "react-router-dom"
 
 export default function NonConformity() {
     const navigate = useNavigate();
@@ -12,8 +10,9 @@ export default function NonConformity() {
     const [ncType, setNcType] = useState('');
     const [dueDate, setDueDate] = useState('');
     const [department, setDepartment] = useState('');
-    const [responsibleperson, setResponsibleperson] = useState('');
-    const [responsiblepersonmail, setResponsiblepersonmail] = useState('');
+    const [responsiblePeople, setResponsiblePeople] = useState([]); // <-- array for the list
+    const [responsibleperson, setResponsibleperson] = useState(''); // <-- string for the selected person
+    const [responsiblepersonmail, setResponsiblepersonmail] = useState(''); // <-- string for the email
     const [nclocation, setNclocation] = useState('');
     const [ncCorrectiveAction, setNcCorrectiveAction] = useState('');
     const [ncPreventiveAction, setNcPreventiveAction] = useState('');
@@ -22,10 +21,39 @@ export default function NonConformity() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [formError, setFormError] = useState('');
 
+    const dummyPeople = [
+  { _id: 1, name: "Alice Johnson", email: "alice.johnson@example.com" },
+  { _id: 2, name: "Bob Smith", email: "bob.smith@example.com" },
+  { _id: 3, name: "Charlie Lee", email: "charlie.lee@example.com" }
+  ];
+
+  useEffect(() => {
+  setResponsiblePeople([
+    { _id: 1, name: "Alice Johnson", email: "alice.johnson@example.com" },
+    { _id: 2, name: "Bob Smith", email: "bob.smith@example.com" },
+    { _id: 3, name: "Charlie Lee", email: "charlie.lee@example.com" }
+  ]);
+}, []);
+
+
+  // // Use this in place of your fetch for now:
+  // useEffect(() => {
+  // setResponsiblePeople(dummyPeople);
+  // }, []);
+
+    // // Fetch responsible persons on mount
+    //     useEffect(() => {
+    //     fetch('http://localhost:5000/api/responsiblePerson')
+    //     .then(res => res.json())
+    //     .then(data => setResponsiblePeople(data))
+    //     .catch(err => console.error(err));
+    //     }, []);
+
 
 
     // Example function to submit contact form data
-  const submitNonConformityForm = async (NonConformityData) => {
+  
+    const submitNonConformityForm = async (NonConformityData) => {
     try 
     {
       const response = await fetch('http://localhost:5000/api/NonConformity', {
@@ -51,6 +79,21 @@ export default function NonConformity() {
   const handleNonConformityFormSubmit = (e) => {
   e.preventDefault();
   setFormError('');
+console.log({
+  ncDescription,
+  ncClauseNo,
+  ncType,
+  dueDate,
+  department,
+  responsibleperson,
+  responsiblepersonmail,
+  nclocation,
+  ncCorrectiveAction,
+  ncPreventiveAction,
+  ncRootCause,
+  ncstatus
+});
+
 
   // Basic validation (you can expand this as needed)
   if (
@@ -143,6 +186,7 @@ export default function NonConformity() {
                     <div className="flex justify-center items-center min-h-screen bg-gray-0">
                         <form className="p-1 flex flex-col justify-center" onSubmit={handleNonConformityFormSubmit}>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+{/* ncId */}
                               <div className="flex flex-col">
                                 <label htmlFor="ncId" className="text-medium font-medium text-gray-700">
                                   NonConformityId
@@ -157,7 +201,7 @@ export default function NonConformity() {
                                   className="w-100 mt-2 py-3 px-3 rounded-lg bg-gray-100 border border-gray-400 text-gray-800 font-semibold"
                                 />
                               </div>
-
+{/* description */}
                               <div className="flex flex-col  ">
                                     <label htmlFor="ncDescription" className="text-medium font-medium text-gray-700">
                                        Description  <span className="text-red-500 text-xl mt-1">*</span>
@@ -175,7 +219,7 @@ export default function NonConformity() {
                                         font-semibold focus:border-orange-500 focus:outline-none"
                                     />
                               </div>
-
+{/* clause no  */}
                               <div className="flex flex-col  ">
                                     <label htmlFor="ncClauseNo" className="text-medium font-medium text-gray-700">
                                       Clause Number  <span className="text-red-500 text-xl mt-1">*</span>
@@ -193,7 +237,7 @@ export default function NonConformity() {
                                         font-semibold focus:border-orange-500 focus:outline-none"
                                     />
                               </div>
-
+{/* nctype */}
                               <div className="flex flex-col">
                                <label htmlFor="nc-type" className="text-medium font-medium text-gray-700">
                                   NonConformity Type <span className="text-red-500 text-xl mt-1">*</span>
@@ -202,7 +246,8 @@ export default function NonConformity() {
                                        name="ncType"
                                        id="nc-type"
                                        required
-                                       defaultValue=""
+                                       value={ncType}
+                                       onChange={e => setNcType(e.target.value)}
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                                        font-semibold focus:border-orange-500 focus:outline-none">
                                        <option value="" disabled>
@@ -213,7 +258,7 @@ export default function NonConformity() {
                                        <option>Observation</option>
                                     </select>
                               </div>
-
+{/* due date */}
                               <div className="flex flex-col">
                                 <label htmlFor="due-date" className="text-medium font-medium text-gray-700">
                                     Due Date <span className="text-red-500 text-xl mt-1">*</span>
@@ -223,11 +268,13 @@ export default function NonConformity() {
                                   required
                                   name="dueDate"
                                   id="due-date"
+                                  value={dueDate}
+                                  onChange={e => setDueDate(e.target.value)}
                                   className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
                                   font-semibold focus:border-orange-500 focus:outline-none"
                                 />
                               </div>
-
+{/* department */}
                               <div className="flex flex-col">
                                <label htmlFor="department" className="text-medium font-medium text-gray-700">
                                   Department <span className="text-red-500 text-xl mt-1">*</span>
@@ -236,7 +283,8 @@ export default function NonConformity() {
                                        name="department"
                                        id="department"
                                        required
-                                       defaultValue=""
+                                       value={department}
+                                       onChange={e => setDepartment(e.target.value)}
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                                        font-semibold focus:border-orange-500 focus:outline-none">
                                        <option value="" disabled>
@@ -250,47 +298,54 @@ export default function NonConformity() {
                                        <option value="Quality Assurance">Quality Assurance</option>
                                     </select>
                               </div>
-
+{/* responsible person */}
                               <div className="flex flex-col">
                                <label htmlFor="responsible-person" className="text-medium font-medium text-gray-700">
                                   Responsible-Person <span className="text-red-500 text-xl mt-1">*</span>
                                 </label>
                                     <select
-                                       name="responsibleperson"
-                                       id="responsible-person"
-                                       required
-                                       defaultValue=""
-                                       className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
-                                       font-semibold focus:border-orange-500 focus:outline-none">
-                                       <option value="" disabled>
-                                              Responsible-Person
-                                        </option>
-                                       <option value="Alice">Alice</option>
-                                       <option value="Bob">Bob</option>
-                                       <option value="Charlie">Charlie</option>
+                                      name="responsibleperson"
+                                      id="responsible-person"
+                                      required
+                                      value={responsibleperson}
+                                      onChange={e => {
+                                      setResponsibleperson(e.target.value);
+                                      // Find the selected person and set the email automatically
+                                      const person = responsiblePeople.find(p => p.name === e.target.value);
+                                      setResponsiblepersonmail(person ? person.email : '');
+                                      }}
+                                      className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
+                                      font-semibold focus:border-orange-500 focus:outline-none">
+                                      <option value="" disabled>Responsible-Person</option>
+                                      {responsiblePeople.map(person => (
+                                      <option key={person._id} value={person.name}>{person.name}</option>
+                                      ))}
                                     </select>
-                              </div>
 
+                              </div>
+{/* responsible person email */}
                                <div className="flex flex-col">
                                <label htmlFor="responsible-person-mail" className="text-medium font-medium text-gray-700">
                                   Responsible Person E-Mail <span className="text-red-500 text-xl mt-1">*</span>
                                 </label>
-                                    <select
+                                      <input
+                                       type="email"
                                        name="responsiblepersonmail"
                                        id="responsible-person-mail"
-                                       defaultValue=""
+                                       readOnly
                                        required
+                                       value={responsiblepersonmail} 
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
-                                       font-semibold focus:border-orange-500 focus:outline-none">
-                                       <option value="" disabled>
+                                       font-semibold focus:border-orange-500 focus:outline-none"/>
+
+                                       {/* <option value="" disabled>
                                               Responsible Person E-Mail
                                         </option>
                                        <option value="alice@example.com">alice@example.com</option>
                                        <option value="bob@example.com">bob@example.com</option>
-                                       <option value="charlie@example.com">charlie@example.com</option>
-                                    </select>
-                              </div>
-                            
+                                       <option value="charlie@example.com">charlie@example.com</option> */}
+                                </div>
+{/* location */}                            
                               <div className="flex flex-col">
                                 <label htmlFor="nc-location" className="text-medium font-medium text-gray-700">
                                   Location <span className="text-red-500 text-xl mt-1">*</span>
@@ -299,7 +354,8 @@ export default function NonConformity() {
                                        name="location"
                                        id="nclocation"
                                        required
-                                       defaultValue=""
+                                       value={nclocation}
+                                       onChange={e => setNclocation(e.target.value)}
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
                                        font-semibold focus:border-orange-500 focus:outline-none">
                                         <option value="" disabled>
@@ -313,7 +369,7 @@ export default function NonConformity() {
                                        <option value="Gurgaon">Gurgaon</option>
                                     </select>
                               </div>
-
+{/* corrective action*/}
                               <div className="flex flex-col  ">
                                     <label htmlFor="ncCorrectiveAction" className="text-medium font-medium text-gray-700">
                                        Corrective Action  <span className="text-red-500 text-xl mt-1">*</span>
@@ -331,7 +387,7 @@ export default function NonConformity() {
                                         font-semibold focus:border-orange-500 focus:outline-none"
                                     />
                               </div>
-
+{/* preventive action*/}
                               <div className="flex flex-col  ">
                                     <label htmlFor="ncPreventiveAction" className="text-medium font-medium text-gray-700">
                                        Preventive Action  <span className="text-red-500 text-xl mt-1">*</span>
@@ -349,7 +405,7 @@ export default function NonConformity() {
                                         font-semibold focus:border-orange-500 focus:outline-none"
                                     />
                               </div>
-
+{/* root cause */}
                               <div className="flex flex-col  ">
                                     <label htmlFor="ncRootCause" className="text-medium font-medium text-gray-700">
                                        Root Cause  <span className="text-red-500 text-xl mt-1">*</span>
@@ -367,7 +423,7 @@ export default function NonConformity() {
                                         font-semibold focus:border-orange-500 focus:outline-none"
                                     />
                               </div>
-
+{/* status */}
                               <div className="flex flex-col">
                                 <label htmlFor="ncstatus" className="text-medium font-medium text-gray-700">
                                   Status <span className="text-red-500 text-xl mt-1">*</span>
@@ -375,8 +431,9 @@ export default function NonConformity() {
                                     <select
                                        name="ncstatus"
                                        id="ncstatus"
+                                       value={ncstatus}
+                                      onChange={e => setNcstatus(e.target.value)}
                                        required
-                                       defaultValue=""
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
                                        font-semibold focus:border-orange-500 focus:outline-none">
                                         <option value="" disabled>

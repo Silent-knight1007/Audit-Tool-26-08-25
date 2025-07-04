@@ -7,6 +7,7 @@ const Audit = require('./models/AuditPlan'); // ✅ adjust path if needed
 const NonConformity = require('./models/NonConformity');
 const authRoutes = require('./routes/auth'); // adjust path as needed
 const auditPlanRouter = require('./routes/AuditPlan'); // Adjust path as needed
+const responsiblePersonRoutes = require('./routes/responsiblePerson');
 
 
 const app = express();
@@ -64,6 +65,7 @@ app.delete('/audits', async (req, res) => {
 // });
 
 app.use('/auth', authRoutes);
+app.use('/api/responsiblePerson', responsiblePersonRoutes);
 app.use('/api/AuditPlan', require('./routes/AuditPlan'));
 app.use('/api/NonConformity', require('./routes/NonConformity'));
 app.use('/api/auth', require('./routes/auth'));
