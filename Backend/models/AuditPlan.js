@@ -11,7 +11,11 @@ const mongoose = require('mongoose');
 const auditplanSchema = new mongoose.Schema({
   auditId: { type: String, unique: true }, // Ensure uniqueness
   auditType: String,
-  standards: String,
+  standards: {
+  type: [String],
+  required: true, // if you want at least one standard selected
+  validate: [arr => arr.length > 0, 'At least one standard must be selected.']
+  },
   location: String,
   leadAuditor: String,
   auditTeam: [{ type: String }],

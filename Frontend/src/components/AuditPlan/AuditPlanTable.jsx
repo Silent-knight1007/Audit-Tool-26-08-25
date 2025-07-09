@@ -30,8 +30,8 @@ const AuditTable = () => {
   };
 
   const navigate = useNavigate();
-  const handleClick=()=>{
-    navigate('/abc')
+  const handleClick=(auditId  )=>{
+    navigate('/abc', { state: { auditId } });
   }
 
   const handleDeleteSelected = async (ids = selectedIds) => {
@@ -115,7 +115,7 @@ const AuditTable = () => {
               <td className="border p-2">
                 {audit.status === "Executed"
                 &&
-              <button onClick={handleClick} className="md:w-25 bg-orange-700 hover:bg-blue-dark text-white font-bold text-l py-3 px-6 rounded-lg mt-5 mb-5 ml-2
+              <button onClick={() => handleClick(audit.auditId)} className="md:w-25 bg-orange-700 hover:bg-blue-dark text-white font-bold text-l py-3 px-6 rounded-lg mt-5 mb-5 ml-2
                hover:bg-orange-600 transition ease-in-out duration-300">
                 Add Non Conformity
               </button>}

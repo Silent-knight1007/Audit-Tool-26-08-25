@@ -4,6 +4,16 @@ import {useNavigate} from 'react-router-dom';
 
 export default function AuditPlan() {
 
+  const handleAddNonConformity = () => {
+  navigate('/NonConformity', { state: { auditId: auditId } });
+};
+
+// Handler for multiple select
+const handleStandardsChange = (e) => {
+  const selected = Array.from(e.target.selectedOptions, option => option.value);
+  setStandards(selected);
+};
+
   const auditTeamOptions = [
   { value: "Alice", label: "Alice" },
   { value: "Bob", label: "Bob" },
@@ -168,9 +178,10 @@ const handleCancel = () => {
                                        name="standards"
                                        id="standards"
                                        value={standards}
-                                       onChange={e => setStandards(e.target.value)}
+                                       onChange={handleStandardsChange}
                                       //  defaultValue=""
                                        required
+                                       multiple
                                        className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                                        font-semibold focus:border-orange-500 focus:outline-none">
                                        <option value="" disabled>

@@ -8,7 +8,8 @@ router.post('/', async (req, res) => {
     await newAudit.save();
     res.status(201).json({ id: newAudit.auditId });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to create audit' });
+    console.error('AuditPlan POST error:', err);
+     res.status(500).json({ error: err.message, details: err.errors });
   }
 });
 

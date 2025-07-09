@@ -1,9 +1,14 @@
 import Multiselect from 'multiselect-react-dropdown'
 import React, { useRef, useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { useLocation } from "react-router-dom";
 
 export default function NonConformity() {
     const navigate = useNavigate();
+    const location = useLocation();
+    const [auditId, setAuditId] = useState(location.state?.auditId || '');
+    console.log("Loaded auditId:", auditId);
+    // const [auditId, setAuditId] = useState('');
     const [ncId, setNcId] = useState('');
     const [ncDescription, setNcDescription] = useState('');
     const [ncClauseNo, setNcClauseNo] = useState('');
@@ -62,8 +67,8 @@ export default function NonConformity() {
         body: JSON.stringify(NonConformityData),
       });
       const result = await response.json();
-      if(response.ok){
-        alert('NonConformity form submitted successfully!');
+      if (response.ok) {
+         alert('NonConformity form submitted successfully! NC ID: ' + result.ncId);
         navigate('/NonConformity');
       } else {
         alert('Failed to submit NonConformity form: ' + result.error);
@@ -80,6 +85,7 @@ export default function NonConformity() {
   e.preventDefault();
   setFormError('');
 console.log({
+  auditId,
   ncDescription,
   ncClauseNo,
   ncType,
@@ -97,6 +103,7 @@ console.log({
 
   // Basic validation (you can expand this as needed)
   if (
+    !auditId ||
     !ncDescription ||
     !ncClauseNo ||
     !ncType ||
@@ -105,8 +112,6 @@ console.log({
     !responsibleperson ||
     !responsiblepersonmail ||
     !nclocation ||
-    !ncCorrectiveAction ||
-    !ncPreventiveAction ||
     !ncRootCause ||
     !ncstatus
   ) {
@@ -121,6 +126,7 @@ console.log({
   setIsSubmitting(true);
 
   const NonConformityData = {
+    auditId,
     ncDescription,
     ncClauseNo,
     ncType,
@@ -138,10 +144,10 @@ console.log({
   submitNonConformityForm(NonConformityData).finally(() => setIsSubmitting(false));
 };
 
-
   // Cancel handler
   const handleCancel = () => {
     if (window.confirm("Are you sure you want to cancel filling the form?")) {
+      setAuditId('');
       setNcId('');
       setNcDescription('');
       setNcClauseNo('');
@@ -186,6 +192,25 @@ console.log({
                     <div className="flex justify-center items-center min-h-screen bg-gray-0">
                         <form className="p-1 flex flex-col justify-center" onSubmit={handleNonConformityFormSubmit}>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+
+{/* auditId */}
+                              <div className="flex flex-col">
+                                <label htmlFor="audit-id" className="text-medium font-medium text-gray-700">
+                                  Audit ID <span className="text-red-500 text-xl mt-1">*</span>
+                                </label>
+                                <input
+                                  type="text"
+                                  required
+                                  readOnly
+                                  name="auditId"
+                                  id="audit-id"
+                                  value={auditId}
+                                  onChange={e => setAuditId(e.target.value)}
+                                  className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
+                                  font-semibold focus:border-orange-500 focus:outline-none"
+                                  placeholder="Enter or select Audit ID"
+                                />
+                              </div>
 {/* ncId */}
                               <div className="flex flex-col">
                                 <label htmlFor="ncId" className="text-medium font-medium text-gray-700">
@@ -194,9 +219,10 @@ console.log({
                                 <input
                                   type="text"
                                   name="ncId"
+                                  required
                                   id="ncId"
                                   value={ncId}
-                                  disabled
+                                  readOnly
                                   placeholder="Will be generated after save"
                                   className="w-100 mt-2 py-3 px-3 rounded-lg bg-gray-100 border border-gray-400 text-gray-800 font-semibold"
                                 />
@@ -372,7 +398,7 @@ console.log({
 {/* corrective action*/}
                               <div className="flex flex-col  ">
                                     <label htmlFor="ncCorrectiveAction" className="text-medium font-medium text-gray-700">
-                                       Corrective Action  <span className="text-red-500 text-xl mt-1">*</span>
+                                       Corrective Action  
                                     </label>
                                     <textarea
                                         value={ncCorrectiveAction}
@@ -380,7 +406,6 @@ console.log({
                                         maxLength={1000}
                                         rows={4}
                                         name="ncCorrectiveAction"
-                                        required
                                         id="ncCorrectiveAction"
                                         placeholder="Enter Corrective Action"
                                         className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
@@ -390,14 +415,13 @@ console.log({
 {/* preventive action*/}
                               <div className="flex flex-col  ">
                                     <label htmlFor="ncPreventiveAction" className="text-medium font-medium text-gray-700">
-                                       Preventive Action  <span className="text-red-500 text-xl mt-1">*</span>
+                                       Preventive Action 
                                     </label>
                                     <textarea
                                         value={ncPreventiveAction}
                                         maxLength={1000}
                                         rows={4}
                                         onChange={e => setNcPreventiveAction(e.target.value)}
-                                        required
                                         name="ncPreventiveAction"
                                         id="ncPreventiveAction"
                                         placeholder="Enter Preventive Action"
