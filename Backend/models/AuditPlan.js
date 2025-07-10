@@ -1,29 +1,50 @@
-const mongoose = require('mongoose');
-
-// // Counter schema/model
-// const counterSchema = new mongoose.Schema({
-//   _id: { type: String, required: true },
-//   seq: { type: Number, default: 0 }
-// });
-// const Counter = mongoose.model('Counter', counterSchema);
+import mongoose from 'mongoose';
 
 // Audit Plan schema/model
 const auditplanSchema = new mongoose.Schema({
   auditId: { type: String, unique: true }, // Ensure uniqueness
+
   auditType: String,
+
   standards: {
-  type: [String],
-  required: true, // if you want at least one standard selected
-  validate: [arr => arr.length > 0, 'At least one standard must be selected.']
+    type: [String],
+    required: true,
+    validate: [arr => arr.length > 0, 'At least one standard must be selected.']
   },
-  location: String,
+
+  location: {
+    type: [String],
+    required: true,
+    validate: [arr => arr.length > 0, 'At least one location must be selected.']
+  },
+
   leadAuditor: String,
-  auditTeam: [{ type: String }],
+
+  auditTeam: {
+    type: [String],
+    required: true,
+    validate: [arr => arr.length > 0, 'At least one location must be selected.']
+  },
+
   plannedDate: Date,
+
   status: String,
+
   actualDate: Date,
+
   criteria: String,
-  scope: String
+
+  scope: String,
+
+  attachments: [
+    {
+      filename: String, // The name stored on disk
+      originalname: String, // The original file name
+      mimetype: String,
+      size: Number,
+      path: String // Optional: relative path to the file
+    }
+  ]
 });
 
 // Auto-generate AUDxxx ID before saving
@@ -36,7 +57,7 @@ auditplanSchema.pre('save', async function (next) {
 
     // Extract numeric parts of auditIds and sort them
     const usedNumbers = audits
-      .map(a => parseInt(a.auditId.replace('AUD', ''), 10))
+      .map(a => parseInt((a.auditId || '').replace('AUD', ''), 10))
       .filter(n => !isNaN(n))
       .sort((a, b) => a - b);
 
@@ -58,22 +79,9 @@ auditplanSchema.pre('save', async function (next) {
   }
 });
 
-module.exports = mongoose.models.Audit || mongoose.model('Audit', auditplanSchema);
+// Remove model from mongoose.models if it exists (for hot-reloading in dev)
+delete mongoose.connection.models['Audit'];
 
-// auditplanSchema.pre('save', async function (next) {
-//   if (!this.isNew) return next();
+const Audit = mongoose.models.Audit || mongoose.model('Audit', auditplanSchema);
 
-//   try {
-//     const counter = await Counter.findByIdAndUpdate(
-//       { _id: 'auditId' },
-//       { $inc: { seq: 1 } },
-//       { new: true, upsert: true }
-//     );
-//     this.auditId = `AUD${counter.seq.toString().padStart(3, '0')}`;
-//     next();
-//   } catch (err) {
-//     next(err);
-//   }
-// });
-
-
+export default Audit;

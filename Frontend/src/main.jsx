@@ -37,13 +37,17 @@ const router = createBrowserRouter(
       <Route path='' element={<Home />} />
       <Route path='Dashboard' element={<Dashboard />} />
       <Route path='AuditPlan' element={<AuditPlanButton />} />
-      <Route path='NonConformity' element={<NonConformityButton/>} />
+      <Route path='NonConformity' element={<NonConformityButton />} />
       <Route path='user/:userid' element={<User />} />
-       <Route path='xyz' element={<AuditPlan />} />
-       <Route path='abc' element={<NonConformity />} />
-    </Route> 
+      <Route path='xyz' element={<AuditPlan />} />
+      <Route path='abc' element={<NonConformity />} />
+      {/* Add these two: */}
+      <Route path='edit-audit/:id' element={<AuditPlan />} />
+      <Route path='edit-nc/:id' element={<NonConformity />} />
+    </Route>
   )
 )
+
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

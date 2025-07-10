@@ -38,6 +38,8 @@ export default function App() {
           <Route path='user/:userid' element={<User/>} />
           <Route path='xyz' element={<AuditPlan />} />
           <Route path='abc' element={<NonConformity />} />
+          <Route path="/edit-audit/:id" element={<AuditPlan />} />
+          <Route path="/edit-nc/:id" element={<NonConformity />} />
           {/* ...other routes */}
         </Routes>
       </div>

@@ -1,6 +1,6 @@
-const express = require('express');
+import express from 'express';
+import ResponsiblePerson from '../models/responsibleperson.js'; // Note the .js extension!
 const router = express.Router();
-const ResponsiblePerson = require('../models/responsibleperson');
 
 // GET all responsible persons
 router.get('/', async (req, res) => {
@@ -12,4 +12,4 @@ router.get('/', async (req, res) => {
   }
 });
 
-module.exports = router;
+export default router;
