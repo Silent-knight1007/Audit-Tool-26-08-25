@@ -81,8 +81,13 @@ export default function AuthPanel() {
       const data = await response.json();
       if (response.ok) {
         setLoginMsg(
-          "You are successfully logged in to Onextel Audit Program Tool. Now you can start exploring the tool."
+          "You are successfully Registered into Onextel Audit Program Tool. Now you can move forward towards SignIn Process."
         );
+        localStorage.setItem('isAuthenticated', 'true');
+          setTimeout(() => {
+          navigate("/dashboard");
+          }, 2000);
+
         // Redirect after 2 seconds
         setTimeout(() => {
           navigate("/dashboard");
@@ -94,7 +99,7 @@ export default function AuthPanel() {
       setLoginMsg("Network error. Please try again.");
     }
     // Simulate successful login
-    setLoginMsg("Login successful! (Simulated)");
+    setLoginMsg("SignIn Successful!");
   };
 
   
@@ -152,7 +157,7 @@ export default function AuthPanel() {
     registeredUsers.add(registerEmail);
     setRegisterSuccess(true);
     setRegisterMsg(
-      `Hello ${registerEmail}, you are successfully registered at Onextel Audit Program Tool. Now you can move forward for sign in process to explore the tool.`
+      `Hello ${registerEmail}, You are successfully Registered into Onextel Audit Program Tool. Now you can move forward towards SignIn Process.`
     );
     setRegisterEmail("");
     setRegisterPassword("");

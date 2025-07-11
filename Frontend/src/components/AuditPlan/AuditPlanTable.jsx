@@ -32,8 +32,6 @@ const AuditTable = () => {
     navigate('/abc', { state: { auditId } });
   };
 
-
-
   const handleDeleteSelected = async (ids = selectedIds) => {
     if (!window.confirm("Are you sure you want to delete?")) return;
 
@@ -116,13 +114,13 @@ const AuditTable = () => {
               <td className="border p-2">{audit.criteria}</td>
               <td className="border p-2">{audit.scope}</td>
               <td className="border p-2">
-                {audit.status === "Executed" && (
-                  <button
-                    onClick={() => handleClick(audit.auditId)}
-                    className="md:w-25 bg-orange-700 hover:bg-blue-dark text-white font-bold text-l py-3 px-6 rounded-lg mt-5 mb-5 ml-2 hover:bg-orange-600 transition ease-in-out duration-300"
-                  >
-                    Add Non Conformity
-                  </button>
+                  {audit.status === "Executed" && (
+                <button
+                  onClick={() => handleClick(audit.auditId)}
+                  className="w-auto bg-orange-700 hover:bg-orange-600 text-white font-semibold text-sm 
+                  py-1 px-3 rounded mt-2 mb-2 ml-2 transition duration-200">
+                  Add Non Conformity
+                </button>
                 )}
               </td>
               <td className="border p-2">
