@@ -1,3 +1,4 @@
+
 // Add to your auth routes
 const crypto = require('crypto');
 const User = require('../models/User');
