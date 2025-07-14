@@ -485,13 +485,13 @@ const submitNCForm = async (ncData) => {
                   {/* attachments */}
                   <div className="flex flex-col">
                     <label htmlFor="attachments" className="text-medium font-medium text-gray-700">
-                      Attachments (png, jpeg, docx, pdf, xls, xlsx, ppt, pptx)
+                      Attachments (png, jpeg, docx, pdf, xlsx, pptx)
                     </label>
                     <input
                       type="file"
                       id="attachments"
                       name="attachments"
-                      accept=".png,.jpeg,.jpg,.doc,.docx,.pdf,.xls,.xlsx,.ppt,.pptx"
+                      accept=".png,.jpeg,.jpg,.doc,.docx,.pdf,.xlsx,.pptx"
                       multiple
                       onChange={handleAttachmentsChange}
                       className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 

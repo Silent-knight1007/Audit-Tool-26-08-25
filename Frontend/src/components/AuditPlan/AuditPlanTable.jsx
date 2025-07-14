@@ -68,12 +68,12 @@ const AuditTable = () => {
             <th className="border p-2">Standards</th>
             <th className="border p-2">Location</th>
             <th className="border p-2">Lead Auditor</th>
-            <th className="border p-2">Audit Team</th>
+            {/* <th className="border p-2">Audit Team</th> */}
             <th className="border p-2">Planned Date</th>
             <th className="border p-2">Status</th>
             <th className="border p-2">Actual Date</th>
-            <th className="border p-2">Audit Criteria</th>
-            <th className="border p-2">Audit Scope</th>
+            {/* <th className="border p-2">Audit Criteria</th> */}
+            {/* <th className="border p-2">Audit Scope</th> */}
             <th className="border p-2">Add Non Conformity</th>
             <th className="border p-2">Attachments</th>
           </tr>
@@ -102,25 +102,24 @@ const AuditTable = () => {
                   {audit.auditId}
                 </button>
               </td>
-
               <td className="border p-2">{audit.auditType}</td>
               <td className="border p-2">{audit.standards}</td>
               <td className="border p-2">{audit.location}</td>
               <td className="border p-2">{audit.leadAuditor}</td>
-              <td className="border p-2">{audit.auditTeam}</td>
+              {/* <td className="border p-2">{audit.auditTeam}</td> */}
               <td className="border p-2">{new Date(audit.plannedDate).toLocaleDateString()}</td>
               <td className="border p-2">{audit.status}</td>
               <td className="border p-2">{new Date(audit.actualDate).toLocaleDateString()}</td>
-              <td className="border p-2">{audit.criteria}</td>
-              <td className="border p-2">{audit.scope}</td>
+              {/* <td className="border p-2">{audit.criteria}</td> */}
+              {/* <td className="border p-2">{audit.scope}</td> */}
               <td className="border p-2">
-                  {audit.status === "Executed" && (
-                <button
-                  onClick={() => handleClick(audit.auditId)}
-                  className="w-auto bg-orange-700 hover:bg-orange-600 text-white font-semibold text-sm 
-                  py-1 px-3 rounded mt-2 mb-2 ml-2 transition duration-200">
-                  Add Non Conformity
-                </button>
+                {audit.status === "Executed" && (
+                  <button
+                    onClick={() => handleClick(audit.auditId)}
+                    className="w-auto bg-orange-700 hover:bg-orange-600 text-white font-semibold text-sm 
+                      py-1 px-3 rounded mt-2 mb-2 ml-2 transition duration-200">
+                    Add Non Conformity
+                  </button>
                 )}
               </td>
               <td className="border p-2">

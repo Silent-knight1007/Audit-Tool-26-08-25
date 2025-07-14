@@ -1,6 +1,7 @@
-import React from "react"
 import { FaCogs, FaClipboardCheck, FaChartBar, FaShieldAlt, FaUsers } from "react-icons/fa"
 import { useNavigate } from 'react-router-dom';
+import React, { useEffect } from "react";
+
 
 // Audit Management Info Blocks
 const auditInfo = [
@@ -57,6 +58,13 @@ const features = [
 export default function Home() {
 
 const navigate = useNavigate();
+const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
+
+// useEffect(() => {
+//   if (isAuthenticated) {
+//     navigate("/dashboard", { replace: true });
+//   }
+// }, [isAuthenticated, navigate]);
 
   return (
     <div className="w-full min-h-screen bg-white">

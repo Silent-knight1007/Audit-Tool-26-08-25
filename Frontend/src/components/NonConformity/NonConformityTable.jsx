@@ -3,28 +3,25 @@ import axios from 'axios';
 import { FileIcon } from 'react-file-icon';
 import { useNavigate } from 'react-router-dom';
 
-
 const NonConformityTable = () => {
   const [nc, setnc] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
 
   useEffect(() => {
-  axios.get('http://localhost:5000/api/NonConformity')
-    .then(res => {
-      // Sort by auditId, then by ncId (optional)
-      const sorted = res.data.sort((a, b) => {
-        if (a.auditId < b.auditId) return -1;
-        if (a.auditId > b.auditId) return 1;
-        // If auditId is the same, sort by ncId
-        if (a.ncId < b.ncId) return -1;
-        if (a.ncId > b.ncId) return 1;
-        return 0;
-      });
-      setnc(sorted);
-    })
-    .catch(err => console.error(err));
-}, []);
-
+    axios.get('http://localhost:5000/api/NonConformity')
+      .then(res => {
+        // Sort by auditId, then by ncId (optional)
+        const sorted = res.data.sort((a, b) => {
+          if (a.auditId < b.auditId) return -1;
+          if (a.auditId > b.auditId) return 1;
+          if (a.ncId < b.ncId) return -1;
+          if (a.ncId > b.ncId) return 1;
+          return 0;
+        });
+        setnc(sorted);
+      })
+      .catch(err => console.error(err));
+  }, []);
 
   const handleDeleteSelected = async (ids = selectedIds) => {
     if (!window.confirm("Are you sure you want to delete?")) return;
@@ -44,7 +41,6 @@ const NonConformityTable = () => {
   };
 
   const navigate = useNavigate();
-
 
   return (
     <div className="p-4">
@@ -72,13 +68,13 @@ const NonConformityTable = () => {
             <th className="border p-2">Due Date</th>
             <th className="border p-2">Department</th>
             <th className="border p-2">Responsible Person</th>
-            <th className="border p-2">Responsible Person Email</th>
+            {/* <th className="border p-2">Responsible Person Email</th> */}
             <th className="border p-2">Location</th>
-            <th className="border p-2">Corrective Action</th>
+            {/* <th className="border p-2">Corrective Action</th>
             <th className="border p-2">Preventive Action</th>
-            <th className="border p-2">Root Cause</th>
+            <th className="border p-2">Root Cause</th> */}
             <th className="border p-2">Status</th>
-            <th className="border p-2">Attachments</th>
+            {/* <th className="border p-2">Attachments</th> */}
           </tr>
         </thead>
         <tbody>
@@ -106,20 +102,19 @@ const NonConformityTable = () => {
                   {ncItem.ncId}
                 </button>
               </td>
-
               <td className="border p-2">{ncItem.ncDescription}</td>
               <td className="border p-2">{ncItem.ncClauseNo}</td>
               <td className="border p-2">{ncItem.ncType}</td>
               <td className="border p-2">{ncItem.dueDate ? new Date(ncItem.dueDate).toLocaleDateString() : ''}</td>
               <td className="border p-2">{ncItem.department}</td>
               <td className="border p-2">{ncItem.responsibleperson}</td>
-              <td className="border p-2">{ncItem.responsiblepersonmail}</td>
+              {/* <td className="border p-2">{ncItem.responsiblepersonmail}</td> */}
               <td className="border p-2">{Array.isArray(ncItem.nclocation) ? ncItem.nclocation.join(', ') : ncItem.nclocation}</td>
-              <td className="border p-2">{ncItem.ncCorrectiveAction}</td>
+              {/* <td className="border p-2">{ncItem.ncCorrectiveAction}</td>
               <td className="border p-2">{ncItem.ncPreventiveAction}</td>
-              <td className="border p-2">{ncItem.ncRootCause}</td>
+              <td className="border p-2">{ncItem.ncRootCause}</td> */}
               <td className="border p-2">{ncItem.ncstatus}</td>
-              <td className="border p-2">
+              {/* <td className="border p-2">
                 {ncItem.attachments && ncItem.attachments.length > 0 ? (
                   <ul>
                     {ncItem.attachments.map(file => (
@@ -142,7 +137,7 @@ const NonConformityTable = () => {
                 ) : (
                   <span className="text-gray-400">No files</span>
                 )}
-              </td>
+              </td> */}
             </tr>
           ))}
         </tbody>
