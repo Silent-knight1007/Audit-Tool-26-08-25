@@ -2,6 +2,7 @@ import express from 'express';
 import AuditPlan from '../models/AuditPlan.js'; // Adjust path if needed
 import multer from 'multer';
 import path from 'path';
+import mongoose from 'mongoose';
 
 const router = express.Router();
 
@@ -31,7 +32,6 @@ const upload = multer({
 // POST: Create new AuditPlan with attachments
 router.post('/', upload.array('attachments'), async (req, res) => {
   try {
-    // Prepare attachments array if files were uploaded
     let attachments = [];
     if (req.files && req.files.length > 0) {
       attachments = req.files.map(file => ({
@@ -43,7 +43,6 @@ router.post('/', upload.array('attachments'), async (req, res) => {
       }));
     }
 
-    // Create new AuditPlan document
     const newAudit = new AuditPlan({
       ...req.body,
       attachments
@@ -82,7 +81,6 @@ router.get('/:id', async (req, res) => {
 // UPDATE an AuditPlan by ID
 router.put('/:id', upload.array('attachments'), async (req, res) => {
   try {
-    // Prepare attachments array if files were uploaded
     let attachments = [];
     if (req.files && req.files.length > 0) {
       attachments = req.files.map(file => ({
@@ -94,7 +92,6 @@ router.put('/:id', upload.array('attachments'), async (req, res) => {
       }));
     }
 
-    // Build update object
     const updateData = {
       ...req.body,
     };
@@ -102,7 +99,6 @@ router.put('/:id', upload.array('attachments'), async (req, res) => {
       updateData.attachments = attachments;
     }
 
-    // Update the AuditPlan by ID
     const updatedAudit = await AuditPlan.findByIdAndUpdate(
       req.params.id,
       updateData,
@@ -117,15 +113,40 @@ router.put('/:id', upload.array('attachments'), async (req, res) => {
   }
 });
 
-
-// DELETE: Delete multiple Audit Plans
-router.delete('/', async (req, res) => {
+// DELETE: Delete multiple Audit Plans (ONLY if status is 'planned')
+router.delete('/audits', async (req, res) => {
   const { ids } = req.body;
+
+  if (!ids || !Array.isArray(ids) || ids.length === 0) {
+    return res.status(400).json({ message: "No IDs provided for deletion." });
+  }
+
   try {
-    await AuditPlan.deleteMany({ _id: { $in: ids } });
-    res.status(200).json({ message: 'Audit Plans deleted successfully' });
-  } catch (err) {
-    res.status(500).json({ message: 'Error deleting Audit Plans', error: err });
+    // Ensure all ids are ObjectId
+    const objectIds = ids.map(id => new mongoose.Types.ObjectId(id));
+    const auditsToDelete = await AuditPlan.find({ _id: { $in: objectIds } });
+
+    // Filter only audits with status = 'planned'
+    const allowedIds = auditsToDelete
+     .filter(
+      audit =>
+      typeof audit.status === "string" &&
+      audit.status.trim().toLowerCase() === "planned"
+    )
+      .map(audit => audit._id);
+
+    if (allowedIds.length === 0) {
+      return res.status(400).json({ message: 'No audits with status "planned" can be deleted.' });
+    }
+
+    const result = await AuditPlan.deleteMany({ _id: { $in: allowedIds } });
+    res.status(200).json({
+      message: `${result.deletedCount} audit(s) deleted.`,
+      deletedIds: allowedIds
+    });
+  } catch (error) {
+    console.error('Error deleting audits:', error);
+    res.status(500).json({ message: 'Server error during delete.', error: error.message });
   }
 });
 

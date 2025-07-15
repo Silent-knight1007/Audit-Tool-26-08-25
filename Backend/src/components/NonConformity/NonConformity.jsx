@@ -288,48 +288,6 @@ const submitNonConformityForm = async (NonConformityData) => {
                                       </select>
                               </div>
 
-                                {/* <div className="field">
-                                <label className="label" htmlFor="audit-attachment">
-                                  Attachments
-                                </label>
-                                <div className="control">
-                                  <div className="file has-name is-fullwidth">
-                                    <label className="file-label">
-                                      <input
-                                        className="file-input"
-                                        type="file"
-                                        id="audit-attachment"
-                                        multiple
-                                        accept=".png,.jpg,.jpeg,.pdf,.docx,.xls,.xlsx,.ppt,.pptx"
-                                        onChange={handleFileChange}
-                                        ref={fileInputRef}
-                                      />
-                                        <span className="file-cta">
-                                          <span className="file-icon">
-                                            <i className="fas fa-upload" />
-                                          </span>
-                                          <span className="file-label">
-                                            Choose file(s) from your device…
-                                          </span>
-                                        </span>
-                                        <span className="file-name" id="audit-attachment-name">
-                                          {files.length === 0
-                                            ? "No file uploaded"
-                                            : files.map((file) => file.name).join(", ")}
-                                        </span>
-                                    </label>
-                                  </div>
-                                </div>
-                                <div id="audit-attachment-list" style={{ marginTop: "0.5em" }}>
-                                  {files.length > 0 && (
-                                    <ul>
-                                      {files.map((file, idx) => (
-                                      <li key={idx}>{file.name}</li>
-                                      ))}
-                                    </ul>
-                                  )}
-                                </div>
-                                </div>  */}
 
                               <button
                                 type="submit"

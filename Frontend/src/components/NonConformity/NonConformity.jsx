@@ -220,7 +220,7 @@ const submitNCForm = async (ncData) => {
           <div className="mt-8 overflow-hidden">
             <div className="flex justify-center items-center min-h-screen bg-gray-0">
               <form className="p-1 flex flex-col justify-center" onSubmit={handleNonConformityFormSubmit}>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-xs">
 
                   {/* auditId */}
                   <div className="flex flex-col">
@@ -526,13 +526,13 @@ const submitNCForm = async (ncData) => {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="w-32 bg-orange-700 hover:bg-blue-dark text-white font-bold py-2 px-6 rounded-lg 
+                    className="w-32 bg-red-500 hover:bg-blue-dark text-white font-bold py-2 px-6 rounded-lg 
                       mt-10 hover:bg-orange-600 transition ease-in-out duration-300">
                     {isSubmitting ? 'Saving...' : 'Save'}
                   </button>
 
                   <button type="button" onClick={handleCancel}
-                    className="md:w-32 bg-orange-700 hover:bg-blue-dark text-white font-bold py-3 px-6 rounded-lg mt-10
+                    className="md:w-32 bg-red-500 hover:bg-blue-dark text-white font-bold py-3 px-6 rounded-lg mt-10
                       hover:bg-orange-600 transition ease-in-out duration-300">
                     Cancel
                   </button>

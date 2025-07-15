@@ -194,11 +194,11 @@ export default function AuditPlan() {
           <div className="flex justify-center items-center min-h-screen bg-gray-0">
 
             <form className="p-1 flex flex-col justify-center" onSubmit={handleAuditPlanFormSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-xs">
                 {/* audit Id */}
                 <div className="flex flex-col  ">
                   <label htmlFor="auditId" className="text-medium font-medium text-gray-700">
-                    Audit ID  <span className="text-red-500 text-xl mt-1">*</span>
+                    Audit ID  <span className="text-red-500 text-xs mt-1">*</span>
                   </label>
                   <input
                     type="text"
@@ -216,7 +216,7 @@ export default function AuditPlan() {
                 {/* audit type */}
                 <div className="flex flex-col">
                   <label htmlFor="audit-type" className="text-medium font-medium text-gray-700">
-                    Audit Type <span className="text-red-500 text-xl mt-1">*</span>
+                    Audit Type <span className="text-red-500 text-xs mt-1">*</span>
                   </label>
                   <select
                     name="auditType"
@@ -234,9 +234,9 @@ export default function AuditPlan() {
                   </select>
                 </div>
                 {/* audit standards */}
-                <div className="flex flex-col">
+                <div className="flex flex-col ">
                   <label htmlFor="standards" className="text-medium font-medium text-gray-700">
-                    Standards <span className="text-red-500 text-xl mt-1">*</span>
+                    Standards <span className="text-red-500 text-xs mt-1">*</span>
                   </label>
                   <Select
                     isMulti

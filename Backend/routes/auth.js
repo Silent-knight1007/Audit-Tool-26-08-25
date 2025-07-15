@@ -4,6 +4,21 @@ const router = express.Router();
 const User = require('../models/auth');
 const crypto = require('crypto');
 const nodemailer = require('nodemailer');
+import transporter from '../utils/Mailer';
+
+const sendWelcomeEmail = async (email, name) => {
+  try {
+    await transporter.sendMail({
+      from: process.env.FROM_EMAIL || "My App <[email protected]>",
+      to: email,
+      subject: "Welcome to Our Platform!",
+      html: `<h2>Welcome, ${name}!</h2><p>Thanks for signing in or registering.</p>`,
+    });
+    console.log("Welcome email sent.");
+  } catch (err) {
+    console.error("Failed to send email:", err.message);
+  }
+};
 
 // Helper: Validate @onextel.com email
 function isOnextelEmail(email) {

@@ -32,23 +32,44 @@ const AuditTable = () => {
     navigate('/abc', { state: { auditId } });
   };
 
-  const handleDeleteSelected = async (ids = selectedIds) => {
-    if (!window.confirm("Are you sure you want to delete?")) return;
+ const handleDeleteSelected = async (ids = selectedIds) => {
+  const selectedAudits = audits.filter(audit => ids.includes(audit._id));
+  const nonPlanned = selectedAudits.filter(
+    audit =>
+      typeof audit.status === 'string' &&
+      audit.status.trim().toLowerCase() !== 'planned'
+  );
 
-    try {
-      await axios.delete('http://localhost:5000/audits', { data: { ids } });
-      setAudits(audits.filter(audit => !ids.includes(audit._id)));
-      setSelectedIds(selectedIds.filter(id => !ids.includes(id)));
-    } catch (error) {
-      alert("Error deleting audits");
-    }
-  };
+  if (nonPlanned.length > 0) {
+    alert("Only audits with status 'planned' can be deleted.");
+    return;
+  }
+
+  if (!window.confirm("Are you sure you want to delete?")) return;
+
+  try {
+    const response = await axios.delete('http://localhost:5000/audits', {
+      data: { ids }
+    });
+
+    const deletedIds = response.data.deletedIds || [];
+
+    setAudits(audits.filter(a => !deletedIds.includes(a._id)));
+    setSelectedIds(selectedIds.filter(id => !deletedIds.includes(id)));
+
+    alert(response.data.message || "Deleted successfully.");
+  } catch (error) {
+    console.error('Error deleting audits:', error);
+    alert("Error deleting audits");
+  }
+};
+
 
   return (
-    <div className="p-4">
+    <div className="p-1">
       <h2 className="text-xl font-bold mb-4">Audit Records</h2>
-      <table className="min-w-full table-auto border-collapse border border-gray-300">
-        <thead className="bg-gray-200">
+      <table className="min-w-full table-auto border-collapse border-red-500 text-xs">
+        <thead className="bg-red-500">
           <tr>
             <th className="border p-2">
               <input
@@ -63,19 +84,19 @@ const AuditTable = () => {
                 }}
               />
             </th>
-            <th className="border p-2">Audit ID</th>
-            <th className="border p-2">Type</th>
-            <th className="border p-2">Standards</th>
-            <th className="border p-2">Location</th>
-            <th className="border p-2">Lead Auditor</th>
+            <th className="border p-2 text-xs text-white">Audit ID</th>
+            <th className="border p-2 text-xs text-white">Type</th>
+            <th className="border p-2 text-xs text-white">Standards</th>
+            <th className="border p-2 text-xs text-white">Location</th>
+            <th className="border p-2 text-xs text-white">Lead Auditor</th>
             {/* <th className="border p-2">Audit Team</th> */}
-            <th className="border p-2">Planned Date</th>
-            <th className="border p-2">Status</th>
-            <th className="border p-2">Actual Date</th>
+            <th className="border p-2 text-xs text-white">Planned Date</th>
+            <th className="border p-2 text-xs text-white">Status</th>
+            <th className="border p-2 text-xs text-white">Actual Date</th>
             {/* <th className="border p-2">Audit Criteria</th> */}
             {/* <th className="border p-2">Audit Scope</th> */}
-            <th className="border p-2">Add Non Conformity</th>
-            <th className="border p-2">Attachments</th>
+            <th className="border p-2 text-xs text-white">Add Non Conformity</th>
+            <th className="border p-2 text-xs text-white">Attachments</th>
           </tr>
         </thead>
         <tbody>
@@ -94,31 +115,31 @@ const AuditTable = () => {
                   }}
                 />
               </td>
-              <td className="border p-2">
+              <td className="border p-2 text-xs">
                 <button
-                  className="text-blue-600 underline"
+                  className="text-blue-900 underline"
                   style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
                   onClick={() => navigate(`/edit-audit/${audit._id}`)}>
                   {audit.auditId}
                 </button>
               </td>
-              <td className="border p-2">{audit.auditType}</td>
-              <td className="border p-2">{audit.standards}</td>
-              <td className="border p-2">{audit.location}</td>
-              <td className="border p-2">{audit.leadAuditor}</td>
+              <td className="border p-2 text-xs">{audit.auditType}</td>
+              <td className="border p-2 text-xs">{audit.standards}</td>
+              <td className="border p-2 text-xs">{audit.location}</td>
+              <td className="border p-2 text-xs">{audit.leadAuditor}</td>
               {/* <td className="border p-2">{audit.auditTeam}</td> */}
-              <td className="border p-2">{new Date(audit.plannedDate).toLocaleDateString()}</td>
-              <td className="border p-2">{audit.status}</td>
-              <td className="border p-2">{new Date(audit.actualDate).toLocaleDateString()}</td>
+              <td className="border p-2 text-xs">{new Date(audit.plannedDate).toLocaleDateString()}</td>
+              <td className="border p-2 text-xs">{audit.status}</td>
+              <td className="border p-2 text-xs">{new Date(audit.actualDate).toLocaleDateString()}</td>
               {/* <td className="border p-2">{audit.criteria}</td> */}
               {/* <td className="border p-2">{audit.scope}</td> */}
-              <td className="border p-2">
+              <td className="border p-2 text-xs">
                 {audit.status === "Executed" && (
                   <button
                     onClick={() => handleClick(audit.auditId)}
-                    className="w-auto bg-orange-700 hover:bg-orange-600 text-white font-semibold text-sm 
-                      py-1 px-3 rounded mt-2 mb-2 ml-2 transition duration-200">
-                    Add Non Conformity
+                    className="w-auto bg-red-500 hover:bg-orange-600 text-white font-bold text-xs
+                      py-1 px-1 rounded mt-2 mb-2 transition duration-200">
+                    Add NonConformity
                   </button>
                 )}
               </td>
@@ -137,7 +158,7 @@ const AuditTable = () => {
                             target="_blank"
                             rel="noopener noreferrer"
                             download
-                            className="text-blue-600 underline"
+                            className="text-blue-900 underline"
                           >
                             {file.originalname}
                           </a>
@@ -146,7 +167,7 @@ const AuditTable = () => {
                     })}
                   </ul>
                 ) : (
-                  <span className="text-gray-400">No files</span>
+                  <span className="text-red-500">No files</span>
                 )}
               </td>
             </tr>
@@ -154,11 +175,11 @@ const AuditTable = () => {
         </tbody>
       </table>
       <button
-        className="bg-red-600 text-white px-4 py-2 rounded mt-4"
+        className="bg-red-500 text-white font-bold px-4 py-2 rounded mt-4 text-xs hover:bg-orange-600 transition ease-in-out duration-300"
         onClick={() => handleDeleteSelected()}
         disabled={selectedIds.length === 0}
       >
-        Delete Selected
+        Delete 
       </button>
     </div>
   );

@@ -43,12 +43,12 @@ const NonConformityTable = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Non-Conformity Records</h2>
-      <table className="min-w-full table-auto border-collapse border border-gray-300">
-        <thead className="bg-gray-200">
+    <div className="p-2">
+      <h2 className="text-lg font-bold mb-4">Non-Conformity Records</h2>
+      <table className="min-w-full table-auto border-collapse border border-red-500 text-xs">
+        <thead className="bg-red-500 ">
           <tr>
-            <th className="border p-2">
+            <th className="border p-2 ">
               <input
                 type="checkbox"
                 checked={nc.length > 0 && selectedIds.length === nc.length}
@@ -61,19 +61,19 @@ const NonConformityTable = () => {
                 }}
               />
             </th>
-            <th className="border p-2">NC ID</th>
-            <th className="border p-2">Description</th>
-            <th className="border p-2">Clause No</th>
-            <th className="border p-2">Type</th>
-            <th className="border p-2">Due Date</th>
-            <th className="border p-2">Department</th>
-            <th className="border p-2">Responsible Person</th>
+            <th className="border p-2 text-white">NC ID</th>
+            <th className="border p-2 text-white">Description</th>
+            <th className="border p-2 text-white">Clause No</th>
+            <th className="border p-2 text-white">Type</th>
+            <th className="border p-2 text-white">Due Date</th>
+            <th className="border p-2 text-white">Department</th>
+            <th className="border p-2 text-white">Responsible Person</th>
+            <th className="border p-2 text-white">Location</th>
+            <th className="border p-2 text-white">Status</th>
             {/* <th className="border p-2">Responsible Person Email</th> */}
-            <th className="border p-2">Location</th>
             {/* <th className="border p-2">Corrective Action</th>
             <th className="border p-2">Preventive Action</th>
             <th className="border p-2">Root Cause</th> */}
-            <th className="border p-2">Status</th>
             {/* <th className="border p-2">Attachments</th> */}
           </tr>
         </thead>
@@ -95,7 +95,7 @@ const NonConformityTable = () => {
               </td>
               <td className="border p-2">
                 <button
-                  className="text-blue-600 underline"
+                  className="text-blue-900 underline"
                   style={{ background: "none", border: "none", padding: 0, cursor: "pointer" }}
                   onClick={() => navigate(`/edit-nc/${ncItem._id}`)}
                 >
@@ -144,10 +144,10 @@ const NonConformityTable = () => {
       </table>
 
       <button
-        className="bg-red-600 text-white px-4 py-2 rounded mt-4"
+        className="bg-red-500 text-xs text-white font-bold px-4 py-2 rounded mt-4 hover:bg-orange-600 transition ease-in-out duration-300"
         onClick={() => handleDeleteSelected()}
         disabled={selectedIds.length === 0}>
-        Delete Selected
+        Delete
       </button>
     </div>
   );

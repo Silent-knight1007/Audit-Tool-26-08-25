@@ -61,18 +61,6 @@ export default function Navbar({ onMenuClick }) {
           {menuOpen && (
             <div className="absolute right-0 mt-2 w-44 bg-white rounded shadow-lg z-50 border">
               <button
-                className="block w-full text-left px-4 py-2 hover:bg-orange-50"
-                onClick={() => { setMenuOpen(false); navigate("/profile"); }}
-              >
-                Your Profile
-              </button>
-              <button
-                className="block w-full text-left px-4 py-2 hover:bg-orange-50"
-                onClick={() => { setMenuOpen(false); navigate("/settings"); }}
-              >
-                Settings
-              </button>
-              <button
                 className="block w-full text-left px-4 py-2 text-red-700 hover:bg-orange-50"
                 onClick={() => { setMenuOpen(false); handleLogout(); }}
               >

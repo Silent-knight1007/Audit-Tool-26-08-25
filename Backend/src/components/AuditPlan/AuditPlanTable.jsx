@@ -28,19 +28,25 @@ const AuditTable = () => {
   };
 
   const handleDeleteSelected = async (ids = selectedIds) => {
+  const selectedAudits = audits.filter((audit) => ids.includes(audit._id));
+  const nonPlannedAudits = selectedAudits.filter(a => a.status.toLowerCase() !== 'planned');
+
+  if (nonPlannedAudits.length > 0) {
+    alert("Only audits with status 'planned' can be deleted. Please review your selection.");
+    return;
+  }
+
   if (!window.confirm("Are you sure you want to delete?")) return;
 
   try {
-    // Send DELETE request to backend
     await axios.delete('http://localhost:5000/audits', { data: { ids } });
-
-    // Remove from UI after successful deletion
+    // Remove deleted audits from list
     setAudits(audits.filter(audit => !ids.includes(audit._id)));
     setSelectedIds(selectedIds.filter(id => !ids.includes(id)));
   } catch (error) {
     alert("Error deleting audits");
   }
-};  
+}; 
 
   return (
     <div className="p-4">

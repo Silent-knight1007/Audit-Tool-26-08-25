@@ -61,8 +61,8 @@ const AuditPlanButton = () => {
   return (
         <div>
             <Link to="/xyz" className="inline-block items-center mr-10">
-                <button className=" md:w-25 bg-orange-700 hover:bg-blue-dark text-white font-bold text-l py-3 px-6 rounded-lg mt-5 mb-5 ml-2
-                    // hover:bg-orange-600 transition ease-in-out duration-300">
+                <button className=" md:w-25 bg-red-500 hover:bg-blue-dark text-white font-bold text-xs py-3 px-6 rounded-lg mt-5 mb-5 ml-2
+                    hover:bg-orange-600 transition ease-in-out duration-300">
                        Create New Audit
                 </button>
             </Link>

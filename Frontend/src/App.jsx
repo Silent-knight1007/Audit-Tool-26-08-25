@@ -14,7 +14,7 @@ import AuditPlanButton from './components/AuditPlan/AuditPlanButtons';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import User from './components/User/User';
-import Footer from './components/Footer/Footer';
+// import Footer from './components/Footer/Footer';
 import ProtectedRoute from './components/Authorization/ProtectedRoutes';
 
 export default function App() {
@@ -88,7 +88,7 @@ export default function App() {
         </div>
       </div>
       <ToastContainer position="top-center" />
-      <Footer />
+      {/* <Footer /> */}
     </>
   );
 }
