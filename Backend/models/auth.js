@@ -1,11 +1,22 @@
 // models/User.js
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
 const UserSchema = new mongoose.Schema({
-  email: { type: String, required: true, unique: true, lowercase: true, trim: true },
-  password: { type: String, required: true },
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true
+  },
+  password: {
+    type: String,
+    required: true
+  },
   resetPasswordToken: String,
   resetPasswordExpires: Date,
 });
 
-module.exports = mongoose.model('User', UserSchema);
+// ✅ Use ESModule export
+const User = mongoose.model('User', UserSchema);
+export default User;

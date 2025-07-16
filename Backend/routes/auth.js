@@ -1,138 +1,85 @@
-const express = require('express');
-const bcrypt = require('bcryptjs');
+// routes/auth.js (ES Module compatible - fixed version)
+import express from 'express';
+import bcrypt from 'bcryptjs';
+import { sendRegistrationEmail } from '../utils/emails.js';
+import User from '../models/auth.js'; // Must also be ESModule-compatible
+
 const router = express.Router();
-const User = require('../models/auth');
-const crypto = require('crypto');
-const nodemailer = require('nodemailer');
-import transporter from '../utils/Mailer';
 
-const sendWelcomeEmail = async (email, name) => {
-  try {
-    await transporter.sendMail({
-      from: process.env.FROM_EMAIL || "My App <[email protected]>",
-      to: email,
-      subject: "Welcome to Our Platform!",
-      html: `<h2>Welcome, ${name}!</h2><p>Thanks for signing in or registering.</p>`,
-    });
-    console.log("Welcome email sent.");
-  } catch (err) {
-    console.error("Failed to send email:", err.message);
-  }
-};
-
-// Helper: Validate @onextel.com email
+// ✅ Helper function to validate onextel.com domain
 function isOnextelEmail(email) {
   return /^[a-zA-Z0-9._%+-]+@onextel\.com$/.test(email);
 }
 
-// Register
+// ✅ Register route (includes sending email with password)
 router.post('/register', async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { name, email, password } = req.body;
 
-  // Email domain check
-  if (!isOnextelEmail(email)) {
-    return res.status(400).json({ message: 'Only @onextel.com emails are allowed.' });
+    // 1️⃣ Domain check
+    if (!isOnextelEmail(email)) {
+      return res.status(400).json({ message: 'Only @onextel.com emails are allowed.' });
+    }
+
+    // 2️⃣ Password strength check
+    const strongPwd = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+    if (!strongPwd.test(password)) {
+      return res.status(400).json({
+        message: 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.'
+      });
+    }
+
+    // 3️⃣ Check duplicate
+    const existing = await User.findOne({ email });
+    if (existing) {
+      return res.status(400).json({
+        message: 'You are already registered. Please sign in instead.'
+      });
+    }
+
+    // 4️⃣ Hash and save user
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new User({ name, email, password: hashedPassword });
+    await user.save();
+
+    // 5️⃣ Send custom welcome email with credentials
+    await sendRegistrationEmail(email, name, password);
+
+    return res.status(201).json({
+      message: `Welcome ${name}, you are successfully registered for the Onextel Audit Program Tool. Your credentials have been sent to your email address.`
+    });
+  } catch (err) {
+    console.error('Register error:', err.message);
+    res.status(500).json({ message: 'Registration failed. Try again later.' });
   }
-
-  // Password strength check
-  if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/.test(password)) {
-    return res.status(400).json({ message: 'Password must be at least 8 characters and include uppercase, lowercase, number, and special character.' });
-  }
-
-  // Duplicate check
-  const existing = await User.findOne({ email });
-  if (existing) {
-    return res.status(400).json({ message: 'You are already registered. Please sign in or use "forgot password".' });
-  }
-
-  // Hash password
-  const hash = await bcrypt.hash(password, 10);
-  const user = new User({ email, password: hash });
-  await user.save();
-
-  res.status(200).json({
-    message: `Hello ${email}, you are successfully registered at Onextel Audit Program Tool. Now you can move forward for sign in process to explore the tool.`
-  });
 });
 
-// Login
+// ✅ Login route
 router.post('/login', async (req, res) => {
-  const { email, password } = req.body;
+  try {
+    const { email, password } = req.body;
 
-  if (!isOnextelEmail(email)) {
-    return res.status(400).json({ message: 'Only @onextel.com emails are allowed.' });
+    if (!isOnextelEmail(email)) {
+      return res.status(400).json({ message: 'Only @onextel.com emails are allowed.' });
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: 'User not registered. Please register first.' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json({ message: 'Invalid credentials.' });
+    }
+
+    res.status(200).json({ message: 'Login successful' });
+  } catch (err) {
+    console.error('Login error:', err);
+    res.status(500).json({ message: 'Login failed.' });
   }
-
-  const user = await User.findOne({ email });
-  if (!user) {
-    // CHANGED: Give specific message for unregistered user
-    return res.status(400).json({ message: 'User not registered. Please register first.' });
-  }
-
-  const isMatch = await bcrypt.compare(password, user.password);
-  if (!isMatch) {
-    return res.status(400).json({ message: 'Invalid credentials.' });
-  }
-
-  res.status(200).json({ message: 'Login successful' });
 });
 
-// === Add this: Forgot Password route ===
-router.post('/forgot-password', async (req, res) => {
-  const { email } = req.body;
-  const user = await User.findOne({ email });
-  if (!user) {
-    // Don't reveal if user exists
-    return res.status(200).json({ message: 'If this email is registered, a reset link has been sent.' });
-  }
+// ❌ Removed forgot/reset password logic per your instruction
 
-  // Generate token
-  const token = crypto.randomBytes(32).toString('hex');
-  user.resetPasswordToken = token;
-  user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-  await user.save();
-
-  // Set up nodemailer transporter (replace with your SMTP details)
-  const transporter = nodemailer.createTransport({
-    service: 'Gmail',
-    auth: {
-      user: 'your_email@gmail.com',
-      pass: 'your_gmail_app_password',
-    },
-  });
-
-  const resetUrl = `http://localhost:5000/reset-password/${token}`;
-
-  await transporter.sendMail({
-    to: user.email,
-    subject: 'Password Reset - Onextel Audit Program Tool',
-    html: `
-      <p>You requested a password reset.</p>
-      <p>Click <a href="${resetUrl}">here</a> to reset your password. This link will expire in 1 hour.</p>
-    `,
-  });
-
-  res.status(200).json({ message: 'If this email is registered, a reset link has been sent.' });
-});
-
-// === Add this: Reset Password route ===
-router.post('/reset-password', async (req, res) => {
-  const { token, password } = req.body;
-  const user = await User.findOne({
-    resetPasswordToken: token,
-    resetPasswordExpires: { $gt: Date.now() },
-  });
-
-  if (!user) {
-    return res.status(400).json({ message: 'Invalid or expired token.' });
-  }
-
-  user.password = await bcrypt.hash(password, 10);
-  user.resetPasswordToken = undefined;
-  user.resetPasswordExpires = undefined;
-  await user.save();
-
-  res.status(200).json({ message: 'Password has been reset. Please log in.' });
-});
-
-module.exports = router;
+export default router;
