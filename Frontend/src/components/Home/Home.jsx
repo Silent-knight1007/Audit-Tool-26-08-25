@@ -67,15 +67,15 @@ const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
 // }, [isAuthenticated, navigate]);
 
   return (
-    <div className="w-full min-h-screen bg-white">
+    <div className="w-full min-h-screen bg-red-400">
       {/* Hero Section */}
-      <section className="w-full bg-orange-50 py-16">
-        <div className="max-w-4xl mx-auto text-center px-4">
-          <h1 className="text-5xl font-bold text-orange-700 mb-4">OneXtel Audit management </h1>
+      <section className="w-full bg-red-400 py-16">
+        <div className="max-w-4xl mx-auto text-center px-4 ">
+          <h1 className="text-5xl font-bold text-black mb-4">OneXtel Audit Management </h1>
           <p className="text-xl text-gray-700 mb-8">
             The complete solution for automated audit management and compliance.
           </p>
-          <button className="bg-orange-700 text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-orange-800 transition" onClick={() => navigate("/login")}>
+          <button className="bg-black text-red-500 px-8 py-3 rounded-lg text-lg font-bold hover:bg-red-800 transition" onClick={() => navigate("/login")}>
             Get Started
           </button>
         </div>
@@ -95,7 +95,7 @@ const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
       </section>
 
       {/* How it Works Section with Video */}
-<section className="w-full bg-gray-50 py-16">
+<section className="w-full bg-red-400 py-16">
   <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 px-4">
     {/* Left: Text Content */}
     <div className="flex-1">

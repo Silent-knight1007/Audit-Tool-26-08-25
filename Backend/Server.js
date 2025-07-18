@@ -55,4 +55,11 @@ app.delete('/audits', async (req, res) => {
   }
 });
 
+// Error handler middleware
+app.use((err, req, res, next) => {
+  console.error("Unhandled error:", err.stack);
+  res.status(500).json({ message: "Something went wrong!", error: err.message });
+});
+
+
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

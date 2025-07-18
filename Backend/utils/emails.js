@@ -1,5 +1,5 @@
 // utils/emails.js
-import transporter from "./Mailer";
+import transporter from "./mailer.js";
 
 export const sendRegistrationEmail = async (toEmail, userName, userPassword) => {
   console.log("📧 Sending email to:", toEmail); // ✅ ADD this

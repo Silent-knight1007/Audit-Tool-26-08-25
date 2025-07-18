@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Home from './components/Home/Home';
 import AuthPanel from './components/Authorization/AuthPanel';
-import ResetPassword from './components/Authorization/ResetPasswordpage';
+// import ResetPassword from './components/Authorization/ResetPasswordpage';
 import TopNavbar from './components/Navbar/TopNavbar';
 import SidebarNavbar from './components/Navbar/SideNavbar';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -30,7 +30,7 @@ export default function App() {
             {/* Public routes */}
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<AuthPanel />} />
-            <Route path="/reset-password/:token" element={<ResetPassword />} />
+            
 
             {/* Protected routes */}
             <Route path="/dashboard" element={
@@ -38,55 +38,66 @@ export default function App() {
                 <Dashboard />
               </ProtectedRoute>
             } />
+
             <Route path="/edit/:id" element={
               <ProtectedRoute>
                 <AuditPlan />
               </ProtectedRoute>
             } />
+
             <Route path="/auditplan" element={
               <ProtectedRoute>
                 <AuditPlanButton />
               </ProtectedRoute>
             } />
+
             <Route path="/auditplantable" element={
               <ProtectedRoute>
                 <AuditTable />
               </ProtectedRoute>
             } />
+
             <Route path="/nonconformity" element={
               <ProtectedRoute>
                 <NonConformityButton />
               </ProtectedRoute>
             } />
+
             <Route path="/user/:userid" element={
               <ProtectedRoute>
                 <User />
               </ProtectedRoute>
             } />
+
             <Route path="/xyz" element={
               <ProtectedRoute>
                 <AuditPlan />
               </ProtectedRoute>
             } />
+
             <Route path="/abc" element={
               <ProtectedRoute>
                 <NonConformity />
               </ProtectedRoute>
             } />
+
             <Route path="/edit-audit/:id" element={
               <ProtectedRoute>
                 <AuditPlan />
               </ProtectedRoute>
             } />
+
             <Route path="/edit-nc/:id" element={
               <ProtectedRoute>
                 <NonConformity />
               </ProtectedRoute>
             } />
+
             {/* Add any additional protected routes below in the same pattern */}
           </Routes>
         </div>
       </div>
+
       <ToastContainer position="top-center" />
       {/* <Footer /> */}
     </>

@@ -32,7 +32,7 @@ const AuditTable = () => {
     navigate('/abc', { state: { auditId } });
   };
 
- const handleDeleteSelected = async (ids = selectedIds) => {
+const handleDeleteSelected = async (ids = selectedIds) => {
   const selectedAudits = audits.filter(audit => ids.includes(audit._id));
   const nonPlanned = selectedAudits.filter(
     audit =>
@@ -41,7 +41,7 @@ const AuditTable = () => {
   );
 
   if (nonPlanned.length > 0) {
-    alert("Only audits with status 'planned' can be deleted.");
+    alert("audits with status 'executed' can't be deleted.");
     return;
   }
 
@@ -53,9 +53,10 @@ const AuditTable = () => {
     });
 
     const deletedIds = response.data.deletedIds || [];
+    console.log('Deleted IDs from backend:', deletedIds);
 
-    setAudits(audits.filter(a => !deletedIds.includes(a._id)));
-    setSelectedIds(selectedIds.filter(id => !deletedIds.includes(id)));
+    setAudits(prevAudits => prevAudits.filter(a => !deletedIds.includes(a._id)));
+    setSelectedIds(prevIds => prevIds.filter(id => !deletedIds.includes(id)));
 
     alert(response.data.message || "Deleted successfully.");
   } catch (error) {
