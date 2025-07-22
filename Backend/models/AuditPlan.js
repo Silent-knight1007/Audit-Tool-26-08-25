@@ -32,6 +32,8 @@ const auditplanSchema = new mongoose.Schema({
 
   actualDate: Date,
 
+  completeDate: Date,
+
   criteria: String,
 
   scope: String,

@@ -67,17 +67,17 @@ const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
 // }, [isAuthenticated, navigate]);
 
   return (
-    <div className="w-full min-h-screen bg-red-400">
+    <div className="w-full min-h-screen ">
       {/* Hero Section */}
-      <section className="w-full bg-red-400 py-16">
+      <section className=" bg-red-100 w-full py-16">
         <div className="max-w-4xl mx-auto text-center px-4 ">
-          <h1 className="text-5xl font-bold text-black mb-4">OneXtel Audit Management </h1>
-          <p className="text-xl text-gray-700 mb-8">
+          <h1 className="text-5xl font-bold text-red-600 italic mb-4">OneXtel Audit Management </h1>
+          <p className="text-m text-gray-900 italic mb-8">
             The complete solution for automated audit management and compliance.
           </p>
-          <button className="bg-black text-red-500 px-8 py-3 rounded-lg text-lg font-bold hover:bg-red-800 transition" onClick={() => navigate("/login")}>
+          {/* <button className="bg-black italic text-red-600 px-2 py-1 rounded-lg text-lg font-bold hover:bg-red-200 transition" onClick={() => navigate("/login")}>
             Get Started
-          </button>
+          </button> */}
         </div>
       </section>
 
@@ -86,24 +86,24 @@ const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
         {auditInfo.map((item, idx) => (
           <div
             key={idx}
-            className="bg-white rounded-xl shadow p-6 transition-transform duration-300 hover:scale-105 hover:shadow-lg"
+            className="bg-red-100  rounded-xl shadow p-6 transition-transform duration-300 hover:scale-105 hover:shadow-lg"
           >
-            <h3 className="text-2xl font-bold text-orange-700 mb-2">{item.title}</h3>
-            <p className="text-gray-700">{item.content}</p>
+            <h3 className="text-xl italic font-bold text-red-600 mb-2">{item.title}</h3>
+            <p className="text-gray-900 italic text-sm">{item.content}</p>
           </div>
         ))}
       </section>
 
       {/* How it Works Section with Video */}
-<section className="w-full bg-red-400 py-16">
-  <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-12 px-4">
+<section className="w-full bg-red-100 px-5 py-5">
+  <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-12 px-4">
     {/* Left: Text Content */}
     <div className="flex-1">
-      <h2 className="text-4xl font-bold text-gray-800 mb-4">See how it works</h2>
-      <p className="text-lg text-gray-600 mb-8">
+      <h2 className="text-xl font-bold text-red-600 italic mb-4">See How It Works</h2>
+      <p className="text-sm font-bold italic text-gray-600 mb-8">
         Watch as we showcase our platform’s intuitive interface, automated control testing, and real-time risk assessments in action.
       </p>
-      <button className="bg-orange-700 text-white px-6 py-3 rounded-full font-semibold hover:bg-orange-800 transition">
+      <button className="bg-red-600 text-white px-2 italic text-sm py-2 rounded-full font-bold hover:bg-red-800 transition">
         SCHEDULE A DEMO
       </button>
     </div>
@@ -128,13 +128,13 @@ const isAuthenticated = localStorage.getItem("isAuthenticated") === "true";
 
       {/* Features Section */}
       <section className="max-w-5xl mx-auto py-20 px-4">
-        <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Platform Services</h2>
-        <div className="grid md:grid-cols-3 gap-10">
+        <h2 className="text-3xl font-bold text-center text-red-600 italic mb-12">Platform Services</h2>
+        <div className="grid md:grid-cols-3 gap-10 ">
           {features.map((feature, idx) => (
-            <div key={idx} className="bg-white rounded-xl shadow-md p-8 flex flex-col items-center transition-transform transition-shadow duration-300 hover:scale-105 hover:shadow-2xl">
+            <div key={idx} className="bg-red-100 rounded-xl shadow-md p-5 flex flex-col items-center transition-transform transition-shadow duration-300 hover:scale-105 hover:shadow-5xl">
               {feature.icon}
-              <h3 className="mt-6 text-xl font-semibold text-orange-700 mb-2 text-center">{feature.title}</h3>
-              <p className="text-gray-700 text-center">{feature.desc}</p>
+              <h3 className="mt-6 text-sm italic font-semibold text-red-600 mb-2 text-center">{feature.title}</h3>
+              <p className="text-gray-900 italic text-sm text-center">{feature.desc}</p>
             </div>
           ))}
         </div>

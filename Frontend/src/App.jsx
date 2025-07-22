@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route , Navigate } from 'react-router-dom';
 import Home from './components/Home/Home';
 import AuthPanel from './components/Authorization/AuthPanel';
 // import ResetPassword from './components/Authorization/ResetPasswordpage';
@@ -28,9 +28,22 @@ export default function App() {
         <div className="pt-16">
           <Routes>
             {/* Public routes */}
-            <Route path="/" element={<Home />} />
-            <Route path="/login" element={<AuthPanel />} />
-            
+            <Route path="/" element={<Navigate to="/login" replace />} />
+
+            <Route path="/home" element={
+              <ProtectedRoute>
+                <Home />
+              </ProtectedRoute>
+            } />
+
+            <Route
+              path="/login"
+              element={
+              localStorage.getItem("isAuthenticated") === "true"
+              ? <Navigate to="/home" replace />
+              : <AuthPanel />
+              }
+            />
 
             {/* Protected routes */}
             <Route path="/dashboard" element={

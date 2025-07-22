@@ -28,9 +28,22 @@ const AuditTable = () => {
     }
   };
 
-  const handleClick = (auditId) => {
-    navigate('/abc', { state: { auditId } });
+  const handleClick = (auditId, actualDate) => {
+    navigate('/abc', {
+      state: {
+        auditId: auditId,
+        actualdate: actualDate  // ✅ this is the key addition
+      }
+    });
   };
+
+
+  const formatDate = (date) => {
+  if (!date) return '—';
+  const d = new Date(date);
+  return isNaN(d.getTime()) ? '—' : d.toLocaleDateString();
+};
+
 
 const handleDeleteSelected = async (ids = selectedIds) => {
   const selectedAudits = audits.filter(audit => ids.includes(audit._id));
@@ -41,7 +54,7 @@ const handleDeleteSelected = async (ids = selectedIds) => {
   );
 
   if (nonPlanned.length > 0) {
-    alert("audits with status 'executed' can't be deleted.");
+    alert("Audits with status 'executed' & 'completed' can't be deleted.");
     return;
   }
 
@@ -90,14 +103,15 @@ const handleDeleteSelected = async (ids = selectedIds) => {
             <th className="border p-2 text-xs text-white">Standards</th>
             <th className="border p-2 text-xs text-white">Location</th>
             <th className="border p-2 text-xs text-white">Lead Auditor</th>
-            {/* <th className="border p-2">Audit Team</th> */}
             <th className="border p-2 text-xs text-white">Planned Date</th>
             <th className="border p-2 text-xs text-white">Status</th>
             <th className="border p-2 text-xs text-white">Actual Date</th>
-            {/* <th className="border p-2">Audit Criteria</th> */}
-            {/* <th className="border p-2">Audit Scope</th> */}
+            <th className="border p-2 text-xs text-white">Complete Date</th>
             <th className="border p-2 text-xs text-white">Add Non Conformity</th>
             <th className="border p-2 text-xs text-white">Attachments</th>
+            {/* <th className="border p-2">Audit Team</th> */}
+            {/* <th className="border p-2">Audit Criteria</th> */}
+            {/* <th className="border p-2">Audit Scope</th> */}
           </tr>
         </thead>
         <tbody>
@@ -128,16 +142,17 @@ const handleDeleteSelected = async (ids = selectedIds) => {
               <td className="border p-2 text-xs">{audit.standards}</td>
               <td className="border p-2 text-xs">{audit.location}</td>
               <td className="border p-2 text-xs">{audit.leadAuditor}</td>
-              {/* <td className="border p-2">{audit.auditTeam}</td> */}
               <td className="border p-2 text-xs">{new Date(audit.plannedDate).toLocaleDateString()}</td>
               <td className="border p-2 text-xs">{audit.status}</td>
               <td className="border p-2 text-xs">{new Date(audit.actualDate).toLocaleDateString()}</td>
+              <td className="border p-2 text-xs">{formatDate(audit.completeDate)}</td>
+              {/* <td className="border p-2">{audit.auditTeam}</td> */}
               {/* <td className="border p-2">{audit.criteria}</td> */}
               {/* <td className="border p-2">{audit.scope}</td> */}
               <td className="border p-2 text-xs">
                 {audit.status === "Executed" && (
                   <button
-                    onClick={() => handleClick(audit.auditId)}
+                    onClick={() => handleClick(audit.auditId, audit.actualDate)}
                     className="w-auto bg-red-500 hover:bg-orange-600 text-white font-bold text-xs
                       py-1 px-1 rounded mt-2 mb-2 transition duration-200">
                     Add NonConformity

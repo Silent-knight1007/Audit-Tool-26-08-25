@@ -32,6 +32,7 @@ export default function AuditPlan() {
   const [plannedDate, setPlannedDate] = useState('');
   const [status, setStatus] = useState('');
   const [actualDate, setActualDate] = useState('');
+  const [completeDate,setCompleteDate] = useState('');
   const [criteria, setCriteria] = useState('');
   const [scope, setScope] = useState('');
   const [attachments, setAttachments] = useState([]);
@@ -53,6 +54,7 @@ export default function AuditPlan() {
           setPlannedDate(data.plannedDate ? data.plannedDate.slice(0,10) : '');
           setStatus(data.status || '');
           setActualDate(data.actualDate ? data.actualDate.slice(0,10) : '');
+          setCompleteDate(data.completeDate ? data.completeDate.slice(0,10) : '');
           setCriteria(data.criteria || '');
           setScope(data.scope || '');
           setExistingAttachments(data.attachments || []);
@@ -62,6 +64,21 @@ export default function AuditPlan() {
         });
     }
   }, [id]);
+
+  const [isEditable, setIsEditable] = useState({
+  standards: true,
+  location: true,
+  leadAuditor: true,
+  auditteam: true,
+  status: true,
+  actualdate: true,
+  completedate:true,
+  auditscope : true,
+  auditcriteria:true,
+  planneddate : false,
+  audittype:false
+  // add others as per need
+});
 
   const locationOptions = [
     { value: "Noida", label: "Noida" },
@@ -104,7 +121,12 @@ export default function AuditPlan() {
 
     for (const key in AuditPlanData) {
       if (key !== 'attachments') {
-        formData.append(key, AuditPlanData[key]);
+        if (key === 'completeDate' || key === 'actualDate' || key === 'plannedDate') {
+          formData.append(key, AuditPlanData[key] || null);
+        } else {
+          formData.append(key, AuditPlanData[key]);
+        }
+
       }
     }
     attachments.forEach((file) => {
@@ -136,19 +158,29 @@ export default function AuditPlan() {
   }
 };
 
-
   const handleAuditPlanFormSubmit = (e) => {
     e.preventDefault();
 
     // Convert to Date objects
-      const planned = new Date(plannedDate);
-      const actual = new Date(actualDate);
+      const planned = plannedDate ? new Date(plannedDate) : null;
+      const actual = actualDate ? new Date(actualDate) : null;
+      const complete = completeDate ? new Date(completeDate) : null;
 
     // Check if actualDate is before or equal to plannedDate
-      if (actual <= planned) {
-      alert("Actual Date must be after Planned Date.");
-      return;
-     }
+     if (planned && actual && actual < planned) {
+    alert("Actual Date cannot be before Planned Date.");
+    return;
+  }
+
+  if (planned && complete && complete < planned) {
+    alert("Completion Date cannot be before Planned Date.");
+    return;
+  }
+
+  if (actual && complete && complete < actual) {
+    alert("Completion Date cannot be before Actual Date.");
+    return;
+  }
 
     const AuditPlanData = {
       auditId,
@@ -160,6 +192,7 @@ export default function AuditPlan() {
       plannedDate,
       status,
       actualDate,
+      completeDate,
       criteria,
       scope,
     };
@@ -177,6 +210,7 @@ export default function AuditPlan() {
       setPlannedDate('');
       setStatus('');
       setActualDate('');
+      setCompleteDate('');
       setCriteria('');
       setScope('');
     }
@@ -196,7 +230,7 @@ export default function AuditPlan() {
             <form className="p-1 flex flex-col justify-center" onSubmit={handleAuditPlanFormSubmit}>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-xs">
                 {/* audit Id */}
-                <div className="flex flex-col  ">
+                <div className="flex flex-col  hidden">
                   <label htmlFor="auditId" className="text-medium font-medium text-gray-700">
                     Audit ID  <span className="text-red-500 text-xs mt-1">*</span>
                   </label>
@@ -223,6 +257,7 @@ export default function AuditPlan() {
                     id="audit-type"
                     value={auditType}
                     onChange={e => setAuditType(e.target.value)}
+                     disabled={!isEditable.audittype}
                     required
                     className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                     font-semibold focus:border-orange-500 focus:outline-none">
@@ -242,6 +277,7 @@ export default function AuditPlan() {
                     isMulti
                     name="standards"
                     options={standardOptions}
+                     isDisabled={!isEditable.standards}
                     value={standardOptions.filter(opt => standards.includes(opt.value))}
                     onChange={selected => setStandards(selected ? selected.map(opt => opt.value) : [])}
                     className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
@@ -260,6 +296,7 @@ export default function AuditPlan() {
                     name="location"
                     id="location-audit"
                     options={locationOptions}
+                    isDisabled={!isEditable.location}
                     value={locationOptions.filter(opt => location.includes(opt.value))}
                     onChange={selected => setLocation(selected ? selected.map(opt => opt.value) : [])}
                     className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
@@ -278,6 +315,7 @@ export default function AuditPlan() {
                     name="leadAuditor"
                     value={leadAuditor}
                     onChange={e => setLeadAuditor(e.target.value)}
+                    disabled={!isEditable.leadAuditor}
                     id="lead-auditor"
                     required
                     placeholder="Lead Auditor"
@@ -295,6 +333,7 @@ export default function AuditPlan() {
                     name="auditTeam"
                     id="audit-team"
                     options={auditTeamOptions}
+                    isDisabled={!isEditable.auditteam}
                     value={auditTeamOptions.filter(opt => selectedAuditTeam.includes(opt.value))}
                     onChange={selected => setSelectedAuditTeam(selected ? selected.map(opt => opt.value) : [])}
                     className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
@@ -314,6 +353,7 @@ export default function AuditPlan() {
                     id="planned-date"
                     value={plannedDate}
                     onChange={e => setPlannedDate(e.target.value)}
+                    disabled={!isEditable.planneddate}
                     required
                     className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
                     font-semibold focus:border-orange-500 focus:outline-none"
@@ -329,6 +369,7 @@ export default function AuditPlan() {
                     id="status"
                     value={status}
                     onChange={e => setStatus(e.target.value)}
+                    disabled={!isEditable.status}
                     required
                     className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
                     font-semibold focus:border-orange-500 focus:outline-none">
@@ -343,7 +384,7 @@ export default function AuditPlan() {
                 {/* actual date */}
                 <div className="flex flex-col">
                   <label htmlFor="actual-date" className="text-medium font-medium text-gray-700">
-                    Actual Date
+                    Actual Date 
                   </label>
                   <input
                     type="date"
@@ -351,7 +392,27 @@ export default function AuditPlan() {
                     id="actual-date"
                     value={actualDate}
                     onChange={e => setActualDate(e.target.value)}
-                    min={plannedDate ? new Date(new Date(plannedDate).getTime() + 24*60*60*1000).toISOString().split('T')[0] : undefined}
+                    disabled={!isEditable.actualdate}
+                    min={plannedDate || undefined}
+                    className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
+                    font-semibold focus:border-orange-500 focus:outline-none"
+                  />
+                </div>
+                {/* complete date */}
+                <div className="flex flex-col">
+                  <label htmlFor="complete-date" className="text-medium font-medium text-gray-700">
+                    Complete Date <span className="text-red-500 text-xl mt-1">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    name="completeDate"
+                    id="complete-date"
+                    value={completeDate}
+                    required
+                    onChange={e => setCompleteDate(e.target.value)}
+                    disabled={!isEditable.completedate}
+                    min={actualDate ? (new Date(actualDate) > new Date(plannedDate) ? actualDate : plannedDate) : plannedDate || undefined }
+                      // If actualDate after plannedDate, use actualDate as min, else plannedDate (
                     className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
                     font-semibold focus:border-orange-500 focus:outline-none"
                   />
@@ -366,6 +427,7 @@ export default function AuditPlan() {
                     id="criteria"
                     value={criteria}
                     onChange={e => setCriteria(e.target.value)}
+                    readOnly={!isEditable.auditcriteria} 
                     maxLength={1000}
                     required
                     placeholder="Enter Audit Criteria"
@@ -383,6 +445,7 @@ export default function AuditPlan() {
                     id="scope"
                     value={scope}
                     onChange={e => setScope(e.target.value)}
+                    readOnly={!isEditable.auditscope}
                     maxLength={1000}
                     required
                     placeholder="Enter Audit Scope"

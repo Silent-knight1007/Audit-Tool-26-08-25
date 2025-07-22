@@ -42,6 +42,13 @@ const NonConformityTable = () => {
 
   const navigate = useNavigate();
 
+  const formatDate = (date) => {
+  if (!date) return '—';
+  const d = new Date(date);
+  return isNaN(d.getTime()) ? '—' : d.toLocaleDateString();
+};
+
+
   return (
     <div className="p-2">
       <h2 className="text-lg font-bold mb-4">Non-Conformity Records</h2>
@@ -65,6 +72,7 @@ const NonConformityTable = () => {
             <th className="border p-2 text-white">Description</th>
             <th className="border p-2 text-white">Clause No</th>
             <th className="border p-2 text-white">Type</th>
+            <th className="border p-2 text-white">Reporting Date</th>
             <th className="border p-2 text-white">Due Date</th>
             <th className="border p-2 text-white">Department</th>
             <th className="border p-2 text-white">Responsible Person</th>
@@ -105,15 +113,17 @@ const NonConformityTable = () => {
               <td className="border p-2">{ncItem.ncDescription}</td>
               <td className="border p-2">{ncItem.ncClauseNo}</td>
               <td className="border p-2">{ncItem.ncType}</td>
+              <td className="border p-2">{formatDate(ncItem.reportingDate)}</td>
               <td className="border p-2">{ncItem.dueDate ? new Date(ncItem.dueDate).toLocaleDateString() : ''}</td>
               <td className="border p-2">{ncItem.department}</td>
               <td className="border p-2">{ncItem.responsibleperson}</td>
-              {/* <td className="border p-2">{ncItem.responsiblepersonmail}</td> */}
               <td className="border p-2">{Array.isArray(ncItem.nclocation) ? ncItem.nclocation.join(', ') : ncItem.nclocation}</td>
+              <td className="border p-2">{ncItem.ncstatus}</td>
+              {/* <td className="border p-2">{ncItem.responsiblepersonmail}</td> */}
               {/* <td className="border p-2">{ncItem.ncCorrectiveAction}</td>
               <td className="border p-2">{ncItem.ncPreventiveAction}</td>
               <td className="border p-2">{ncItem.ncRootCause}</td> */}
-              <td className="border p-2">{ncItem.ncstatus}</td>
+
               {/* <td className="border p-2">
                 {ncItem.attachments && ncItem.attachments.length > 0 ? (
                   <ul>

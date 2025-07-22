@@ -12,6 +12,24 @@ export default function NonConformity() {
     const location = useLocation();
     const { id } = useParams();
 
+     const [isEditable, setIsEditable] = useState({
+     description: true,
+     location: true,
+     clauseno: true,
+     auditteam: true,
+     status: true,
+     reportingdate: false,
+     department : true,
+     nonConformitytype:true,
+     dueDate:true,
+     responsibleperson:true,
+     responsiblepersonmail:true,
+     CorrectiveAction:true,
+     preventiveAction:true,
+     rootcause:true
+  // add others as per need
+});
+
 const submitNCForm = async (ncData) => {
   try {
     const formData = new FormData();
@@ -54,6 +72,8 @@ const submitNCForm = async (ncData) => {
     const [ncDescription, setNcDescription] = useState('');
     const [ncClauseNo, setNcClauseNo] = useState('');
     const [ncType, setNcType] = useState('');
+    const [actualdate, setActualdate] = useState(location.state?.actualdate || '');
+    const [reportingDate, setReportingDate] = useState('');
     const [dueDate, setDueDate] = useState('');
     const [department, setDepartment] = useState('');
     const [responsiblePeople, setResponsiblePeople] = useState([]);
@@ -88,6 +108,7 @@ const submitNCForm = async (ncData) => {
         setNcDescription(data.ncDescription || '');
         setNcClauseNo(data.ncClauseNo || '');
         setNcType(data.ncType || '');
+        setReportingDate(data.reportingDate ? data.reportingDate.slice(0,10) : '');
         setDueDate(data.dueDate ? data.dueDate.slice(0,10) : ''); // <-- FIXED LINE
         setDepartment(data.department || '');
         setResponsibleperson(data.responsibleperson || '');
@@ -101,6 +122,10 @@ const submitNCForm = async (ncData) => {
       });
   }
 }, [id]);
+
+    useEffect(() => {
+    console.log('✅ actualdate received via navigate:', actualdate);
+    }, [actualdate]);
 
 
     const ncLocationOptions = [
@@ -158,6 +183,7 @@ const submitNCForm = async (ncData) => {
         !ncDescription ||
         !ncClauseNo ||
         !ncType ||
+        !reportingDate||
         !dueDate ||
         !department ||
         !responsibleperson ||
@@ -169,18 +195,41 @@ const submitNCForm = async (ncData) => {
         setFormError('Please fill in all required fields.');
         return;
       }
+      
+      const rep = new Date(reportingDate);
+      const due = new Date(dueDate);
+      const act = new Date(actualdate);
 
-      if (!window.confirm("Are you sure you want to save the NonConformity form?")) {
-        return;
-      }
+    // Logs for debugging (optional)
+    console.log("Reporting Date Parsed:", rep);
+    console.log("Due Date Parsed:", due);
+    console.log("Actual Date Parsed:", act);
+
+    // Rule 1: rep > act
+    if (rep.getTime() <= act.getTime()) {
+    window.alert('❌ Reporting Date must be after the Actual Date of Audit.');
+    return;
+    }
+
+   // Rule 2: rep ≠ due
+   if (rep.getTime() === due.getTime()) {
+   window.alert('❌ Reporting Date must not be equal to Due Date.');
+   return;
+   }
+
+   // Rule 3: rep < due
+   if (rep.getTime() >= due.getTime()) {
+   window.alert('❌ Reporting Date must be before the Due Date.');
+   return;
+}
 
       setIsSubmitting(true);
-
       const NonConformityData = {
         auditId,
         ncDescription,
         ncClauseNo,
         ncType,
+        reportingDate,
         dueDate,
         department,
         responsibleperson,
@@ -191,7 +240,6 @@ const submitNCForm = async (ncData) => {
         ncRootCause,
         ncstatus,
       };
-
       submitNCForm(NonConformityData).finally(() => setIsSubmitting(false));
     };
 
@@ -203,6 +251,7 @@ const submitNCForm = async (ncData) => {
         setNcClauseNo('');
         setNcType('');
         setDueDate('');
+        setReportingDate('');
         setDepartment('');
         setResponsibleperson('');
         setResponsiblepersonmail('');
@@ -241,7 +290,7 @@ const submitNCForm = async (ncData) => {
                     />
                   </div>
                   {/* ncId */}
-                  <div className="flex flex-col">
+                  <div className="flex flex-col hidden">
                     <label htmlFor="ncId" className="text-medium font-medium text-gray-700">
                       NonConformityId
                     </label>
@@ -264,6 +313,7 @@ const submitNCForm = async (ncData) => {
                     <AutoResizeTextarea
                       value={ncDescription}
                       onChange={e => setNcDescription(e.target.value)}
+                      readOnly={!isEditable.description}
                       maxLength={1000}
                       name="ncDescription"
                       id="ncDescription"
@@ -281,6 +331,7 @@ const submitNCForm = async (ncData) => {
                     <AutoResizeTextarea
                       value={ncClauseNo}
                       onChange={e => setNcClauseNo(e.target.value)}
+                      disabled={!isEditable.clauseno}
                       maxLength={1000}
                       name="ncClauseNo"
                       id="ncClauseNo"
@@ -301,6 +352,7 @@ const submitNCForm = async (ncData) => {
                       required
                       value={ncType}
                       onChange={e => setNcType(e.target.value)}
+                      disabled={!isEditable.nonConformitytype}
                       className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                       font-semibold focus:border-orange-500 focus:outline-none">
                       <option value="" disabled>
@@ -310,6 +362,23 @@ const submitNCForm = async (ncData) => {
                       <option>Major</option>
                       <option>Observation</option>
                     </select>
+                  </div>
+                  {/* reporting date */}
+                  <div className="flex flex-col">
+                    <label htmlFor="reporting-date" className="text-medium font-medium text-gray-700">
+                      Reporting Date <span className="text-red-500 text-xl mt-1">*</span>
+                    </label>
+                    <input
+                      type="date"
+                      required
+                      name="reportingDate"
+                      id="reporting-date"
+                      value={reportingDate}
+                      onChange={e => setReportingDate(e.target.value)}
+                      disabled={!isEditable.reportingdate}
+                      className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
+                      font-semibold focus:border-orange-500 focus:outline-none"
+                    />
                   </div>
                   {/* due date */}
                   <div className="flex flex-col">
@@ -323,6 +392,7 @@ const submitNCForm = async (ncData) => {
                       id="due-date"
                       value={dueDate}
                       onChange={e => setDueDate(e.target.value)}
+                      disabled={!isEditable.dueDate}
                       className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
                       font-semibold focus:border-orange-500 focus:outline-none"
                     />
@@ -338,6 +408,7 @@ const submitNCForm = async (ncData) => {
                       required
                       value={department}
                       onChange={e => setDepartment(e.target.value)}
+                      disabled={!isEditable.department}
                       className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                       font-semibold focus:border-orange-500 focus:outline-none">
                       <option value="" disabled>
@@ -366,6 +437,7 @@ const submitNCForm = async (ncData) => {
                         const person = responsiblePeople.find(p => p.name === e.target.value);
                         setResponsiblepersonmail(person ? person.email : '');
                       }}
+                      disabled={!isEditable.responsibleperson}
                       className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                       font-semibold focus:border-orange-500 focus:outline-none">
                       <option value="" disabled>Responsible-Person</option>
@@ -386,6 +458,7 @@ const submitNCForm = async (ncData) => {
                       readOnly
                       required
                       value={responsiblepersonmail}
+                      disabled={!isEditable.responsiblepersonmail}
                       className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 
                       font-semibold focus:border-orange-500 focus:outline-none"
                     />
@@ -402,6 +475,7 @@ const submitNCForm = async (ncData) => {
                       options={ncLocationOptions}
                       value={ncLocationOptions.filter(opt => nclocation.includes(opt.value))}
                       onChange={selected => setNclocation(selected ? selected.map(opt => opt.value) : [])}
+                      isDisabled={!isEditable.location}
                       className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
                       font-semibold focus:border-orange-500 focus:outline-none"
                       classNamePrefix="select"
@@ -416,6 +490,7 @@ const submitNCForm = async (ncData) => {
                     <AutoResizeTextarea
                       value={ncCorrectiveAction}
                       onChange={e => setNcCorrectiveAction(e.target.value)}
+                      readOnly={!isEditable.CorrectiveAction}
                       maxLength={1000}
                       name="ncCorrectiveAction"
                       id="ncCorrectiveAction"
@@ -432,6 +507,7 @@ const submitNCForm = async (ncData) => {
                     <AutoResizeTextarea
                       value={ncPreventiveAction}
                       onChange={e => setNcPreventiveAction(e.target.value)}
+                      readOnly={!isEditable.preventiveAction}
                       maxLength={1000}
                       name="ncPreventiveAction"
                       id="ncPreventiveAction"
@@ -448,6 +524,7 @@ const submitNCForm = async (ncData) => {
                     <AutoResizeTextarea
                       value={ncRootCause}
                       onChange={e => setNcRootCause(e.target.value)}
+                      readOnly={!isEditable.rootcause}
                       maxLength={1000}
                       name="ncRootCause"
                       id="ncRootCause"
@@ -467,6 +544,7 @@ const submitNCForm = async (ncData) => {
                       id="ncstatus"
                       value={ncstatus}
                       onChange={e => setNcstatus(e.target.value)}
+                      disabled={!isEditable.status}
                       required
                       className="w-100 mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-900 
                       font-semibold focus:border-orange-500 focus:outline-none">
@@ -481,7 +559,6 @@ const submitNCForm = async (ncData) => {
                       <option value="On-Hold">On-Hold</option>
                     </select>
                   </div>
-
                   {/* attachments */}
                   <div className="flex flex-col">
                     <label htmlFor="attachments" className="text-medium font-medium text-gray-700">
@@ -522,6 +599,16 @@ const submitNCForm = async (ncData) => {
                       </div>
                     )}
                   </div>
+                   
+                  {!isEditable.dueDate && (
+                  <button
+                  type="button"
+                  onClick={() => setIsEditable(prev => ({ ...prev, dueDate: true }))}
+                  className="ml-2 text-blue-600 text-xs hover:underline"
+                  >
+                  Edit
+                  </button>
+                  )}
 
                   <button
                     type="submit"

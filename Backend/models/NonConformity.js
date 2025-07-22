@@ -6,6 +6,7 @@ const nonConformitySchema = new mongoose.Schema({
   ncDescription: String,
   ncClauseNo: String,
   ncType: String,
+  reportingDate : Date,
   dueDate: Date,
   department: String,
   responsibleperson: String,

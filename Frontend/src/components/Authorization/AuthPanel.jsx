@@ -39,7 +39,7 @@ export default function AuthPanel() {
         localStorage.setItem("isAuthenticated", "true");
         toast.success("Access granted!", { position: "top-center", autoClose: 2000 });
         setTimeout(() => {
-          navigate("/dashboard");
+          navigate("/home");
         }, 2000);
       } else {
         toast.error(data.message || "Sign In failed.", { position: "top-center", autoClose: 2000 });
