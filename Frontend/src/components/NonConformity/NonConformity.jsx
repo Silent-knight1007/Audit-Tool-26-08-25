@@ -11,14 +11,38 @@ export default function NonConformity() {
     const navigate = useNavigate();
     const location = useLocation();
     const { id } = useParams();
+ 
+    // form fields...
+    const [auditId, setAuditId] = useState(location.state?.auditId || '');
+    const [ncId, setNcId] = useState('');
+    const [ncDescription, setNcDescription] = useState('');
+    const [ncClauseNo, setNcClauseNo] = useState('');
+    const [ncType, setNcType] = useState('');
+    const [actualdate, setActualdate] = useState(location.state?.actualdate || '');
+    const [reportingDate, setReportingDate] = useState('');
+    const [dueDate, setDueDate] = useState('');
+    const [department, setDepartment] = useState('');
+    const [responsiblePeople, setResponsiblePeople] = useState([]);
+    const [responsibleperson, setResponsibleperson] = useState('');
+    const [responsiblepersonmail, setResponsiblepersonmail] = useState('');
+    const [nclocation, setNclocation] = useState([]);
+    const [ncCorrectiveAction, setNcCorrectiveAction] = useState('');
+    const [ncPreventiveAction, setNcPreventiveAction] = useState('');
+    const [ncRootCause, setNcRootCause] = useState('');
+    const [ncstatus, setNcstatus] = useState('');
+    const [attachments, setAttachments] = useState([]);
+    const [existingAttachments, setExistingAttachments] = useState([]);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [formError, setFormError] = useState('');
 
+    // Initial isEditable state - all fields true by default
      const [isEditable, setIsEditable] = useState({
      description: true,
      location: true,
      clauseno: true,
      auditteam: true,
      status: true,
-     reportingdate: false,
+     reportingdate: true,
      department : true,
      nonConformitytype:true,
      dueDate:true,
@@ -29,6 +53,88 @@ export default function NonConformity() {
      rootcause:true
   // add others as per need
 });
+
+// Add this useEffect to set isEditable and initialize form fields depending on edit/create mode
+  useEffect(() => {
+    if (id) {
+      // Editing mode: disable fields as necessary
+      setIsEditable({
+        description: true,
+        location: true,
+        clauseno: true,
+        auditteam: true,
+        status: true,
+        reportingdate: false,
+        department: true,
+        nonConformitytype: true,
+        dueDate: true,
+        responsibleperson: true,
+        responsiblepersonmail: true,
+        CorrectiveAction: true,
+        preventiveAction: true,
+        rootcause: true,
+      });
+
+  // Fetch existing NonConformity data
+      fetch(`http://localhost:5000/api/NonConformity/${id}`)
+        .then(res => res.json())
+        .then(data => {
+          setAuditId(data.auditId || '');
+          setNcId(data.ncId || '');
+          setNcDescription(data.ncDescription || '');
+          setNcClauseNo(data.ncClauseNo || '');
+          setNcType(data.ncType || '');
+          setReportingDate(data.reportingDate ? data.reportingDate.slice(0, 10) : '');
+          setDueDate(data.dueDate ? data.dueDate.slice(0, 10) : '');
+          setDepartment(data.department || '');
+          setResponsibleperson(data.responsibleperson || '');
+          setResponsiblepersonmail(data.responsiblepersonmail || '');
+          setNclocation(data.nclocation || []);
+          setNcCorrectiveAction(data.ncCorrectiveAction || '');
+          setNcPreventiveAction(data.ncPreventiveAction || '');
+          setNcRootCause(data.ncRootCause || '');
+          setNcstatus(data.ncstatus || '');
+          setExistingAttachments(data.attachments || []);
+        })
+        .catch(() => alert('Error loading NonConformity for edit'));
+    } else {
+      // Creating mode: enable all fields and clear form inputs
+      setIsEditable({
+        description: true,
+        location: true,
+        clauseno: true,
+        auditteam: true,
+        status: true,
+        reportingdate: true,
+        department: true,
+        nonConformitytype: true,
+        dueDate: true,
+        responsibleperson: true,
+        responsiblepersonmail: true,
+        CorrectiveAction: true,
+        preventiveAction: true,
+        rootcause: true,
+      });
+
+      setAuditId(location.state?.auditId || '');  // optionally reset or keep from location.state
+      setNcId('');
+      setNcDescription('');
+      setNcClauseNo('');
+      setNcType('');
+      setReportingDate('');
+      setDueDate('');
+      setDepartment('');
+      setResponsibleperson('');
+      setResponsiblepersonmail('');
+      setNclocation([]);
+      setNcCorrectiveAction('');
+      setNcPreventiveAction('');
+      setNcRootCause('');
+      setNcstatus('');
+      setExistingAttachments([]);
+      setAttachments([]);
+    }
+  }, [id, location.state?.auditId]);
 
 const submitNCForm = async (ncData) => {
   try {
@@ -66,29 +172,6 @@ const submitNCForm = async (ncData) => {
     alert('Error submitting NonConformity: ' + error.message);
   }
 };
-
-    const [auditId, setAuditId] = useState(location.state?.auditId || '');
-    const [ncId, setNcId] = useState('');
-    const [ncDescription, setNcDescription] = useState('');
-    const [ncClauseNo, setNcClauseNo] = useState('');
-    const [ncType, setNcType] = useState('');
-    const [actualdate, setActualdate] = useState(location.state?.actualdate || '');
-    const [reportingDate, setReportingDate] = useState('');
-    const [dueDate, setDueDate] = useState('');
-    const [department, setDepartment] = useState('');
-    const [responsiblePeople, setResponsiblePeople] = useState([]);
-    const [responsibleperson, setResponsibleperson] = useState('');
-    const [responsiblepersonmail, setResponsiblepersonmail] = useState('');
-    const [nclocation, setNclocation] = useState([]);
-    const [ncCorrectiveAction, setNcCorrectiveAction] = useState('');
-    const [ncPreventiveAction, setNcPreventiveAction] = useState('');
-    const [ncRootCause, setNcRootCause] = useState('');
-    const [ncstatus, setNcstatus] = useState('');
-    const [attachments, setAttachments] = useState([]);
-    const [existingAttachments, setExistingAttachments] = useState([]);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [formError, setFormError] = useState('');
-
     useEffect(() => {
       setResponsiblePeople([
         { _id: 1, name: "Alice Johnson", email: "alice.johnson@example.com" },
@@ -97,31 +180,31 @@ const submitNCForm = async (ncData) => {
       ]);
     }, []);
 
-    // If editing, fetch existing NonConformity and its attachments
-    useEffect(() => {
-  if (id) {
-    fetch(`http://localhost:5000/api/NonConformity/${id}`)
-      .then(res => res.json())
-      .then(data => {
-        setAuditId(data.auditId || '');
-        setNcId(data.ncId || '');
-        setNcDescription(data.ncDescription || '');
-        setNcClauseNo(data.ncClauseNo || '');
-        setNcType(data.ncType || '');
-        setReportingDate(data.reportingDate ? data.reportingDate.slice(0,10) : '');
-        setDueDate(data.dueDate ? data.dueDate.slice(0,10) : ''); // <-- FIXED LINE
-        setDepartment(data.department || '');
-        setResponsibleperson(data.responsibleperson || '');
-        setResponsiblepersonmail(data.responsiblepersonmail || '');
-        setNclocation(data.nclocation || []);
-        setNcCorrectiveAction(data.ncCorrectiveAction || '');
-        setNcPreventiveAction(data.ncPreventiveAction || '');
-        setNcRootCause(data.ncRootCause || '');
-        setNcstatus(data.ncstatus || '');
-        setExistingAttachments(data.attachments || []);
-      });
-  }
-}, [id]);
+//     // If editing, fetch existing NonConformity and its attachments
+//     useEffect(() => {
+//   if (id) {
+//     fetch(`http://localhost:5000/api/NonConformity/${id}`)
+//       .then(res => res.json())
+//       .then(data => {
+//         setAuditId(data.auditId || '');
+//         setNcId(data.ncId || '');
+//         setNcDescription(data.ncDescription || '');
+//         setNcClauseNo(data.ncClauseNo || '');
+//         setNcType(data.ncType || '');
+//         setReportingDate(data.reportingDate ? data.reportingDate.slice(0,10) : '');
+//         setDueDate(data.dueDate ? data.dueDate.slice(0,10) : ''); // <-- FIXED LINE
+//         setDepartment(data.department || '');
+//         setResponsibleperson(data.responsibleperson || '');
+//         setResponsiblepersonmail(data.responsiblepersonmail || '');
+//         setNclocation(data.nclocation || []);
+//         setNcCorrectiveAction(data.ncCorrectiveAction || '');
+//         setNcPreventiveAction(data.ncPreventiveAction || '');
+//         setNcRootCause(data.ncRootCause || '');
+//         setNcstatus(data.ncstatus || '');
+//         setExistingAttachments(data.attachments || []);
+//       });
+//   }
+// }, [id]);
 
     useEffect(() => {
     console.log('✅ actualdate received via navigate:', actualdate);
@@ -599,17 +682,7 @@ const submitNCForm = async (ncData) => {
                       </div>
                     )}
                   </div>
-                   
-                  {!isEditable.dueDate && (
-                  <button
-                  type="button"
-                  onClick={() => setIsEditable(prev => ({ ...prev, dueDate: true }))}
-                  className="ml-2 text-blue-600 text-xs hover:underline"
-                  >
-                  Edit
-                  </button>
-                  )}
-
+                  {/* update button */}
                   <button
                     type="submit"
                     disabled={isSubmitting}
@@ -617,7 +690,7 @@ const submitNCForm = async (ncData) => {
                       mt-10 hover:bg-orange-600 transition ease-in-out duration-300">
                     {isSubmitting ? 'Saving...' : 'Save'}
                   </button>
-
+                   {/* cancel button */}
                   <button type="button" onClick={handleCancel}
                     className="md:w-32 bg-red-500 hover:bg-blue-dark text-white font-bold py-3 px-6 rounded-lg mt-10
                       hover:bg-orange-600 transition ease-in-out duration-300">

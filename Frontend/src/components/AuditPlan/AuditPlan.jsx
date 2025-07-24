@@ -7,22 +7,10 @@ import { FileIcon } from 'react-file-icon';
 import { useParams } from 'react-router-dom';
 
 export default function AuditPlan() {
-
   const { id } = useParams();
-  useEffect(() => {
-    if (id) {
-      axios.get(`http://localhost:5000/api/AuditPlan/${id}`)
-        .then(response => {
-          const data = response.data;
-          setAuditId(data.auditId);
-          // set other states accordingly
-        })
-        .catch(error => {
-          alert('Error loading audit for edit');
-        });
-    }
-  }, [id]);
-  
+  const navigate = useNavigate();
+
+  // Form field states
   const [auditId, setAuditId] = useState('');
   const [auditType, setAuditType] = useState('');
   const [standards, setStandards] = useState([]);
@@ -37,11 +25,55 @@ export default function AuditPlan() {
   const [scope, setScope] = useState('');
   const [attachments, setAttachments] = useState([]);
   const [existingAttachments, setExistingAttachments] = useState([]);
-  const navigate = useNavigate();
 
   useEffect(() => {
-    // If editing, fetch audit plan by id and set fields
     if (id) {
+      axios.get(`http://localhost:5000/api/AuditPlan/${id}`)
+        .then(response => {
+          const data = response.data;
+          setAuditId(data.auditId);
+          // set other states accordingly
+        })
+        .catch(error => {
+          alert('Error loading audit for edit');
+        });
+    }
+  }, [id]);
+
+  // Editable state
+  const [isEditable, setIsEditable] = useState({
+    standards: true,
+    location: true,
+    leadAuditor: true,
+    auditteam: true,
+    status: true,
+    actualdate: true,
+    completedate:true,
+    auditscope: true,
+    auditcriteria:true,
+    planneddate: false, // default true now so fields editable in create mode initially
+    audittype: false
+  });
+
+  // Fetch data or reset fields depending on mode (edit/create)
+  useEffect(() => {
+    if (id) {
+      // Editing mode - disable fields you want to lock during edit
+      setIsEditable({
+        standards: true,
+        location: true,
+        leadAuditor: true,
+        auditteam: true,
+        status: true,
+        actualdate: true,
+        completedate: true,
+        auditscope: true,
+        auditcriteria: true,
+        planneddate: false,
+        audittype: false
+      });
+
+  // Fetch existing audit data
       axios.get(`http://localhost:5000/api/AuditPlan/${id}`)
         .then(response => {
           const data = response.data;
@@ -62,23 +94,38 @@ export default function AuditPlan() {
         .catch(error => {
           alert('Error loading audit for edit');
         });
+    } else {
+      // Creating new mode - enable all fields editable, reset form
+      setIsEditable({
+        standards: true,
+        location: true,
+        leadAuditor: true,
+        auditteam: true,
+        status: true,
+        actualdate: true,
+        completedate: true,
+        auditscope: true,
+        auditcriteria: true,
+        planneddate: true,
+        audittype: true
+      });
+
+      setAuditId('');
+      setAuditType('');
+      setStandards([]);
+      setLocation([]);
+      setLeadAuditor('');
+      setSelectedAuditTeam([]);
+      setPlannedDate('');
+      setStatus('');
+      setActualDate('');
+      setCompleteDate('');
+      setCriteria('');
+      setScope('');
+      setExistingAttachments([]);
+      setAttachments([]);
     }
   }, [id]);
-
-  const [isEditable, setIsEditable] = useState({
-  standards: true,
-  location: true,
-  leadAuditor: true,
-  auditteam: true,
-  status: true,
-  actualdate: true,
-  completedate:true,
-  auditscope : true,
-  auditcriteria:true,
-  planneddate : false,
-  audittype:false
-  // add others as per need
-});
 
   const locationOptions = [
     { value: "Noida", label: "Noida" },
@@ -110,10 +157,10 @@ export default function AuditPlan() {
     setAttachments(Array.from(e.target.files));
   };
 
-  const handleAuditTeamChange = (event) => {
-    const values = Array.from(event.target.selectedOptions, option => option.value);
-    setSelectedAuditTeam(values);
-  };
+  // const handleAuditTeamChange = (event) => {
+  //   const values = Array.from(event.target.selectedOptions, option => option.value);
+  //   setSelectedAuditTeam(values);
+  // };
 
   const submitAuditPlanForm = async (AuditPlanData) => {
   try {

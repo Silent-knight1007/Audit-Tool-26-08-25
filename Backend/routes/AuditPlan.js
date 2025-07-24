@@ -133,7 +133,7 @@ router.delete('/audits', async (req, res) => {
       typeof audit.status === "string" &&
       audit.status.trim().toLowerCase() === "planned"
     )
-      .map(audit => audit._id);
+      .map(audit => audit._id.toString()); // Convert ObjectId to string
 
     if (allowedIds.length === 0) {
       return res.status(400).json({ message: 'No audits with status "planned" can be deleted.' });
@@ -141,9 +141,10 @@ router.delete('/audits', async (req, res) => {
 
     const result = await AuditPlan.deleteMany({ _id: { $in: allowedIds } });
     res.status(200).json({
-      message: `${result.deletedCount} audit(s) deleted.`,
-      deletedIds: allowedIds
+    message: `${result.deletedCount} audit(s) deleted.`,
+    deletedIds: allowedIds.map(id => id.toString())
     });
+
   } catch (error) {
     console.error('Error deleting audits:', error);
     res.status(500).json({ message: 'Server error during delete.', error: error.message });
