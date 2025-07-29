@@ -1,1420 +1,652 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from "react";
 import {
-  BarChart, Bar, XAxis, YAxis, Tooltip,
-  ResponsiveContainer, PieChart, Pie, Cell
-} from 'recharts';
-import { motion } from 'framer-motion';
-import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+} from "recharts";
+import { motion } from "framer-motion";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-// Pie slice colors for Minor, Major, Observation
 const PIE_COLORS = [
-  '#2b72b8',  // Minor - blue
-  '#e94560',  // Major - red
-  '#ffd460'   // Observation - yellow
+  "#2b72b8", // Minor
+  "#e94560", // Major
+  "#ffd460", // Observation
 ];
 
-// Color palette for bar chart: planned blue shades, executed orange shades
 const COLORS = {
-  plannedInternal: '#1565c0',    // Dark Blue for Planned - Internal
-  plannedExternal: '#90caf9',    // Light Blue for Planned - External
-  executedInternal: '#ef6c00',   // Dark Orange for Executed - Internal
-  executedExternal: '#ffd180',   // Light Orange for Executed - External
+  plannedInternal: "#1560bd",
+  plannedExternal: "#90caf9",
+  executedInternal: "#ef6c00",
+  executedExternal: "#ffd180",
 };
+
+const DEPARTMENTS = [
+  "IT",
+  "HR",
+  "Compliance",
+  "Operations",
+  "Quality Assurance",
+  "Finance",
+];
 
 export default function Dashboard() {
   const [auditData, setAuditData] = useState([]);
   const [plannedVsExecutedData, setPlannedVsExecutedData] = useState([]);
-  const [nonConformities, setNonConformities] = useState([]);
-  const [ncDropdown, setNcDropdown] = useState('all');
+
+  const [nonconformities, setNonconformities] = useState([]);
+
+  // General Nonconformity Dropdown
+  const [ncDropdown, setNcDropdown] = useState("all");
   const [ncYears, setNcYears] = useState([]);
   const [pieData, setPieData] = useState([
-    { name: 'Minor', value: 0 },
-    { name: 'Major', value: 0 },
-    { name: 'Observation', value: 0 }
+    { name: "Minor", value: 0 },
+    { name: "Major", value: 0 },
+    { name: "Observation", value: 0 },
   ]);
+
+  // Open Nonconformity Dropdown and Data
+  const [openNcDropdown, setOpenNcDropdown] = useState("all");
+  const [openNcYears, setOpenNcYears] = useState([]);
+  const [openPieData, setOpenPieData] = useState([
+    { name: "Minor", value: 0 },
+    { name: "Major", value: 0 },
+    { name: "Observation", value: 0 },
+  ]);
+  const [deptOpenNcDropdown, setDeptOpenNcDropdown] = useState("all");
+  const [deptOpenNcYears, setDeptOpenNcYears] = useState([]);
+  const [deptOpenBarData, setDeptOpenBarData] = useState(
+    DEPARTMENTS.map((d) => ({ department: d, count: 0 }))
+  );
+
+  // Closed Nonconformities Dropdown and Data
+  const [closedNcDropdown, setClosedNcDropdown] = useState("all");
+  const [closedNcYears, setClosedNcYears] = useState([]);
+  const [closedPieData, setClosedPieData] = useState([
+    { name: "Minor", value: 0 },
+    { name: "Major", value: 0 },
+    { name: "Observation", value: 0 },
+  ]);
+  const [closedDeptDropdown, setClosedDeptDropdown] = useState("all");
+  const [closedDeptYears, setClosedDeptYears] = useState([]);
+  const [closedDeptBarData, setClosedDeptBarData] = useState(
+    DEPARTMENTS.map((d) => ({ department: d, count: 0 }))
+  );
+
   const navigate = useNavigate();
 
-  // Fetch nonConformities data
+  // Fetch audits
   useEffect(() => {
-    async function fetchNonConformities() {
-      try {
-        const response = await axios.get('http://localhost:5000/api/NonConformity');
-        setNonConformities(response.data || []);
-      } catch (err) {
-        console.error('Error fetching nonconformities', err);
-      }
-    }
-    fetchNonConformities();
+    axios
+      .get("http://localhost:5000/api/AuditPlan")
+      .then((res) => setAuditData(res.data || []))
+      .catch((e) => console.error("Audit fetch error", e));
   }, []);
 
-  // Fetch audit data
-  useEffect(() => {
-    async function fetchAudits() {
-      try {
-        const response = await axios.get('http://localhost:5000/api/AuditPlan');
-        setAuditData(response.data || []);
-      } catch (err) {
-        console.error('Error fetching audits', err);
-      }
-    }
-    fetchAudits();
-  }, []);
-
-  // Process Planned vs Executed data for bar chart
+  // Process audits to bar chart data
   useEffect(() => {
     const countsByYear = {};
-    auditData.forEach(audit => {
+    auditData.forEach((audit) => {
       if (!audit.plannedDate) return;
-      const year = new Date(audit.plannedDate).getFullYear();
-      if (!countsByYear[year]) countsByYear[year] = {
-        plannedInternal: 0,
-        plannedExternal: 0,
-        executedInternal: 0,
-        executedExternal: 0
-      };
-      const auditType = audit.auditType?.toLowerCase();
-      if (audit.status === 'Planned') {
-        if (auditType === 'internal')
-          countsByYear[year].plannedInternal += 1;
-        else if (auditType === 'external')
-          countsByYear[year].plannedExternal += 1;
-      } else if (audit.status === 'Executed' || audit.status === 'Completed') {
-        if (auditType === 'internal')
-          countsByYear[year].executedInternal += 1;
-        else if (auditType === 'external')
-          countsByYear[year].executedExternal += 1;
+      const y = new Date(audit.plannedDate).getFullYear();
+      if (!countsByYear[y]) {
+        countsByYear[y] = {
+          plannedInternal: 0,
+          plannedExternal: 0,
+          executedInternal: 0,
+          executedExternal: 0,
+        };
+      }
+      const type = (audit.auditType || "").toLowerCase();
+      if (audit.status === "Planned") {
+        if (type === "internal") countsByYear[y].plannedInternal++;
+        else if (type === "external") countsByYear[y].plannedExternal++;
+      } else if (audit.status === "Executed" || audit.status === "Completed") {
+        if (type === "internal") countsByYear[y].executedInternal++;
+        else if (type === "external") countsByYear[y].executedExternal++;
       }
     });
-    const processed = Object.keys(countsByYear)
-      .sort()
-      .map(year => ({
+    const processed = Object.entries(countsByYear)
+      .sort(([a], [b]) => a - b)
+      .map(([year, data]) => ({
         year,
-        plannedInternal: countsByYear[year].plannedInternal,
-        plannedExternal: countsByYear[year].plannedExternal,
-        executedInternal: countsByYear[year].executedInternal,
-        executedExternal: countsByYear[year].executedExternal,
+        ...data,
       }));
     setPlannedVsExecutedData(processed);
   }, [auditData]);
 
-  // Extract unique years from nonConformities for dropdown filter
+  // Fetch nonconformities
   useEffect(() => {
-    if (!nonConformities.length) {
+    axios
+      .get("http://localhost:5000/api/Nonconformity")
+      .then((res) => setNonconformities(res.data || []))
+      .catch((e) => console.error("Nonconformity fetch error", e));
+  }, []);
+
+  // Extract dropdown years for general NCs
+  useEffect(() => {
+    if (!nonconformities.length) {
       setNcYears([]);
       return;
     }
-    const yearsSet = new Set();
-    nonConformities.forEach(nc => {
-      let yr;
-      // Use reportingDate here instead of date
-    if (nc.reportingDate) {
-      const d = new Date(nc.reportingDate);
-      if (!isNaN(d)) yr = d.getFullYear();
-    } else if (nc.year) {
-      yr = Number(nc.year);
-    }
-    if (yr) yearsSet.add(yr);
-  });
-  const sortedYears = Array.from(yearsSet).sort((a, b) => b - a);
-  setNcYears(sortedYears.map(String));
-}, [nonConformities]);
+    const setYears = new Set();
+    nonconformities.forEach((nc) => {
+      let y = nc.reportingDate
+        ? new Date(nc.reportingDate).getFullYear()
+        : nc.year;
+      if (y) setYears.add(String(y));
+    });
+    setNcYears([...setYears].sort((a, b) => b - a));
+  }, [nonconformities]);
 
-  // Update pieData based on dropdown filter selection
+  // General NC pie data update
   useEffect(() => {
-    if (!nonConformities.length) {
+    if (!nonconformities.length) {
       setPieData([
-        { name: 'Minor', value: 0 },
-        { name: 'Major', value: 0 },
-        { name: 'Observation', value: 0 }
+        { name: "Minor", value: 0 },
+        { name: "Major", value: 0 },
+        { name: "Observation", value: 0 },
       ]);
       return;
     }
     const filtered =
-      ncDropdown === 'all'
-        ? nonConformities
-        : nonConformities.filter(nc => {
-          let yr;
-          if (nc.reportingDate) {
-            const d = new Date(nc.reportingDate);
-          if (!isNaN(d)) yr = d.getFullYear().toString();
-          } else if (nc.year) {
-          yr = nc.year.toString();
-          }
-
-          return yr === ncDropdown;
-        });
-
-    const counts = { Minor: 0, Major: 0, Observation: 0 };
-    filtered.forEach(nc => {
-      const cat = (nc.ncType || '').trim().toLowerCase();
-      if (cat === 'minor') counts.Minor += 1;
-      else if (cat === 'major') counts.Major += 1;
-      else if (cat === 'observation') counts.Observation += 1;
+      ncDropdown === "all"
+        ? nonconformities
+        : nonconformities.filter((nc) => {
+            let y = nc.reportingDate
+              ? new Date(nc.reportingDate).getFullYear()
+              : nc.year;
+            return String(y) === ncDropdown;
+          });
+    const counts = { minor: 0, major: 0, observation: 0 };
+    filtered.forEach((nc) => {
+      const t = (nc.ncType || "").toLowerCase();
+      if (t === "minor") counts.minor++;
+      else if (t === "major") counts.major++;
+      else if (t === "observation") counts.observation++;
     });
-
     setPieData([
-      { name: 'Minor', value: counts.Minor },
-      { name: 'Major', value: counts.Major },
-      { name: 'Observation', value: counts.Observation }
+      { name: "Minor", value: counts.minor },
+      { name: "Major", value: counts.major },
+      { name: "Observation", value: counts.observation },
     ]);
-  }, [nonConformities, ncDropdown]);
+  }, [nonconformities, ncDropdown]);
 
-  // Handler for navigation on bar click
-  const handleBarClick = (year, plannedOrExecuted, type) => {
-    navigate('/AuditPlan', { state: { year, type: `${plannedOrExecuted} ${type}` } });
-  };
-
-  // Handler for click on pie slice
-  const handlePieClick = (category) => {
-    navigate('/NonConformity', {
-      state: {
-        category,
-        year: ncDropdown === 'all' ? null : ncDropdown
+  // Open NC years
+  useEffect(() => {
+    if (!nonconformities.length) {
+      setOpenNcYears([]);
+      return;
+    }
+    const ySet = new Set();
+    nonconformities.forEach((nc) => {
+      if (
+        nc.ncstatus &&
+        nc.ncstatus.toLowerCase() === "open"
+      ) {
+        let y = nc.reportingDate
+          ? new Date(nc.reportingDate).getFullYear()
+          : nc.year;
+        if (y) ySet.add(String(y));
       }
     });
+    setOpenNcYears([...ySet].sort((a, b) => b - a));
+  }, [nonconformities]);
+
+  // Open NC pie data
+  useEffect(() => {
+    if (!nonconformities.length) {
+      setOpenPieData([
+        { name: "Minor", value: 0 },
+        { name: "Major", value: 0 },
+        { name: "Observation", value: 0 },
+      ]);
+      return;
+    }
+    const filtered = nonconformities.filter((nc) => {
+      return (
+        nc.ncstatus &&
+        nc.ncstatus.toLowerCase() === "open" &&
+        (openNcDropdown === "all" ||
+          String(
+            nc.reportingDate
+              ? new Date(nc.reportingDate).getFullYear()
+              : nc.year
+          ) === openNcDropdown)
+      );
+    });
+    const counts = { minor: 0, major: 0, observation: 0 };
+    filtered.forEach((nc) => {
+      const t = (nc.ncType || "").toLowerCase();
+      if (t === "minor") counts.minor++;
+      else if (t === "major") counts.major++;
+      else if (t === "observation") counts.observation++;
+    });
+    setOpenPieData([
+      { name: "Minor", value: counts.minor },
+      { name: "Major", value: counts.major },
+      { name: "Observation", value: counts.observation },
+    ]);
+  }, [nonconformities, openNcDropdown]);
+
+  // Open NC dept years
+  useEffect(() => {
+    if (!nonconformities.length) {
+      setDeptOpenNcYears([]);
+      return;
+    }
+    const ySet = new Set();
+    nonconformities.forEach((nc) => {
+      if (
+        nc.ncstatus &&
+        nc.ncstatus.toLowerCase() === "open"
+      ) {
+        let y = nc.reportingDate
+          ? new Date(nc.reportingDate).getFullYear()
+          : nc.year;
+        if (y) ySet.add(String(y));
+      }
+    });
+    setDeptOpenNcYears([...ySet].sort((a, b) => b - a));
+  }, [nonconformities]);
+
+  // Open NC dept bar chart data
+  useEffect(() => {
+    if (!nonconformities.length) {
+      setDeptOpenBarData(DEPARTMENTS.map((d) => ({ department: d, count: 0 })));
+      return;
+    }
+    const filtered = nonconformities.filter((nc) => {
+      return (
+        nc.ncstatus &&
+        nc.ncstatus.toLowerCase() === "open" &&
+        (deptOpenNcDropdown === "all" ||
+          String(
+            nc.reportingDate
+              ? new Date(nc.reportingDate).getFullYear()
+              : nc.year
+          ) === deptOpenNcDropdown)
+      );
+    });
+    const counts = {};
+    DEPARTMENTS.forEach((d) => (counts[d] = 0));
+    filtered.forEach((nc) => {
+      const d = (nc.department || "").trim();
+      if (DEPARTMENTS.includes(d)) counts[d]++;
+    });
+    setDeptOpenBarData(
+      DEPARTMENTS.map((d) => ({ department: d, count: counts[d] || 0 }))
+    );
+  }, [nonconformities, deptOpenNcDropdown]);
+
+  // Closed NC years
+  useEffect(() => {
+    if (!nonconformities.length) {
+      setClosedNcYears([]);
+      return;
+    }
+    const ySet = new Set();
+    nonconformities.forEach((nc) => {
+      if (
+        nc.ncstatus &&
+        nc.ncstatus.toLowerCase() === "closed"
+      ) {
+        let y = nc.reportingDate
+          ? new Date(nc.reportingDate).getFullYear()
+          : nc.year;
+        if (y) ySet.add(String(y));
+      }
+    });
+    setClosedNcYears([...ySet].sort((a, b) => b - a));
+  }, [nonconformities]);
+
+  // Closed NC pie data
+  useEffect(() => {
+    if (!nonconformities.length) {
+      setClosedPieData([
+        { name: "Minor", value: 0 },
+        { name: "Major", value: 0 },
+        { name: "Observation", value: 0 },
+      ]);
+      return;
+    }
+    const filtered = nonconformities.filter((nc) => {
+      return (
+        nc.ncstatus &&
+        nc.ncstatus.toLowerCase() === "closed" &&
+        (closedNcDropdown === "all" ||
+          String(
+            nc.reportingDate ? new Date(nc.reportingDate).getFullYear() : nc.year
+          ) === closedNcDropdown)
+      );
+    });
+    const counts = { minor: 0, major: 0, observation: 0 };
+    filtered.forEach((nc) => {
+      const t = (nc.ncType || "").toLowerCase();
+      if (t === "minor") counts.minor++;
+      else if (t === "major") counts.major++;
+      else if (t === "observation") counts.observation++;
+    });
+    setClosedPieData([
+      { name: "Minor", value: counts.minor },
+      { name: "Major", value: counts.major },
+      { name: "Observation", value: counts.observation },
+    ]);
+  }, [nonconformities, closedNcDropdown]);
+
+  // Closed NC dept years
+  useEffect(() => {
+    if (!nonconformities.length) {
+      setClosedDeptYears([]);
+      return;
+    }
+    const ySet = new Set();
+    nonconformities.forEach((nc) => {
+      if (
+        nc.ncstatus &&
+        nc.ncstatus.toLowerCase() === "closed"
+      ) {
+        let y = nc.reportingDate
+          ? new Date(nc.reportingDate).getFullYear()
+          : nc.year;
+        if (y) ySet.add(String(y));
+      }
+    });
+    setClosedDeptYears([...ySet].sort((a, b) => b - a));
+  }, [nonconformities]);
+
+  // Closed NC dept bar chart data
+  useEffect(() => {
+    if (!nonconformities.length) {
+      setClosedDeptBarData(DEPARTMENTS.map((d) => ({ department: d, count: 0 })));
+      return;
+    }
+    const filtered = nonconformities.filter((nc) => {
+      return (
+        nc.ncstatus &&
+        nc.ncstatus.toLowerCase() === "closed" &&
+        (closedDeptDropdown === "all" ||
+          String(
+            nc.reportingDate
+              ? new Date(nc.reportingDate).getFullYear()
+              : nc.year
+          ) === closedDeptDropdown)
+      );
+    });
+    const counts = {};
+    DEPARTMENTS.forEach((d) => (counts[d] = 0));
+    filtered.forEach((nc) => {
+      const d = (nc.department || "").trim();
+      if (DEPARTMENTS.includes(d)) counts[d]++;
+    });
+    setClosedDeptBarData(
+      DEPARTMENTS.map((d) => ({ department: d, count: counts[d] || 0 }))
+    );
+  }, [nonconformities, closedDeptDropdown]);
+
+  // Navigation handlers
+  const navigateToAuditPlan = (year, type) => {
+    navigate("/AuditPlan", { state: { year, type } });
+  };
+  const handlePieClick = (category) => {
+    navigate("/Nonconformity", {
+      state: { category, year: ncDropdown === "all" ? null : ncDropdown },
+    });
+  };
+  const handleOpenPieClick = (category) => {
+    navigate("/Nonconformity", {
+      state: { category, year: openNcDropdown === "all" ? null : openNcDropdown },
+    });
+  };
+  const handleClosedPieClick = (category) => {
+    navigate("/Nonconformity", {
+      state: { category, year: closedNcDropdown === "all" ? null : closedNcDropdown },
+    });
   };
 
-  // Animation variants
+  // Animations
   const headingVariant = {
     hidden: { opacity: 0, x: -60, scale: 0.6 },
-    visible: { opacity: 1, x: 0, scale: 1, transition: { type: 'spring', stiffness: 80, delay: 0.1 } }
+    visible: { opacity: 1, x: 0, scale: 1, transition: { type: "spring", stiffness: 80, delay: 0.1 } },
   };
   const subheadingVariant = {
     hidden: { opacity: 0, x: 60 },
-    visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 80, delay: 0.5 } }
+    visible: { opacity: 1, x: 0, transition: { type: "spring", stiffness: 80, delay: 0.5 } },
   };
-  const chartContainerVariant = {
-    hidden: { opacity: 0, scale: 0.7, y: 50 },
-    visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', stiffness: 80, delay: 0.9 } }
+  const chartVariant = {
+    hidden: { opacity: 0, scale: 0.8, y: 50 },
+    visible: { opacity: 1, scale: 1, y: 0, transition: { type: "spring", stiffness: 80, delay: 0.9 } },
   };
 
-  // Custom legend for the bar chart (Planned blue, Executed orange)
-  const BarCustomLegend = () => (
-    <div className="mb-5 select-none flex gap-8 justify-center mt-4">
-      <div className="flex items-center gap-2">
-        <span className="inline-block w-5 h-5 rounded" style={{ backgroundColor: COLORS.plannedInternal, border: '1px solid #1565c0' }} />
-        <span className="font-semibold text-[16px]" style={{ color: "#1565c0" }}>Planned</span>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="inline-block w-5 h-5 rounded" style={{ backgroundColor: COLORS.executedInternal, border: '1px solid #ef6c00' }} />
-        <span className="font-semibold text-[16px]" style={{ color: "#ef6c00" }}>Executed</span>
-      </div>
-    </div>
-  );
-
-  // Pie chart safe data ensuring minimal values to render slices properly
-  const safePieData = pieData.map(d => ({
+  // safe pie data for zero slices
+  const safePieData = pieData.map((d) => ({
     ...d,
-    value: d.value === 0 ? 0.1 : d.value
+    value: d.value === 0 ? 0.1 : d.value,
+  }));
+
+  const safeOpenPieData = openPieData.map((d) => ({
+    ...d,
+    value: d.value === 0 ? 0.1 : d.value,
+  }));
+
+  const safeClosedPieData = closedPieData.map((d) => ({
+    ...d,
+    value: d.value === 0 ? 0.1 : d.value,
   }));
 
   return (
     <motion.div
+      className="py-16 bg-white min-h-screen"
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, ease: 'easeOut' }}
-      className="py-16 bg-white min-h-screen"
+      transition={{ duration: 0.8, ease: "easeOut" }}
     >
       <div className="container mx-auto px-4 md:px-10 text-gray-700">
-        {/* Main Heading */}
-        <motion.h1
-          className="text-4xl font-bold mb-10 text-center"
-          variants={headingVariant}
-          initial="hidden"
-          animate="visible"
-        >
-          Welcome to Onxtel Dashboard
-        </motion.h1>
+        {/* Dashboard title
+        <motion.h1 className="text-4xl font-bold mb-10 text-center" variants={headingVariant} initial="hidden" animate="visible">
+          Dashboard
+        </motion.h1> */}
 
-        {/* Side-by-side cards container */}
-        <div className="flex flex-col md:flex-row gap-8">
-          
-          {/* Bar Chart Card */}
-          <div className="bg-white rounded-lg shadow-lg p-6 flex-1 min-w-0">
-            <motion.h2
-              className="text-2xl font-semibold mb-4 text-center"
-              variants={subheadingVariant}
-              initial="hidden"
-              animate="visible"
-            >
-              Planned vs Executed Audits
+        {/* First row */}
+        <div className="flex flex-col md:flex-row gap-8 mb-8">
+          {/* Planned vs Executed audits */}
+          <div className="bg-white rounded-xl shadow-xl p-5 flex-1 min-w-0">
+            <motion.h2 className="text-2xl font-semibold mb-4 text-center" variants={subheadingVariant} initial="hidden" animate="visible">
+              Planned Vs Executed Audits
             </motion.h2>
-            <BarCustomLegend />
-            <motion.div
-              className="w-full h-96"
-              variants={chartContainerVariant}
-              initial="hidden"
-              animate="visible"
-            >
+            <motion.div className="w-full h-96" variants={chartVariant} initial="hidden" animate="visible">
               <ResponsiveContainer width="100%" height="100%">
-                <BarChart
-                  data={plannedVsExecutedData}
-                  margin={{ top: 10, right: 40, left: 10, bottom: 50 }}
-                  barCategoryGap="35%"
-                  barGap={16}
-                >
-                  <XAxis
-                    dataKey="year"
-                    tick={{ fontSize: 14, fill: "#222" }}
-                    axisLine
-                    style={{ fontWeight: "bold" }}
-                    label={{
-                      value: "Year",
-                      position: "insideBottom",
-                      offset: -20,
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                      fill: "#555"
-                    }}
-                  />
-                  <YAxis
-                    allowDecimals={false}
-                    tick={{ fontSize: 14, fill: "#222" }}
-                    label={{
-                      value: "Count",
-                      angle: -90,
-                      position: "insideLeft",
-                      offset: 15,
-                      fontWeight: 'bold',
-                      fontSize: 16,
-                      fill: "#555"
-                    }}
-                  />
-                  <Tooltip
-                    formatter={(value, name) => [value, name.replace(/([A-Z])/g, ' $1').trim()]}
-                    labelStyle={{ fontWeight: 'bold' }}
-                  />
-                  <Bar
-                    dataKey="plannedInternal"
-                    stackId="planned"
-                    fill={COLORS.plannedInternal}
-                    name="Planned Internal"
-                    barSize={26}
-                    cursor="pointer"
-                    onClick={(data) => handleBarClick(data.payload.year, "Planned", "Internal")}
-                  />
-                  <Bar
-                    dataKey="plannedExternal"
-                    stackId="planned"
-                    fill={COLORS.plannedExternal}
-                    name="Planned External"
-                    barSize={26}
-                    cursor="pointer"
-                    onClick={(data) => handleBarClick(data.payload.year, "Planned", "External")}
-                  />
-                  <Bar
-                    dataKey="executedInternal"
-                    stackId="executed"
-                    fill={COLORS.executedInternal}
-                    name="Executed Internal"
-                    barSize={26}
-                    cursor="pointer"
-                    onClick={(data) => handleBarClick(data.payload.year, "Executed", "Internal")}
-                  />
-                  <Bar
-                    dataKey="executedExternal"
-                    stackId="executed"
-                    fill={COLORS.executedExternal}
-                    name="Executed External"
-                    barSize={26}
-                    cursor="pointer"
-                    onClick={(data) => handleBarClick(data.payload.year, "Executed", "External")}
-                  />
+                <BarChart data={plannedVsExecutedData} margin={{ top: 10, right: 40, left: 10, bottom: 50 }}>
+                  <XAxis dataKey="year" axisLine tick={{ fontSize: 14, fill: "#222" }} style={{ fontWeight: "bold" }} label={{ value: "Year", position: "insideBottom", offset: -20, fontWeight: "bold", fontSize: 16, fill: "#555" }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 14, fill: "#222" }} label={{ value: "Count", angle: -90, position: "insideLeft", offset: 15, fontWeight: "bold", fontSize: 16, fill: "#555" }} />
+                  <Tooltip formatter={(val, name) => [val, name.replace(/([A-Z])/g, " $1").trim()]} labelStyle={{ fontWeight: "bold" }} />
+                  <Bar dataKey="plannedInternal" stackId="planned" fill={COLORS.plannedInternal} name="Planned Internal" barSize={26} cursor="pointer" onClick={(d) => navigateToAuditPlan(d.payload.year, "Planned Internal")} />
+                  <Bar dataKey="plannedExternal" stackId="planned" fill={COLORS.plannedExternal} name="Planned External" barSize={26} cursor="pointer" onClick={(d) => navigateToAuditPlan(d.payload.year, "Planned External")} />
+                  <Bar dataKey="executedInternal" stackId="executed" fill={COLORS.executedInternal} name="Executed Internal" barSize={26} cursor="pointer" onClick={(d) => navigateToAuditPlan(d.payload.year, "Executed Internal")} />
+                  <Bar dataKey="executedExternal" stackId="executed" fill={COLORS.executedExternal} name="Executed External" barSize={26} cursor="pointer" onClick={(d) => navigateToAuditPlan(d.payload.year, "Executed External")} />
                 </BarChart>
               </ResponsiveContainer>
             </motion.div>
           </div>
 
-          {/* Pie Chart Card */}
-          <div className="bg-white rounded-lg shadow-lg p-6 flex-1 min-w-0 flex flex-col items-center justify-center">
-            <motion.h2
-              className="text-2xl font-semibold mb-4 text-center"
-              variants={subheadingVariant}
-              initial="hidden"
-              animate="visible"
-            >
-              Reported Non-Conformity
-            </motion.h2>
-            <div className="w-[360px] h-[360px] mb-4">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={safePieData}
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={110}
-                    innerRadius={50}
-                    paddingAngle={6}
-                    dataKey="value"
-                    nameKey="name"
-                    label={({ name, value }) => value > 0 ? `${name}: ${Math.round(value)}` : ''}
-                    isAnimationActive={true}
-                    stroke="#333"
-                    strokeWidth={2}
-                  >
-                    {safePieData.map((entry, idx) => (
-                      <Cell
-                        key={`cell-${idx}`}
-                        fill={PIE_COLORS[idx % PIE_COLORS.length]}
-                        style={{
-                          filter: 'drop-shadow(0px 7px 6px rgba(0,0,0,0.15))',
-                          cursor: 'pointer',
-                        }}
-                        onClick={() => handlePieClick(entry.name)}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip formatter={(value, name) => [`${Math.round(value)}`, name]} />
-                </PieChart>
-              </ResponsiveContainer>
+          {/* Reported Nonconformities Pie Chart */}
+          <div className="bg-white rounded-xl shadow-xl p-5 flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-4">
+              <motion.h2 className="text-2xl font-semibold">Reported Nonconformities</motion.h2>
+              <select className="border rounded px-2 py-1 text-sm min-w-0 max-w-[120px]" value={ncDropdown} onChange={(e) => setNcDropdown(e.target.value)} aria-label="Filter Reported Nonconformities">
+                <option value="all">All Years</option>
+                {ncYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
             </div>
+            <ResponsiveContainer width="100%" height={360}>
+              <PieChart>
+                <Pie
+                  data={safePieData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  innerRadius={50}
+                  paddingAngle={6}
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, value }) => (value > 0 ? `${name}: ${Math.round(value)}` : "")}
+                  isAnimationActive
+                  stroke="#333"
+                  strokeWidth={2}
+                  onClick={(data) => handlePieClick(data.name)}
+                >
+                  {safePieData.map((entry, idx) => (
+                    <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} style={{ cursor: "pointer" }} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
-            <select
-              className="border rounded px-4 py-2"
-              value={ncDropdown}
-              onChange={(e) => setNcDropdown(e.target.value)}
-              aria-label="Filter Nonconformities by Year or All"
-            >
-              <option value="all">All Nonconformities</option>
-              {ncYears.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
-
+        {/* Second row */}
+        <div className="flex flex-col md:flex-row gap-8 mb-8">
+          {/* Open Nonconformities Pie */}
+          <div className="bg-white rounded-xl shadow-xl p-5 flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-4">
+              <motion.h2 className="text-2xl font-semibold">Open Non-Conformities</motion.h2>
+              <select className="border rounded px-2 py-1 text-sm min-w-0 max-w-[120px]" value={openNcDropdown} onChange={(e) => setOpenNcDropdown(e.target.value)} aria-label="Filter Open Nonconformities">
+                <option value="all">All Years</option>
+                {openNcYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <ResponsiveContainer width="100%" height={360}>
+              <PieChart>
+                <Pie
+                  data={safeOpenPieData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  innerRadius={50}
+                  paddingAngle={6}
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, value }) => (value > 0 ? `${name}: ${Math.round(value)}` : "")}
+                  isAnimationActive
+                  stroke="#333"
+                  strokeWidth={2}
+                  onClick={(data) => handleOpenPieClick(data.name)}
+                >
+                  {safeOpenPieData.map((entry, idx) => (
+                    <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} style={{ cursor: "pointer" }} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
 
+          {/* Open Nonconformities Bar Chart */}
+          <div className="bg-white rounded-xl shadow-xl p-5 flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-4">
+              <motion.h2 className="text-2xl font-semibold">Open Non-Conformities by Department</motion.h2>
+              <select className="border rounded px-2 py-1 text-sm min-w-0 max-w-[120px]" value={deptOpenNcDropdown} onChange={(e) => setDeptOpenNcDropdown(e.target.value)} aria-label="Filter Open Nonconformities by Department">
+                <option value="all">All Years</option>
+                {deptOpenNcYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <ResponsiveContainer width="100%" height={360}>
+              <BarChart data={deptOpenBarData} margin={{ top: 10, right: 30, left: 20, bottom: 50 }}>
+                <YAxis allowDecimals={false} tick={{ fontSize: 14, fill: "#222" }} label={{ value: "Count", angle: -90, position: "insideLeft", offset: 15, fontWeight: "bold", fontSize: 16, fill: "#555" }} />
+                <XAxis dataKey="department" tick={{ fontSize: 12, fill: "#222" }} interval={0} angle={-40} textAnchor="end" />
+                <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#222" }} />
+                <Tooltip />
+                <Bar dataKey="count" fill={COLORS.executedInternal} barSize={26} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Third row */}
+        <div className="flex flex-col md:flex-row gap-8 mb-8">
+          {/* Closed Nonconformities Pie */}
+          <div className="bg-white rounded-xl shadow-xl p-5 flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-4">
+              <motion.h2 className="text-2xl font-semibold">Closed Non-Conformities</motion.h2>
+              <select className="border rounded px-2 py-1 text-sm min-w-0 max-w-[120px]" value={closedNcDropdown} onChange={(e) => setClosedNcDropdown(e.target.value)} aria-label="Filter Closed Nonconformities">
+                <option value="all">All Years</option>
+                {closedNcYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <ResponsiveContainer width="100%" height={360}>
+              <PieChart>
+                <Pie
+                  data={safeClosedPieData}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  innerRadius={50}
+                  paddingAngle={6}
+                  dataKey="value"
+                  nameKey="name"
+                  label={({ name, value }) => (value > 0 ? `${name}: ${Math.round(value)}` : "")}
+                  isAnimationActive
+                  stroke="#333"
+                  strokeWidth={2}
+                  onClick={(data) => handleClosedPieClick(data.name)}
+                >
+                  {safeClosedPieData.map((entry, idx) => (
+                    <Cell key={idx} fill={PIE_COLORS[idx % PIE_COLORS.length]} style={{ cursor: "pointer" }} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Closed Nonconformities Bar Chart */}
+          <div className="bg-white rounded-xl shadow-xl p-5 flex-1 min-w-0">
+            <div className="flex items-center justify-between mb-4">
+              <motion.h2 className="text-2xl font-semibold">Closed Non-Conformities by Department</motion.h2>
+              <select className="border rounded px-2 py-1 text-sm min-w-0 max-w-[120px]" value={closedDeptDropdown} onChange={(e) => setClosedDeptDropdown(e.target.value)} aria-label="Filter Closed Nonconformities by Department">
+                <option value="all">All Years</option>
+                {closedDeptYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <ResponsiveContainer width="100%" height={360}>
+              <BarChart data={closedDeptBarData} margin={{ top: 10, right: 30, left: 20, bottom: 50 }}>
+                <YAxis allowDecimals={false} tick={{ fontSize: 14, fill: "#222" }} label={{ value: "Count", angle: -90, position: "insideLeft", offset: 15, fontWeight: "bold", fontSize: 16, fill: "#555" }} />
+                <XAxis dataKey="department" tick={{ fontSize: 12, fill: "#222" }} interval={0} angle={-40} textAnchor="end" />
+                <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#222" }} />
+                <Tooltip />
+                <Bar dataKey="count" fill={COLORS.plannedExternal} barSize={26} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
         </div>
       </div>
     </motion.div>
   );
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// import React, { useEffect, useState } from 'react';
-// import {
-//   BarChart, Bar, XAxis, YAxis, Tooltip,
-//   ResponsiveContainer, Legend, Label, LabelList
-// } from 'recharts';
-// import { motion } from 'framer-motion';
-// import axios from 'axios';
-// import { useNavigate } from 'react-router-dom';
-
-// export default function Dashboard() {
-//   const [auditData, setAuditData] = useState([]);
-//   const [plannedAuditData, setPlannedAuditData] = useState([]);
-//   const [plannedVsExecutedData, setPlannedVsExecutedData] = useState([]);
-//   const navigate = useNavigate();
-
-//   useEffect(() => {
-//     async function fetchAudits() {
-//       try {
-//         const response = await axios.get('http://localhost:5000/api/AuditPlan');
-//         setAuditData(response.data);
-//       } catch (err) {
-//         console.error('Error fetching audits', err);
-//       }
-//     }
-//     fetchAudits();
-//   }, []);
-
-//   useEffect(() => {
-//     const countsByYear = {};
-//     auditData.forEach(audit => {
-//       if (audit.status === 'Planned') {
-//         const year = new Date(audit.plannedDate).getFullYear();
-//         if (!countsByYear[year]) countsByYear[year] = { internal: 0, external: 0 };
-//         if (audit.auditType?.toLowerCase() === 'internal') countsByYear[year].internal += 1;
-//         else if (audit.auditType?.toLowerCase() === 'external') countsByYear[year].external += 1;
-//       }
-//     });
-//     const processed = Object.keys(countsByYear)
-//       .sort()
-//       .map(year => ({
-//         year,
-//         internal: countsByYear[year].internal,
-//         external: countsByYear[year].external,
-//       }));
-//     setPlannedAuditData(processed);
-//   }, [auditData]);
-
-//   useEffect(() => {
-//     const countsByYear = {};
-//     auditData.forEach(audit => {
-//       const year = new Date(audit.plannedDate).getFullYear();
-//       if (!countsByYear[year]) countsByYear[year] = {
-//         plannedInternal: 0,
-//         plannedExternal: 0,
-//         executedInternal: 0,
-//         executedExternal: 0
-//       };
-//       if (audit.status === 'Planned') {
-//         if (audit.auditType?.toLowerCase() === 'internal') countsByYear[year].plannedInternal += 1;
-//         else if (audit.auditType?.toLowerCase() === 'external') countsByYear[year].plannedExternal += 1;
-//       } else if (audit.status === 'Executed' || audit.status === 'Completed') {
-//         if (audit.auditType?.toLowerCase() === 'internal') countsByYear[year].executedInternal += 1;
-//         else if (audit.auditType?.toLowerCase() === 'external') countsByYear[year].executedExternal += 1;
-//       }
-//     });
-//     const processed = Object.keys(countsByYear)
-//       .sort()
-//       .map(year => ({
-//         year,
-//         plannedInternal: countsByYear[year].plannedInternal,
-//         plannedExternal: countsByYear[year].plannedExternal,
-//         executedInternal: countsByYear[year].executedInternal,
-//         executedExternal: countsByYear[year].executedExternal,
-//       }));
-//     setPlannedVsExecutedData(processed);
-//   }, [auditData]);
-
-//   const handleBarClick = (data, type) => {
-//     const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
-//     navigate('/AuditPlan', { state: { year: data.year, type: capitalizedType } });
-//   };
-
-//   // Animations
-//   const headingVariant = {
-//     hidden: { opacity: 0, x: -60, scale: 0.6 },
-//     visible: { opacity: 1, x: 0, scale: 1, transition: { type: 'spring', stiffness: 80, delay: 0.1 } }
-//   };
-//   const subheadingVariant = {
-//     hidden: { opacity: 0, x: 60 },
-//     visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 80, delay: 0.5 } }
-//   };
-//   const chartContainerVariant = {
-//     hidden: { opacity: 0, scale: 0.7, y: 50 },
-//     visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', stiffness: 80, delay: 0.9 } }
-//   };
-
-//   // Custom legend, unchanged
-//   const CustomLegend = () => (
-//     <div className="text-center mb-6 select-none">
-//       <div className="flex justify-center gap-8 mb-1">
-//         <div className="flex items-center gap-2">
-//           <span className="w-5 h-5 inline-block rounded" style={{ backgroundColor: '#C9184A' }}></span>
-//           <span className="font-semibold text-red-700">Planned Internal</span>
-//         </div>
-//         <div className="flex items-center gap-2">
-//           <span className="w-5 h-5 inline-block rounded" style={{ backgroundColor: '#FF758F' }}></span>
-//           <span className="font-semibold text-red-700">Planned External</span>
-//         </div>
-//       </div>
-//       <div className="flex justify-center gap-8">
-//         <div className="flex items-center gap-2">
-//           <span className="w-5 h-5 inline-block rounded" style={{ backgroundColor: '#C9184A' }}></span>
-//           <span className="font-semibold text-red-700">Executed Internal</span>
-//         </div>
-//         <div className="flex items-center gap-2">
-//           <span className="w-5 h-5 inline-block rounded" style={{ backgroundColor: '#FF758F' }}></span>
-//           <span className="font-semibold text-red-700">Executed External</span>
-//         </div>
-//       </div>
-//     </div>
-//   );
-
-//   return (
-//     <motion.div
-//       initial={{ opacity: 0, y: 40 }}
-//       animate={{ opacity: 1, y: 0 }}
-//       transition={{ duration: 0.8, ease: 'easeOut' }}
-//       className="py-16 bg-white min-h-screen"
-//     >
-//       <div className="container mx-auto px-4 md:px-10">
-//         {/* Heading */}
-//         <motion.h1
-//           className="text-4xl font-bold mb-10 text-center"
-//           variants={headingVariant}
-//           initial="hidden"
-//           animate="visible"
-//         >
-//           Welcome to Onxtel Dashboard
-//         </motion.h1>
-
-//         {/* Responsive cards grid */}
-//         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-//           {/* First Chart Card */}
-//           <div className="bg-white rounded-lg shadow-lg p-5 flex flex-col">
-//             <motion.h2
-//               className="text-2xl font-semibold mb-6 text-center"
-//               variants={subheadingVariant}
-//               initial="hidden"
-//               animate="visible"
-//             >
-//               Planned Audits
-//             </motion.h2>
-//             <motion.div
-//               className="w-full h-96"
-//               variants={chartContainerVariant}
-//               initial="hidden"
-//               animate="visible"
-//             >
-//               <ResponsiveContainer>
-//                 <BarChart
-//                   data={plannedAuditData}
-//                   margin={{ top: 10, right: 40, left: 20, bottom: 80 }}
-//                   barCategoryGap="20%"
-//                   barGap={10}
-//                 >
-//                   <XAxis dataKey="year" tick={{ fontSize: 14, fill: '#b91010ff' }}>
-//                     <Label
-//                       value="YEAR"
-//                       offset={-35}
-//                       position="insideBottom"
-//                       style={{ fontWeight: 'bold', fontSize: 16 }}
-//                     />
-//                   </XAxis>
-//                   <YAxis allowDecimals={false} tick={{ fontSize: 14, fill: '#b91010ff' }}>
-//                     <Label
-//                       angle={-90}
-//                       position="insideLeft"
-//                       value="COUNT"
-//                       offset={10}
-//                       style={{ textAnchor: 'middle', fontWeight: 'bold', fontSize: 16 }}
-//                     />
-//                   </YAxis>
-//                   <Tooltip />
-//                   <Legend
-//                     verticalAlign="top"
-//                     height={10}
-//                     formatter={(value) => value.charAt(0).toUpperCase() + value.slice(1)}
-//                   />
-//                   <Bar
-//                     dataKey="internal"
-//                     fill="#e5464bff"
-//                     onClick={(data) => handleBarClick(data.payload, 'internal')}
-//                     cursor="pointer"
-//                   >
-//                     <LabelList dataKey="internal" position="top" style={{ fill: '#e5464bff', fontWeight: 'bold' }} />
-//                   </Bar>
-//                   <Bar
-//                     dataKey="external"
-//                     fill="#b91010ff"
-//                     onClick={(data) => handleBarClick(data.payload, 'external')}
-//                     cursor="pointer"
-//                   >
-//                     <LabelList dataKey="external" position="top" style={{ fill: '#b91010ff', fontWeight: 'bold' }} />
-//                   </Bar>
-//                 </BarChart>
-//               </ResponsiveContainer>
-//             </motion.div>
-//           </div>
-
-//           {/* Second Chart Card */}
-//           <div className="bg-white rounded-lg shadow-lg p-5 flex flex-col">
-//             <motion.h2
-//               className="text-2xl font-semibold mb-2 text-center"
-//               variants={subheadingVariant}
-//               initial="hidden"
-//               animate="visible"
-//             >
-//               Planned vs Executed Audits
-//             </motion.h2>
-//             <CustomLegend />
-
-//             <motion.div
-//               className="w-full h-96"
-//               variants={chartContainerVariant}
-//               initial="hidden"
-//               animate="visible"
-//             >
-//               <ResponsiveContainer>
-//                 <BarChart
-//                   data={plannedVsExecutedData}
-//                   margin={{ top: 10, right: 40, left: 20, bottom: 80 }}
-//                   barCategoryGap="65%"
-//                   barGap={10}
-//                 >
-//                   <XAxis dataKey="year" tick={{ fontSize: 14, fill: '#b91010ff' }}>
-//                     <Label
-//                       value="YEAR"
-//                       offset={-35}
-//                       position="insideBottom"
-//                       style={{ fontWeight: 'bold', fontSize: 16 }}
-//                     />
-//                   </XAxis>
-//                   <YAxis allowDecimals={false} tick={{ fontSize: 14, fill: '#b91010ff' }}>
-//                     <Label
-//                       angle={-90}
-//                       position="insideLeft"
-//                       value="COUNT"
-//                       offset={10}
-//                       style={{ textAnchor: 'middle', fontWeight: 'bold', fontSize: 16 }}
-//                     />
-//                   </YAxis>
-//                   <Tooltip />
-//                   {/* Bar for Planned auditing (stacked internal+external) */}
-//                   <Bar
-//                     dataKey="plannedInternal"
-//                     stackId="planned"
-//                     fill="#C9184A"
-//                     onClick={(data) => handleBarClick(data.payload, 'Planned Internal')}
-//                     cursor="pointer"
-//                     name="Planned Internal"
-//                   >
-//                     <LabelList dataKey="plannedInternal" position="top" style={{ fill: '#C9184A', fontWeight: 'bold' }} />
-//                   </Bar>
-//                   <Bar
-//                     dataKey="plannedExternal"
-//                     stackId="planned"
-//                     fill="#FF758F"
-//                     onClick={(data) => handleBarClick(data.payload, 'Planned External')}
-//                     cursor="pointer"
-//                     name="Planned External"
-//                   >
-//                     <LabelList dataKey="plannedExternal" position="top" style={{ fill: '#C9184A', fontWeight: 'bold' }} />
-//                   </Bar>
-//                   {/* Bar for Executed auditing (stacked internal+external) */}
-//                   <Bar
-//                     dataKey="executedInternal"
-//                     stackId="executed"
-//                     fill="#C9184A"
-//                     onClick={(data) => handleBarClick(data.payload, 'Executed Internal')}
-//                     cursor="pointer"
-//                     name="Executed Internal"
-//                   >
-//                     <LabelList dataKey="executedInternal" position="top" style={{ fill: '#FF758F', fontWeight: 'bold' }} />
-//                   </Bar>
-//                   <Bar
-//                     dataKey="executedExternal"
-//                     stackId="executed"
-//                     fill="#FF758F"
-//                     onClick={(data) => handleBarClick(data.payload, 'Executed External')}
-//                     cursor="pointer"
-//                     name="Executed External"
-//                   >
-//                     <LabelList dataKey="executedExternal" position="top" style={{ fill: '#FF758F', fontWeight: 'bold' }} />
-//                   </Bar>
-//                 </BarChart>
-//               </ResponsiveContainer>
-//             </motion.div>
-//           </div>
-//         </div>
-//       </div>
-//     </motion.div>
-//   );
-// }
-// new
-// import React, { useEffect, useState } from 'react';
-// import {
-//   BarChart, Bar, XAxis, YAxis, Tooltip,
-//   ResponsiveContainer, Legend, Label, LabelList
-// } from 'recharts';
-// import { motion } from 'framer-motion';
-// import axios from 'axios';
-// import { useNavigate } from 'react-router-dom';
-
-// export default function Dashboard() {
-//   const [auditData, setAuditData] = useState([]);
-//   const [plannedAuditData, setPlannedAuditData] = useState([]);
-//   const [plannedVsExecutedData, setPlannedVsExecutedData] = useState([]);
-//   const navigate = useNavigate();
-
-//   // Fetch audit data once
-//   useEffect(() => {
-//     async function fetchAudits() {
-//       try {
-//         const response = await axios.get('http://localhost:5000/api/AuditPlan');
-//         setAuditData(response.data);
-//       } catch (err) {
-//         console.error('Error fetching audits', err);
-//       }
-//     }
-//     fetchAudits();
-//   }, []);
-
-//   // Process data for first chart: Planned Audits by Internal/External
-//   useEffect(() => {
-//     const countsByYear = {};
-//     auditData.forEach(audit => {
-//       if (audit.status === 'Planned') {
-//         const year = new Date(audit.plannedDate).getFullYear();
-//         if (!countsByYear[year]) countsByYear[year] = { internal: 0, external: 0 };
-//         if (audit.auditType?.toLowerCase() === 'internal') countsByYear[year].internal += 1;
-//         else if (audit.auditType?.toLowerCase() === 'external') countsByYear[year].external += 1;
-//       }
-//     });
-//     const processed = Object.keys(countsByYear)
-//       .sort()
-//       .map(year => ({
-//         year,
-//         internal: countsByYear[year].internal,
-//         external: countsByYear[year].external,
-//       }));
-//     setPlannedAuditData(processed);
-//   }, [auditData]);
-
-//   // Process data for second chart: Planned vs Executed Audits stacked bar with 2 bars per year
-//   useEffect(() => {
-//     const countsByYear = {};
-//     auditData.forEach(audit => {
-//       const year = new Date(audit.plannedDate).getFullYear();
-//       if (!countsByYear[year]) countsByYear[year] = {
-//         plannedInternal: 0,
-//         plannedExternal: 0,
-//         executedInternal: 0,
-//         executedExternal: 0
-//       };
-//       if (audit.status === 'Planned') {
-//         if (audit.auditType?.toLowerCase() === 'internal') countsByYear[year].plannedInternal += 1;
-//         else if (audit.auditType?.toLowerCase() === 'external') countsByYear[year].plannedExternal += 1;
-//       } else if (audit.status === 'Executed' || audit.status === 'Completed') {
-//         if (audit.auditType?.toLowerCase() === 'internal') countsByYear[year].executedInternal += 1;
-//         else if (audit.auditType?.toLowerCase() === 'external') countsByYear[year].executedExternal += 1;
-//       }
-//     });
-//     const processed = Object.keys(countsByYear)
-//       .sort()
-//       .map(year => ({
-//         year,
-//         // Combine for stacking grouped into two bars (planned and executed)
-//         plannedInternal: countsByYear[year].plannedInternal,
-//         plannedExternal: countsByYear[year].plannedExternal,
-//         executedInternal: countsByYear[year].executedInternal,
-//         executedExternal: countsByYear[year].executedExternal,
-//       }));
-//     setPlannedVsExecutedData(processed);
-//   }, [auditData]);
-
-//   // Click handler capitalizing type and navigating
-//   const handleBarClick = (data, type) => {
-//     const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
-//     navigate('/AuditPlan', { state: { year: data.year, type: capitalizedType } });
-//   };
-
-//   // Animation variants for consistent UI
-//   const headingVariant = {
-//     hidden: { opacity: 0, x: -60, scale: 0.6 },
-//     visible: { opacity: 1, x: 0, scale: 1, transition: { type: 'spring', stiffness: 80, delay: 0.1 } }
-//   };
-//   const subheadingVariant = {
-//     hidden: { opacity: 0, x: 60 },
-//     visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 80, delay: 0.5 } }
-//   };
-//   const chartContainerVariant = {
-//     hidden: { opacity: 0, scale: 0.7, y: 50 },
-//     visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', stiffness: 80, delay: 0.9 } }
-//   };
-
-//   // Custom two-line legend for Planned vs Executed stacked graph
-//   const CustomLegend = () => (
-//     <div className="text-center mb-6 select-none">
-//       <div className="flex justify-center gap-8 mb-1">
-//         <div className="flex items-center gap-2">
-//           <span className="w-5 h-5 inline-block rounded" style={{ backgroundColor: '#C9184A' }}></span>
-//           <span className="font-semibold text-red-700">Planned Internal</span>
-//         </div>
-//         <div className="flex items-center gap-2">
-//           <span className="w-5 h-5 inline-block rounded" style={{ backgroundColor: '#FF758F' }}></span>
-//           <span className="font-semibold text-red-700">Planned External</span>
-//         </div>
-//       </div>
-//       <div className="flex justify-center gap-8">
-//         <div className="flex items-center gap-2">
-//           <span className="w-5 h-5 inline-block rounded" style={{ backgroundColor: '#C9184A' }}></span>
-//           <span className="font-semibold text-red-700">Executed Internal</span>
-//         </div>
-//         <div className="flex items-center gap-2">
-//           <span className="w-5 h-5 inline-block rounded" style={{ backgroundColor: '#FF758F' }}></span>
-//           <span className="font-semibold text-red-700">Executed External</span>
-//         </div>
-//       </div>
-//     </div>
-//   );
-
-//   return (
-//     <motion.div
-//       initial={{ opacity: 0, y: 40 }}
-//       animate={{ opacity: 1, y: 0 }}
-//       transition={{ duration: 0.8, ease: 'easeOut' }}
-//       className="py-16 bg-white min-h-screen"
-//     >
-//       <div className="container mx-auto px-6 text-gray-700 md:px-12 xl:px-6">
-
-//         {/* Main Heading */}
-//         <motion.h1
-//           className="text-4xl font-bold mb-10 text-center"
-//           variants={headingVariant}
-//           initial="hidden"
-//           animate="visible"
-//         >
-//           Welcome to Onxtel Dashboard
-//         </motion.h1>
-//         <div className="flex flex-col md:flex-row gap-10">
-//         {/* First Graph - Planned Audits (Unchanged) */}
-//         <div className="flex-1 flex flex-col">
-//         <motion.h2
-//           className="text-2xl font-semibold mb-6 text-center"
-//           variants={subheadingVariant}
-//           initial="hidden"
-//           animate="visible"
-//         >
-//           Planned Audits
-//         </motion.h2>
-//         <motion.div
-//           className="w-full h-96 mb-16"
-//           variants={chartContainerVariant}
-//           initial="hidden"
-//           animate="visible"
-//         >
-//           <ResponsiveContainer>
-//             <BarChart
-//               data={plannedAuditData}
-//               margin={{ top: 10, right: 40, left: 20, bottom: 80 }}
-//               barCategoryGap="20%"
-//               barGap={10}
-//             >
-//               <XAxis dataKey="year" tick={{ fontSize: 14, fill: '#b91010ff' }}>
-//                 <Label
-//                   value="YEAR"
-//                   offset={-35}
-//                   position="insideBottom"
-//                   style={{ fontWeight: 'bold', fontSize: 16 }}
-//                 />
-//               </XAxis>
-//               <YAxis allowDecimals={false} tick={{ fontSize: 14, fill: '#b91010ff' }}>
-//                 <Label
-//                   angle={-90}
-//                   position="insideLeft"
-//                   value="COUNT"
-//                   offset={10}
-//                   style={{ textAnchor: 'middle', fontWeight: 'bold', fontSize: 16 }}
-//                 />
-//               </YAxis>
-//               <Tooltip />
-//               <Legend
-//                 verticalAlign="top"
-//                 height={10}
-//                 formatter={(value) => value.charAt(0).toUpperCase() + value.slice(1)}
-//               />
-//               <Bar
-//                 dataKey="internal"
-//                 fill="#e5464bff"
-//                 onClick={(data) => handleBarClick(data.payload, 'internal')}
-//                 cursor="pointer"
-//               >
-//                 <LabelList dataKey="internal" position="top" style={{ fill: '#e5464bff', fontWeight: 'bold' }} />
-//               </Bar>
-//               <Bar
-//                 dataKey="external"
-//                 fill="#b91010ff"
-//                 onClick={(data) => handleBarClick(data.payload, 'external')}
-//                 cursor="pointer"
-//               >
-//                 <LabelList dataKey="external" position="top" style={{ fill: '#b91010ff', fontWeight: 'bold' }} />
-//               </Bar>
-//             </BarChart>
-//           </ResponsiveContainer>
-//         </motion.div>
-//         </div>
-
-//         {/* Second Graph - Planned vs Executed (Stacked Bar, 2 bars per year) */}
-//         <div className="flex-1 flex flex-col">
-//         <motion.h2
-//           className="text-m font-semibold mb-2 text-center"
-//           variants={subheadingVariant}
-//           initial="hidden"
-//           animate="visible"
-//         >
-//           Planned vs Executed Audits
-//         </motion.h2>
-        
-//         {/* Custom Legend */}
-//         <CustomLegend />
-
-//         <motion.div
-//           className="w-full h-96"
-//           variants={chartContainerVariant}
-//           initial="hidden"
-//           animate="visible"
-//         >
-//           <ResponsiveContainer>
-//             <BarChart
-//               data={plannedVsExecutedData}
-//               margin={{ top: 10, right: 40, left: 20, bottom: 80 }}
-//               barCategoryGap="65%"  // More gap between two bars (planned and executed)
-//               barGap={10}
-//             >
-//               <XAxis dataKey="year" tick={{ fontSize: 14, fill: '#b91010ff' }}>
-//                 <Label
-//                   value="YEAR"
-//                   offset={-35}
-//                   position="insideBottom"
-//                   style={{ fontWeight: 'bold', fontSize: 16 }}
-//                 />
-//               </XAxis>
-//               <YAxis allowDecimals={false} tick={{ fontSize: 14, fill: '#b91010ff' }}>
-//                 <Label
-//                   angle={-90}
-//                   position="insideLeft"
-//                   value="COUNT"
-//                   offset={10}
-//                   style={{ textAnchor: 'middle', fontWeight: 'bold', fontSize: 16 }}
-//                 />
-//               </YAxis>
-//               <Tooltip />
-
-//               {/* Bar for Planned auditing (stacked internal+external) */}
-//               <Bar
-//                 dataKey="plannedInternal"
-//                 stackId="planned"
-//                 fill="#C9184A"
-//                 onClick={(data) => handleBarClick(data.payload, 'Planned Internal')}
-//                 cursor="pointer"
-//                 name="Planned Internal"
-//               >
-//                 <LabelList dataKey="plannedInternal" position="top" style={{ fill: '#C9184A', fontWeight: 'bold' }} />
-//               </Bar>
-//               <Bar
-//                 dataKey="plannedExternal"
-//                 stackId="planned"
-//                 fill="#FF758F"
-//                 onClick={(data) => handleBarClick(data.payload, 'Planned External')}
-//                 cursor="pointer"
-//                 name="Planned External"
-//               >
-//                 <LabelList dataKey="plannedExternal" position="top" style={{ fill: '#C9184A', fontWeight: 'bold' }} />
-//               </Bar>
-
-//               {/* Bar for Executed auditing (stacked internal+external) */}
-//               <Bar
-//                 dataKey="executedInternal"
-//                 stackId="executed"
-//                 fill="#C9184A"
-//                 onClick={(data) => handleBarClick(data.payload, 'Executed Internal')}
-//                 cursor="pointer"
-//                 name="Executed Internal"
-//               >
-//                 <LabelList dataKey="executedInternal" position="top" style={{ fill: '#FF758F', fontWeight: 'bold' }} />
-//               </Bar>
-//               <Bar
-//                 dataKey="executedExternal"
-//                 stackId="executed"
-//                 fill="#FF758F"
-//                 onClick={(data) => handleBarClick(data.payload, 'Executed External')}
-//                 cursor="pointer"
-//                 name="Executed External"
-//               >
-//                 <LabelList dataKey="executedExternal" position="top" style={{ fill: '#FF758F', fontWeight: 'bold' }} />
-//               </Bar>
-//             </BarChart>
-//           </ResponsiveContainer>
-//         </motion.div>
-//         </div>
-//         </div>
-//       </div>
-//     </motion.div>
-//   );
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//old
-// import React, { useEffect, useState } from 'react';
-// import {
-//   BarChart, Bar, XAxis, YAxis, Tooltip,
-//   ResponsiveContainer, Legend, Label, LabelList
-// } from 'recharts';
-// import { motion } from 'framer-motion';
-// import axios from 'axios';
-// import { useNavigate } from 'react-router-dom';
-
-// export default function Dashboard() {
-//   const [auditData, setAuditData] = useState([]);
-//   const [plannedAuditData, setPlannedAuditData] = useState([]);
-//   const [plannedVsExecutedData, setPlannedVsExecutedData] = useState([]);
-//   const navigate = useNavigate();
-
-//   // Fetch audit data once
-//   useEffect(() => {
-//     async function fetchAudits() {
-//       try {
-//         const response = await axios.get('http://localhost:5000/api/AuditPlan');
-//         setAuditData(response.data);
-//       } catch (err) {
-//         console.error('Error fetching audits', err);
-//       }
-//     }
-//     fetchAudits();
-//   }, []);
-
-//   // Process data for first chart: Planned Audits by Internal/External
-//   useEffect(() => {
-//     const countsByYear = {};
-//     auditData.forEach(audit => {
-//       if (audit.status === 'Planned') {
-//         const year = new Date(audit.plannedDate).getFullYear();
-//         if (!countsByYear[year]) countsByYear[year] = { internal: 0, external: 0 };
-//         if (audit.auditType?.toLowerCase() === 'internal') countsByYear[year].internal += 1;
-//         else if (audit.auditType?.toLowerCase() === 'external') countsByYear[year].external += 1;
-//       }
-//     });
-//     const processed = Object.keys(countsByYear)
-//       .sort()
-//       .map(year => ({
-//         year,
-//         internal: countsByYear[year].internal,
-//         external: countsByYear[year].external,
-//       }));
-//     setPlannedAuditData(processed);
-//   }, [auditData]);
-
-//   // Process data for second chart: Planned vs Executed Audits by Internal/External
-//   useEffect(() => {
-//     const countsByYear = {};
-//     auditData.forEach(audit => {
-//       const year = new Date(audit.plannedDate).getFullYear();
-//       if (!countsByYear[year]) countsByYear[year] = {
-//         plannedInternal: 0,
-//         executedInternal: 0,
-//         plannedExternal: 0,
-//         executedExternal: 0
-//       };
-//       if (audit.auditType?.toLowerCase() === 'internal') {
-//         if (audit.status === 'Planned') countsByYear[year].plannedInternal += 1;
-//         else if (audit.status === 'Executed' || audit.status === 'Completed') countsByYear[year].executedInternal += 1;
-//       } else if (audit.auditType?.toLowerCase() === 'external') {
-//         if (audit.status === 'Planned') countsByYear[year].plannedExternal += 1;
-//         else if (audit.status === 'Executed' || audit.status === 'Completed') countsByYear[year].executedExternal += 1;
-//       }
-//     });
-//     const processed = Object.keys(countsByYear)
-//       .sort()
-//       .map(year => ({
-//         year,
-//         plannedInternal: countsByYear[year].plannedInternal,
-//         executedInternal: countsByYear[year].executedInternal,
-//         plannedExternal: countsByYear[year].plannedExternal,
-//         executedExternal: countsByYear[year].executedExternal,
-//       }));
-//     setPlannedVsExecutedData(processed);
-//   }, [auditData]);
-
-//   // Handle clicks on bars, capitalize type before navigation
-//   const handleBarClick = (data, type) => {
-//     const capitalizedType = type.charAt(0).toUpperCase() + type.slice(1);
-//     navigate('/AuditPlan', { state: { year: data.year, type: capitalizedType } });
-//   };
-
-//   // Animation variants
-//   const headingVariant = {
-//     hidden: { opacity: 0, x: -60, scale: 0.6 },
-//     visible: { opacity: 1, x: 0, scale: 1, transition: { type: 'spring', stiffness: 80, delay: 0.1 } }
-//   };
-//   const subheadingVariant = {
-//     hidden: { opacity: 0, x: 60 },
-//     visible: { opacity: 1, x: 0, transition: { type: 'spring', stiffness: 80, delay: 0.5 } }
-//   };
-//   const chartContainerVariant = {
-//     hidden: { opacity: 0, scale: 0.7, y: 50 },
-//     visible: { opacity: 1, scale: 1, y: 0, transition: { type: 'spring', stiffness: 80, delay: 0.9 } }
-//   };
-
-//   // Custom two-line legend for Planned vs Executed graph
-//   const CustomLegend = () => (
-//     <div className="text-center mb-6 select-none">
-//       <div className="flex justify-center gap-8 mb-1">
-//         <div className="flex items-center gap-2">
-//           <span className="w-5 h-5 inline-block rounded" style={{ backgroundColor: '#4F46E5' }}></span>
-//           <span className="font-semibold text-gray-700">Planned Internal</span>
-//         </div>
-//         <div className="flex items-center gap-2">
-//           <span className="w-5 h-5 inline-block rounded" style={{ backgroundColor: '#10B981' }}></span>
-//           <span className="font-semibold text-gray-700">Planned External</span>
-//         </div>
-//       </div>
-//       <div className="flex justify-center gap-8">
-//         <div className="flex items-center gap-2">
-//           <span className="w-5 h-5 inline-block rounded" style={{ backgroundColor: '#3730A3' }}></span>
-//           <span className="font-semibold text-gray-700">Executed Internal</span>
-//         </div>
-//         <div className="flex items-center gap-2">
-//           <span className="w-5 h-5 inline-block rounded" style={{ backgroundColor: '#047857' }}></span>
-//           <span className="font-semibold text-gray-700">Executed External</span>
-//         </div>
-//       </div>
-//     </div>
-//   );
-
-//   return (
-//     <motion.div
-//       initial={{ opacity: 0, y: 40 }}
-//       animate={{ opacity: 1, y: 0 }}
-//       transition={{ duration: 0.8, ease: 'easeOut' }}
-//       className="py-16 bg-white min-h-screen"
-//     >
-//       <div className="container mx-auto px-6 text-gray-700 md:px-12 xl:px-6">
-
-//         {/* Main Heading */}
-//         <motion.h1
-//           className="text-4xl font-bold mb-10 text-center"
-//           variants={headingVariant}
-//           initial="hidden"
-//           animate="visible"
-//         >
-//           Welcome to Onxtel Dashboard
-//         </motion.h1>
-
-//         {/* First Graph - Planned Audits */}
-//         <motion.h2
-//           className="text-2xl font-semibold mb-6 text-center"
-//           variants={subheadingVariant}
-//           initial="hidden"
-//           animate="visible"
-//         >
-//           Planned Audits
-//         </motion.h2>
-//         <motion.div
-//           className="w-full h-96 mb-16"
-//           variants={chartContainerVariant}
-//           initial="hidden"
-//           animate="visible"
-//         >
-//           <ResponsiveContainer>
-//             <BarChart
-//               data={plannedAuditData}
-//               margin={{ top: 40, right: 50, left: 0, bottom: 80 }}
-//               barCategoryGap="25%"
-//               barGap={20}
-//             >
-//               <XAxis dataKey="year" tick={{ fontSize: 14, fill: '#4B5563' }}>
-//                 <Label
-//                   value="Years"
-//                   offset={-35}
-//                   position="insideBottom"
-//                   style={{ fontWeight: 'bold', fontSize: 16 }}
-//                 />
-//               </XAxis>
-//               <YAxis allowDecimals={false} tick={{ fontSize: 14, fill: '#4B5563' }}>
-//                 <Label
-//                   angle={-90}
-//                   position="insideLeft"
-//                   value="Count"
-//                   offset={10}
-//                   style={{ textAnchor: 'middle', fontWeight: 'bold', fontSize: 16 }}
-//                 />
-//               </YAxis>
-//               <Tooltip />
-//               <Legend
-//                 verticalAlign="top"
-//                 height={36}
-//                 formatter={(value) => value.charAt(0).toUpperCase() + value.slice(1)}
-//               />
-//               <Bar
-//                 dataKey="internal"
-//                 fill="#e5464bff"
-//                 onClick={(data) => handleBarClick(data.payload, 'internal')}
-//                 cursor="pointer"
-//               >
-//                 <LabelList dataKey="internal" position="top" style={{ fill: '#e5464bff', fontWeight: 'bold' }} />
-//               </Bar>
-//               <Bar
-//                 dataKey="external"
-//                 fill="#b91010ff"
-//                 onClick={(data) => handleBarClick(data.payload, 'external')}
-//                 cursor="pointer"
-//               >
-//                 <LabelList dataKey="external" position="top" style={{ fill: '#b91010ff', fontWeight: 'bold' }} />
-//               </Bar>
-//             </BarChart>
-//           </ResponsiveContainer>
-//         </motion.div>
-
-//         {/* Second Graph - Planned vs Executed Audits */}
-//         <motion.h2
-//           className="text-2xl font-semibold mb-2 text-center"
-//           variants={subheadingVariant}
-//           initial="hidden"
-//           animate="visible"
-//         >
-//           Planned vs Executed Audits
-//         </motion.h2>
-
-//         {/* Custom Two-Line Legend */}
-//         <CustomLegend />
-
-//         <motion.div
-//           className="w-full h-96"
-//           variants={chartContainerVariant}
-//           initial="hidden"
-//           animate="visible"
-//         >
-//           <ResponsiveContainer>
-//             <BarChart
-//               data={plannedVsExecutedData}
-//               margin={{ top: 40, right: 40, left: 20, bottom: 80 }}
-//               barCategoryGap="30%"
-//               barGap={8}
-//             >
-//               <XAxis dataKey="year" tick={{ fontSize: 14, fill: '#4B5563' }}>
-//                 <Label
-//                   value="Years"
-//                   offset={-35}
-//                   position="insideBottom"
-//                   style={{ fontWeight: 'bold', fontSize: 16 }}
-//                 />
-//               </XAxis>
-//               <YAxis allowDecimals={false} tick={{ fontSize: 14, fill: '#4B5563' }}>
-//                 <Label
-//                   angle={-90}
-//                   position="insideLeft"
-//                   value="Count"
-//                   offset={10}
-//                   style={{ textAnchor: 'middle', fontWeight: 'bold', fontSize: 16 }}
-//                 />
-//               </YAxis>
-//               <Tooltip />
-
-//               {/* Bars ordered as requested */}
-//               <Bar
-//                 dataKey="plannedInternal"
-//                 fill="#C9184A"
-//                 onClick={(data) => handleBarClick(data.payload, 'Planned Internal')}
-//                 cursor="pointer"
-//               >
-//                 <LabelList dataKey="plannedInternal" position="top" style={{ fill: '#C9184A', fontWeight: 'bold' }} />
-//               </Bar>
-//               <Bar
-//                 dataKey="plannedExternal"
-//                 fill="#FF758F"
-//                 onClick={(data) => handleBarClick(data.payload, 'Planned External')}
-//                 cursor="pointer"
-//               >
-//                 <LabelList dataKey="plannedExternal" position="top" style={{ fill: '#10B981', fontWeight: 'bold' }} />
-//               </Bar>
-//               <Bar
-//                 dataKey="executedInternal"
-//                 fill="#F72C5B"
-//                 onClick={(data) => handleBarClick(data.payload, 'Executed Internal')}
-//                 cursor="pointer"
-//               >
-//                 <LabelList dataKey="executedInternal" position="top" style={{ fill: '#F72C5B', fontWeight: 'bold' }} />
-//               </Bar>
-//               <Bar
-//                 dataKey="executedExternal"
-//                 fill="#047857"
-//                 onClick={(data) => handleBarClick(data.payload, 'Executed External')}
-//                 cursor="pointer"
-//               >
-//                 <LabelList dataKey="executedExternal" position="top" style={{ fill: '#047857', fontWeight: 'bold' }} />
-//               </Bar>
-//             </BarChart>
-//           </ResponsiveContainer>
-//         </motion.div>
-//       </div>
-//     </motion.div>
-//   );
-// 1st graph  <div className="bg-white rounded-lg shadow-lg p-5 flex flex-col">
-//             <motion.h2
-//               className="text-2xl font-semibold mb-6 text-center"
-//               variants={subheadingVariant}
-//               initial="hidden"
-//               animate="visible"
-//             >
-//               Planned Audits
-//             </motion.h2>
-//             <motion.div
-//               className="w-full h-96"
-//               variants={chartContainerVariant}
-//               initial="hidden"
-//               animate="visible"
-//             >
-//               <ResponsiveContainer>
-//                 <BarChart
-//                   data={plannedAuditData}
-//                   margin={{ top: 10, right: 40, left: 20, bottom: 80 }}
-//                   barCategoryGap="20%"
-//                   barGap={10}
-//                 >
-//                   <XAxis dataKey="year" tick={{ fontSize: 14, fill: '#b91010ff' }}>
-//                     <Label
-//                       value="YEAR"
-//                       offset={-35}
-//                       position="insideBottom"
-//                       style={{ fontWeight: 'bold', fontSize: 16 }}
-//                     />
-//                   </XAxis>
-//                   <YAxis allowDecimals={false} tick={{ fontSize: 14, fill: '#b91010ff' }}>
-//                     <Label
-//                       angle={-90}
-//                       position="insideLeft"
-//                       value="COUNT"
-//                       offset={10}
-//                       style={{ textAnchor: 'middle', fontWeight: 'bold', fontSize: 16 }}
-//                     />
-//                   </YAxis>
-//                   <Tooltip />
-//                   <Legend
-//                     verticalAlign="top"
-//                     height={10}
-//                     formatter={(value) => value.charAt(0).toUpperCase() + value.slice(1)}
-//                   />
-//                   <Bar
-//                     dataKey="internal"
-//                     fill="#e5464bff"
-//                     onClick={(data) => handleBarClick(data.payload, 'internal')}
-//                     cursor="pointer"
-//                   >
-//                     <LabelList dataKey="internal" position="top" style={{ fill: '#e5464bff', fontWeight: 'bold' }} />
-//                   </Bar>
-//                   <Bar
-//                     dataKey="external"
-//                     fill="#FF758F"
-//                     onClick={(data) => handleBarClick(data.payload, 'external')}
-//                     cursor="pointer"
-//                   >
-//                     <LabelList dataKey="external" position="top" style={{ fill: '#FF758F', fontWeight: 'bold' }} />
-//                   </Bar>
-//                 </BarChart>
-//               </ResponsiveContainer>
-//             </motion.div>
-//           </div> }
