@@ -442,7 +442,7 @@ export default function Dashboard() {
 
   return (
     <motion.div
-      className="py-16 bg-white min-h-screen"
+      className="py-16 bg-red-500 min-h-screen"
       initial={{ opacity: 0, y: 40 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: "easeOut" }}
@@ -458,7 +458,7 @@ export default function Dashboard() {
           {/* Planned vs Executed audits */}
           <div className="bg-white rounded-xl shadow-xl p-5 flex-1 min-w-0">
             <motion.h2 className="text-2xl font-semibold mb-4 text-center" variants={subheadingVariant} initial="hidden" animate="visible">
-              Planned Vs Executed Audits
+              Planned Audits Vs Executed Audits
             </motion.h2>
             <motion.div className="w-full h-96" variants={chartVariant} initial="hidden" animate="visible">
               <ResponsiveContainer width="100%" height="100%">
@@ -478,7 +478,7 @@ export default function Dashboard() {
           {/* Reported Nonconformities Pie Chart */}
           <div className="bg-white rounded-xl shadow-xl p-5 flex-1 min-w-0">
             <div className="flex items-center justify-between mb-4">
-              <motion.h2 className="text-2xl font-semibold">Reported Nonconformities</motion.h2>
+              <motion.h2 className="text-2xl font-semibold">Reported Non-Conformities</motion.h2>
               <select className="border rounded px-2 py-1 text-sm min-w-0 max-w-[120px]" value={ncDropdown} onChange={(e) => setNcDropdown(e.target.value)} aria-label="Filter Reported Nonconformities">
                 <option value="all">All Years</option>
                 {ncYears.map((year) => (
