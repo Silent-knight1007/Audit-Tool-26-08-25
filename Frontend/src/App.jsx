@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Routes, Route , Navigate } from 'react-router-dom';
 import Home from './components/Home/Home';
 import AuthPanel from './components/Authorization/AuthPanel';
-// import ResetPassword from './components/Authorization/ResetPasswordpage';
 import TopNavbar from './components/Navbar/TopNavbar';
 import SidebarNavbar from './components/Navbar/SideNavbar';
 import Dashboard from './components/Dashboard/Dashboard';
@@ -16,6 +15,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import User from './components/User/User';
 // import Footer from './components/Footer/Footer';
 import ProtectedRoute from './components/Authorization/ProtectedRoutes';
+import PolicyForm from './components/Organisationdocuments/Policies/PolicyForm';
+import PolicyTable from './components/Organisationdocuments/Policies/PolicyTable';
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -103,6 +104,24 @@ export default function App() {
             <Route path="/edit-nc/:id" element={
               <ProtectedRoute>
                 <NonConformity />
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/organisationdocuments/policies" element={
+              <ProtectedRoute>
+                <PolicyTable />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/organisationdocuments/policies/new" element={
+              <ProtectedRoute>
+                <PolicyForm />
+              </ProtectedRoute>
+            }/>
+
+            <Route path="/organisationdocuments/policies/:id" element={
+              <ProtectedRoute>
+                <PolicyForm />
               </ProtectedRoute>
             } />
 

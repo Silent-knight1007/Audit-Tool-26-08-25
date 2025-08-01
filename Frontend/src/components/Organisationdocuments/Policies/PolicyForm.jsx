@@ -1,0 +1,240 @@
+import React, { useState } from 'react';
+import Select from 'react-select';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+
+export default function PolicyForm() {
+  const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    serialNumber: '',
+    documentId: '',
+    documentName: '',
+    description: '',
+    versionNumber: '',
+    releaseDate: '',
+    applicableStandard: '',
+  });
+
+  const standardOptions = [
+    { value: "ISO 9001 : 2015", label: "ISO 9001 : 2015" },
+    { value: "ISO 27001 : 2023", label: "ISO 27001 : 2023" },
+    { value: "ISO 27701 : 2019", label: "ISO 27701 : 2019" },
+    { value: "ISO 22301 : 2019", label: "ISO 22301 : 2019" },
+    { value: "ISO 27017 : 2015", label: "ISO 27017 : 2015" },
+    { value: "ISO 27018 : 2015", label: "ISO 27018 : 2015" },
+  ];
+
+  // Handler to allow only numeric input for serialNumber
+  const handleSerialNumberChange = (e) => {
+    const value = e.target.value;
+    if (/^\d*$/.test(value)) { // only digits allowed
+      setFormData(prev => ({ ...prev, serialNumber: value }));
+    }
+  };
+
+  // Handler to allow only alphanumeric for documentId and versionNumber
+  const handleAlphanumericChange = (e) => {
+    const { name, value } = e.target;
+    if (/^[a-zA-Z0-9]*$/.test(value)) { // only alphanumeric allowed
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  // Normal text change handler
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleStandardChange = (selectedOption) => {
+    setFormData(prev => ({
+      ...prev,
+      applicableStandard: selectedOption ? selectedOption.value : '',
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Basic validation
+    const requiredFields = ['serialNumber', 'documentId', 'documentName', 'description', 'versionNumber', 'releaseDate', 'applicableStandard'];
+    for (const field of requiredFields) {
+      if (!formData[field]) {
+        alert(`Please fill the ${field} field.`);
+        return;
+      }
+    }
+
+    try {
+      // Replace URL with your actual backend endpoint
+      await axios.post('http://localhost:5000/api/Policy', formData);
+
+      alert('Policy created successfully!');
+
+      // Redirect to Policy Table page
+      navigate('/organisationdocuments/policies');
+
+    } catch (error) {
+      console.error("Error saving policy:", error);
+      alert('Failed to create policy. Please try again.');
+    }
+  };
+  
+  const handleCancel = () => {
+  if (window.confirm("Are you sure you want to cancel filling the form?")) {
+    navigate('/organisationdocuments/policies');
+  }
+};
+
+
+
+  return (
+    <form onSubmit={handleSubmit} className="p-1 flex flex-col justify-center max-w-5xl mx-auto pt-20">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-xs">
+    
+    {/* Serial Number */}
+    <div className="flex flex-col">
+      <label className="font-medium text-gray-700">
+        Serial Number <span className="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        name="serialNumber"
+        value={formData.serialNumber}
+        onChange={handleSerialNumberChange}
+        required
+        className="mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
+        placeholder="Enter Serial Number"
+        inputMode="numeric"
+        pattern="\d*"
+      />
+    </div>
+
+    {/* Document ID */}
+    <div className="flex flex-col">
+      <label className="font-medium text-gray-700">
+        Document ID <span className="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        name="documentId"
+        value={formData.documentId}
+        onChange={handleAlphanumericChange}
+        required
+        className="mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
+        placeholder="Enter Document ID"
+        pattern="[a-zA-Z0-9]+"
+        title="Only alphanumeric characters allowed"
+        autoComplete="off"
+      />
+    </div>
+
+    {/* Document Name */}
+    <div className="flex flex-col">
+      <label className="font-medium text-gray-700">
+        Document Name <span className="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        name="documentName"
+        value={formData.documentName}
+        onChange={handleChange}
+        required
+        className="mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
+        placeholder="Enter Document Name"
+      />
+    </div>
+
+    {/* Description */}
+    <div className="flex flex-col">
+      <label className="font-medium text-gray-700">
+        Description <span className="text-red-500">*</span>
+      </label>
+      <textarea
+        name="description"
+        value={formData.description}
+        onChange={handleChange}
+        required
+        rows={3}
+        maxLength={1000}
+        className="mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none resize-none"
+        placeholder="Enter Description"
+      />
+    </div>
+
+    {/* Version Number */}
+    <div className="flex flex-col">
+      <label className="font-medium text-gray-700">
+        Version Number <span className="text-red-500">*</span>
+      </label>
+      <input
+        type="text"
+        name="versionNumber"
+        value={formData.versionNumber}
+        onChange={handleAlphanumericChange}
+        required
+        className="mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
+        placeholder="Enter Version Number"
+        pattern="[a-zA-Z0-9]+"
+        title="Only alphanumeric characters allowed"
+        autoComplete="off"
+      />
+    </div>
+
+    {/* Release Date */}
+    <div className="flex flex-col">
+      <label className="font-medium text-gray-700">
+        Release Date <span className="text-red-500">*</span>
+      </label>
+      <input
+        type="date"
+        name="releaseDate"
+        value={formData.releaseDate}
+        onChange={handleChange}
+        required
+        className="mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
+      />
+    </div>
+
+    {/* Applicable Standard */}
+    <div className="flex flex-col">
+      <label className="font-medium text-gray-700">
+        Applicable Standard <span className="text-red-500">*</span>
+      </label>
+      <Select
+        options={standardOptions}
+        value={standardOptions.find(opt => opt.value === formData.applicableStandard) || null}
+        onChange={handleStandardChange}
+        className="mt-2"
+        classNamePrefix="select"
+        placeholder="Select Applicable Standard"
+        isClearable
+      />
+    </div>
+
+  </div>
+
+  <div className="flex gap-4 mt-10">
+    <button
+      type="submit"
+      className="w-32 bg-red-600 hover:bg-red-500 text-white font-bold py-1 px-1 rounded-lg transition ease-in-out duration-300"
+    >
+      Save Policy
+    </button>
+    <button
+      type="button"
+      onClick={handleCancel}
+      className="w-32 bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-6 rounded-lg transition ease-in-out duration-300"
+    >
+      Cancel
+    </button>
+  </div>
+</form>
+
+  );
+}
+
+

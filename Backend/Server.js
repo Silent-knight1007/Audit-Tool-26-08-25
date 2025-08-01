@@ -7,6 +7,7 @@ import auditPlanRouter from './routes/AuditPlan.js';
 import responsiblePersonRoutes from './routes/responsiblePerson.js';
 import authRoutes from './routes/auth.js';
 import Audit from './models/AuditPlan.js';
+import policyRoutes from './routes/Policy.js';  // Adjust path if needed
 import NonConformity from './models/NonConformity.js';
 
 dotenv.config();
@@ -14,6 +15,7 @@ dotenv.config();
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use('/api/Policy', policyRoutes);
 
 // Serve uploaded files statically
 app.use('/uploads', express.static('uploads'));
@@ -24,6 +26,7 @@ app.use('/api/NonConformity', nonConformityRoutes);
 app.use('/api/responsiblePerson', responsiblePersonRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/auth', authRoutes); // If you want to keep this route
+app.use('/api/Policy', policyRoutes);
 
 const PORT = process.env.PORT || 5000;
 

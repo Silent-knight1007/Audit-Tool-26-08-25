@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
   PieChart,
   Pie,
+  Legend,
   Cell,
 } from "recharts";
 import { motion } from "framer-motion";
@@ -448,10 +449,6 @@ export default function Dashboard() {
       transition={{ duration: 0.8, ease: "easeOut" }}
     >
       <div className="container mx-auto px-4 md:px-10 text-gray-700">
-        {/* Dashboard title
-        <motion.h1 className="text-4xl font-bold mb-10 text-center" variants={headingVariant} initial="hidden" animate="visible">
-          Dashboard
-        </motion.h1> */}
 
         {/* First row */}
         <div className="flex flex-col md:flex-row gap-8 mb-8">
@@ -466,6 +463,21 @@ export default function Dashboard() {
                   <XAxis dataKey="year" axisLine tick={{ fontSize: 14, fill: "#222" }} style={{ fontWeight: "bold" }} label={{ value: "Year", position: "insideBottom", offset: -20, fontWeight: "bold", fontSize: 16, fill: "#555" }} />
                   <YAxis allowDecimals={false} tick={{ fontSize: 14, fill: "#222" }} label={{ value: "Count", angle: -90, position: "insideLeft", offset: 15, fontWeight: "bold", fontSize: 16, fill: "#555" }} />
                   <Tooltip formatter={(val, name) => [val, name.replace(/([A-Z])/g, " $1").trim()]} labelStyle={{ fontWeight: "bold" }} />
+                  <Legend
+                      verticalAlign="top"
+                      align="right"
+                      iconType="square"
+                      layout="vertical"
+                      wrapperStyle={{
+                      // display: 'flex',
+                      // flexDirection: 'column',
+                      // alignItems: 'center', // centers legend items horizontally
+                      // marginBottom:10,
+                      width:180,
+                      paddingLeft: 20
+                  
+                      }}
+                  />
                   <Bar dataKey="plannedInternal" stackId="planned" fill={COLORS.plannedInternal} name="Planned Internal" barSize={26} cursor="pointer" onClick={(d) => navigateToAuditPlan(d.payload.year, "Planned Internal")} />
                   <Bar dataKey="plannedExternal" stackId="planned" fill={COLORS.plannedExternal} name="Planned External" barSize={26} cursor="pointer" onClick={(d) => navigateToAuditPlan(d.payload.year, "Planned External")} />
                   <Bar dataKey="executedInternal" stackId="executed" fill={COLORS.executedInternal} name="Executed Internal" barSize={26} cursor="pointer" onClick={(d) => navigateToAuditPlan(d.payload.year, "Executed Internal")} />
