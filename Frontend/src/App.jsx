@@ -17,6 +17,12 @@ import User from './components/User/User';
 import ProtectedRoute from './components/Authorization/ProtectedRoutes';
 import PolicyForm from './components/Organisationdocuments/Policies/PolicyForm';
 import PolicyTable from './components/Organisationdocuments/Policies/PolicyTable';
+import GuidelineForm from './components/Organisationdocuments/Guidelines/GuidelineForm';
+import GuidelineTable from './components/Organisationdocuments/Guidelines/GuidelineTable';
+import TemplateForm from './components/Organisationdocuments/Templates/TemplateForm';
+import TemplateTable from './components/Organisationdocuments/Templates/TemplateTable';
+import CertificateForm from './components/Organisationdocuments/Certificates/Certificateform';
+import CertificateTable from './components/Organisationdocuments/Certificates/CertificateTable';
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -122,6 +128,60 @@ export default function App() {
             <Route path="/organisationdocuments/policies/:id" element={
               <ProtectedRoute>
                 <PolicyForm />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/organisationdocuments/guidelines" element={
+              <ProtectedRoute>
+                <GuidelineTable />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/organisationdocuments/guidelines/new" element={
+              <ProtectedRoute>
+                <GuidelineForm />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/organisationdocuments/guidelines/:id" element={
+              <ProtectedRoute>
+                <GuidelineForm />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/organisationdocuments/templates" element={
+              <ProtectedRoute>
+                <TemplateTable />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/organisationdocuments/templates/new" element={
+              <ProtectedRoute>
+                <TemplateForm />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/organisationdocuments/templates/:id" element={
+              <ProtectedRoute>
+                <TemplateForm />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/organisationdocuments/certificates" element={
+              <ProtectedRoute>
+                <CertificateTable />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/organisationdocuments/certificates/new" element={
+              <ProtectedRoute>
+                <CertificateForm />
+              </ProtectedRoute>
+            } />
+
+           <Route path="/organisationdocuments/certificates/:id" element={
+              <ProtectedRoute>
+                <CertificateForm />
               </ProtectedRoute>
             } />
 

@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Select from 'react-select';
 import { useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 
 export default function PolicyForm() {
@@ -14,6 +15,15 @@ export default function PolicyForm() {
     releaseDate: '',
     applicableStandard: '',
   });
+  
+  const { id } = useParams();
+  useEffect(() => {
+    if (id) {
+      axios.get(`http://localhost:5000/api/policies/${id}`)
+        .then(res => setFormData(res.data))
+        .catch(err => console.error(err));
+      }
+  }, [id]);
 
   const standardOptions = [
     { value: "ISO 9001 : 2015", label: "ISO 9001 : 2015" },
@@ -57,39 +67,42 @@ export default function PolicyForm() {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    // Basic validation
-    const requiredFields = ['serialNumber', 'documentId', 'documentName', 'description', 'versionNumber', 'releaseDate', 'applicableStandard'];
-    for (const field of requiredFields) {
-      if (!formData[field]) {
-        alert(`Please fill the ${field} field.`);
-        return;
-      }
+  // Basic validation same as before
+  const requiredFields = ['serialNumber', 'documentId', 'documentName', 'description', 'versionNumber', 'releaseDate', 'applicableStandard'];
+  for (const field of requiredFields) {
+    if (!formData[field]) {
+      alert(`Please fill the ${field} field.`);
+      return;
+    }
+  }
+
+  try {
+    if (id) {
+      // Editing existing policy - use PUT and include id in URL
+      await axios.put(`http://localhost:5000/api/policies/${id}`, formData);
+      alert('Policy updated successfully!');
+    } else {
+      // Adding new policy - use POST
+      await axios.post('http://localhost:5000/api/policies', formData);
+      alert('Policy added successfully!');
     }
 
-    try {
-      // Replace URL with your actual backend endpoint
-      await axios.post('http://localhost:5000/api/Policy', formData);
-
-      alert('Policy created successfully!');
-
-      // Redirect to Policy Table page
-      navigate('/organisationdocuments/policies');
-
-    } catch (error) {
-      console.error("Error saving policy:", error);
-      alert('Failed to create policy. Please try again.');
-    }
-  };
-  
-  const handleCancel = () => {
-  if (window.confirm("Are you sure you want to cancel filling the form?")) {
+    // Redirect to Policy Table page
     navigate('/organisationdocuments/policies');
+
+  } catch (error) {
+    alert('Failed to save policy. Please try again.');
   }
 };
 
-
+  
+  const handleCancel = () => {
+    if (window.confirm("Are you sure you want to cancel filling the form?")) {
+      navigate('/organisationdocuments/policies');
+    }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="p-1 flex flex-col justify-center max-w-5xl mx-auto pt-20">

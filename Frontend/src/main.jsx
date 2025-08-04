@@ -9,8 +9,6 @@ import AuditPlan from './components/AuditPlan/AuditPlan.jsx'
 import NonConformity from './components/NonConformity/NonConformity.jsx'
 import AuditPlanButton from './components/AuditPlan/AuditPlanButtons.jsx'
 import NonConformityButton from './components/NonConformity/NonConformityButtons.jsx'
-import PolicyForm from './components/Organisationdocuments/Policies/PolicyForm.jsx'
-import PolicyTable from './components/Organisationdocuments/Policies/PolicyTable.jsx'
 import User from './components/User/User.jsx'
 
 const router = createBrowserRouter(

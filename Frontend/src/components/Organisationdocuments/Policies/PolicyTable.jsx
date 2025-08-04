@@ -8,18 +8,17 @@ const PolicyTable = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const navigate = useNavigate();
 
-  // Fetch policies from API
+  // Fetch all policies from the backend (only once)
   useEffect(() => {
     fetchPolicies();
   }, []);
 
   const fetchPolicies = async () => {
     try {
-      const response = await axios.get('http://localhost:5000/api/Policies'); // adjust URL as needed
+      const response = await axios.get('http://localhost:5000/api/policies'); // lowercase!
       setPolicies(response.data);
     } catch (error) {
       console.error('Error fetching policies:', error);
-    //   alert('Failed to load policies');
     }
   };
 
@@ -32,13 +31,15 @@ const PolicyTable = () => {
 
   // Navigate to create new form
   const handleCreateNew = () => {
-    navigate('/organisationdocuments/policies/Policyform');
-  };
+  navigate('/organisationdocuments/policies/new');
+};
+
 
   // Navigate to edit policy form on clicking documentId button
   const handleEditPolicy = (id) => {
-    navigate(`/organisationdocuments/Policy/${id}`);
-  };
+  navigate(`/organisationdocuments/policies/${id}`);
+};
+
 
   // Handle checkbox selection
   const toggleSelect = (id) => {
@@ -63,7 +64,7 @@ const PolicyTable = () => {
     if (!window.confirm(`Are you sure you want to delete ${selectedIds.length} selected policy(s)?`)) return;
 
     try {
-      const response = await axios.delete('http://localhost:5000/api/Policy', { data: { ids: selectedIds } });
+      const response = await axios.delete('http://localhost:5000/api/policies', { data: { ids: selectedIds } }); // lowercase
       const deletedIds = response.data.deletedIds || selectedIds;
       setPolicies(prev => prev.filter(p => !deletedIds.includes(p._id)));
       setSelectedIds([]);
@@ -75,19 +76,25 @@ const PolicyTable = () => {
   };
 
   return (
-    <div className="p-4 max-w-full">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold">Policies</h2><br></br>
+    <div className="p-2 max-w-full">
+      <div className="flex justify-between items-center mb-2">
+        <h2 className="text-xl font-bold mr-10">Policies</h2>
         <button
           onClick={handleCreateNew}
-          className=" md:w-25 bg-red-600 hover:bg-blue-dark text-white font-bold text-xs py-3 px-6 rounded-lg mt-5 mb-5 ml-2
-          hover:bg-orange-600 transition ease-in-out duration-300">
-          Create New Policy
+          className="bg-red-600 hover:bg-blue-dark text-white font-bold text-xs py-2 px-4 rounded-lg mt-5 mb-5 hover:bg-orange-600 transition ease-in-out duration-300">
+          Add 
+        </button>
+        <button
+          onClick={handleDeleteSelected}
+          disabled={selectedIds.length === 0}
+          className={`px-2 py-2 rounded-lg font-bold text-white text-xs ${selectedIds.length === 0 ? 'bg-red-600 cursor-not-allowed' : 'hover:bg-orange-600'} transition`}
+        >
+          Delete Selected
         </button>
       </div>
 
-      <table className="min-w-full border border-red-500 rounded text-sm">
-        <thead className="bg-red-500">
+      <table className="min-w-full border border-red-600 rounded text-sm">
+        <thead className="bg-red-600">
           <tr>
             <th className="border p-2">
               <input
@@ -103,14 +110,13 @@ const PolicyTable = () => {
             <th className="border p-2 text-xs text-white">Version Number</th>
             <th className="border p-2 text-xs text-white">Release Date</th>
             <th className="border p-2 text-xs text-white">Applicable Standard</th>
-            <th className="border p-2 text-xs text-white">Attachments</th>
           </tr>
         </thead>
         <tbody>
           {policies.length === 0 ? (
             <tr>
-              <td colSpan="9" className="p-4 text-center text-red-600">
-                No policies found.
+              <td colSpan="9" className="p-4 text-center font-bold text-red-700">
+                No Policies Found.
               </td>
             </tr>
           ) : (
@@ -137,50 +143,14 @@ const PolicyTable = () => {
                 <td className="border p-2">{policy.versionNumber || '—'}</td>
                 <td className="border p-2">{formatDate(policy.releaseDate)}</td>
                 <td className="border p-2">{policy.applicableStandard || '—'}</td>
-                <td className="border p-2">
-                  {policy.attachments && policy.attachments.length > 0 ? (
-                    <ul>
-                      {policy.attachments.map(file => {
-                        const ext = file.originalname.split('.').pop().toLowerCase();
-                        return (
-                          <li key={file.filename} className="flex items-center gap-1">
-                            <div style={{ width: 20, height: 20 }}>
-                              <FileIcon extension={ext} />
-                            </div>
-                            <a
-                              href={`http://localhost:5000/uploads/${file.filename}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              download
-                              className="text-red-500 underline text-xs"
-                            >
-                              {file.originalname}
-                            </a>
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  ) : (
-                    <span className="text-red-500 text-xs">No files</span>
-                  )}
-                </td>
               </tr>
             ))
           )}
         </tbody>
       </table>
-
-      <div className="mt-3">
-        <button
-          onClick={handleDeleteSelected}
-          disabled={selectedIds.length === 0}
-          className={`px-4 py-2 rounded font-semibold text-white ${selectedIds.length === 0 ? 'bg-red-500 cursor-not-allowed' : 'bg-red-600 hover:bg-red-700' } transition`}
-        >
-          Delete Selected
-        </button>
-      </div>
     </div>
   );
 };
 
 export default PolicyTable;
+

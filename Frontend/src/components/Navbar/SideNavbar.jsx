@@ -76,10 +76,10 @@ export default function SidebarNavbar({ open, onClose }) {
               <ul className="ml-4 mt-1 space-y-1 transition-all duration-200">
               {[
               { to: '/organisationdocuments/policies', label: 'Policies' },
-              { to: '/orgdocs/guidelines', label: 'Guidelines' },
-              { to: '/orgdocs/templates', label: 'Templates' },
-              { to: '/orgdocs/certificates', label: 'Certificates' },
-              { to: '/orgdocs/advisories', label: 'Advisories' }
+              { to: '/organisationdocuments/guidelines', label: 'Guidelines' },
+              { to: '/organisationdocuments/templates', label: 'Templates' },
+              { to: '/organisationdocuments/certificates', label: 'Certificates' },
+              { to: '/organisationdocuments/advisories', label: 'Advisories' }
               ].map(subLink => (
         <li key={subLink.to}>
           <NavLink
