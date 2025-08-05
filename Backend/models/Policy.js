@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 
 const policySchema = new mongoose.Schema({
-  serialNumber: { type: String, required: true },
   documentId: { type: String, required: true },
   documentName: { type: String, required: true },
   description: { type: String, required: true },

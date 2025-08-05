@@ -47,30 +47,41 @@ const GuidelineForm = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const requiredFields = ['serialNumber', 'documentId', 'documentName', 'description', 'versionNumber', 'releaseDate', 'applicableStandard'];
-    for (const field of requiredFields) {
-      if (!formData[field]) {
-        alert(`Please fill the ${field} field.`);
-        return;
-      }
+  // your current validation logic...
+
+  // Convert releaseDate to ISO string for backend
+  const payload = {
+    ...formData,
+    releaseDate: formData.releaseDate ? new Date(formData.releaseDate).toISOString() : undefined
+  };
+
+  try {
+    if (id) {
+      await axios.put(
+        `http://localhost:5000/api/guidelines/${id}`,
+        payload
+      );
+      alert('Guideline updated successfully!');
+    } else {
+      await axios.post(
+        'http://localhost:5000/api/guidelines',
+        payload
+      );
+      alert('Guideline added successfully!');
     }
-
-    try {
-      if (id) {
-        await axios.put(`http://localhost:5000/api/guidelines/${id}`, formData);
-        alert('Guideline updated successfully!');
-      } else {
-        await axios.post('http://localhost:5000/api/guidelines', formData);
-        alert('Guideline added successfully!');
-      }
-      navigate('/organisationdocuments/guidelines');
-    } catch (error) {
-      console.error('Failed to save guideline:', error);
+    navigate('/organisationdocuments/guidelines');
+  } catch (error) {
+    if (error.response && error.response.data && error.response.data.error) {
+      alert('Failed to save guideline: ' + error.response.data.error);
+    } else {
       alert('Failed to save guideline. Please try again.');
     }
-  };
+    console.error('Failed to save guideline:', error);
+  }
+};
+
 
   const handleCancel = () => {
     if (window.confirm('Are you sure you want to cancel?')) {
@@ -82,21 +93,6 @@ const GuidelineForm = () => {
     <form onSubmit={handleSubmit} className="p-1 flex flex-col justify-center max-w-5xl mx-auto pt-20">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-xs">
         {/* Serial Number */}
-        <div className="flex flex-col">
-            <label className="font-medium text-gray-700">
-               Serial Number <span className="text-red-500">*</span>
-            </label>
-            <input
-            name="serialNumber"
-            value={formData.serialNumber}
-            onChange={handleChange}
-            required
-            className="mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
-            placeholder="Enter Serial Number"
-            inputMode="numeric"
-            pattern="\d*"
-            />
-        </div>
 
         {/* Guideline ID */}
         <div className="flex flex-col">

@@ -11,6 +11,7 @@ import policyRoutes from './routes/Policy.js';  // Adjust path if needed
 import guidelineRoutes from './routes/Guideline.js';
 import templateRoutes from './routes/Template.js';
 import certificateRoutes from './routes/Certificate.js';
+import advisoryRoutes from './routes/advisory.js';
 import NonConformity from './models/NonConformity.js';
 
 dotenv.config();
@@ -22,6 +23,7 @@ app.use('/api/policies', policyRoutes);
 app.use('/api/guidelines', guidelineRoutes);
 app.use('/api/templates', templateRoutes);
 app.use('/api/certificates', certificateRoutes);
+app.use('/api/advisories', advisoryRoutes);
 
 // Serve uploaded files statically
 app.use('/uploads', express.static('uploads'));

@@ -32,8 +32,9 @@ router.post('/', async (req, res) => {
     const savedGuideline = await guideline.save();
     res.status(201).json(savedGuideline);
   } catch (err) {
-    res.status(400).json({ error: 'Failed to create guideline' });
-  }
+  console.error('Guideline validation error:', err);
+  res.status(400).json({ error: err.message }); // pass through real error for debugging
+}
 });
 
 // PUT update a guideline by ID
@@ -47,8 +48,9 @@ router.put('/:id', async (req, res) => {
     if (!updatedGuideline) return res.status(404).json({ error: 'Guideline not found' });
     res.json(updatedGuideline);
   } catch (err) {
-    res.status(400).json({ error: 'Failed to update guideline' });
-  }
+  console.error('Guideline validation error:', err);
+  res.status(400).json({ error: err.message }); // pass through real error for debugging
+}
 });
 
 // DELETE multiple guidelines (by ids array in req.body.ids)

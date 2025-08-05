@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 
 const templateSchema = new mongoose.Schema({
-  serialNumber: { type: String, required: true },
   documentId: { type: String, required: true, unique: true },
   documentName: { type: String, required: true },
   description: { type: String },

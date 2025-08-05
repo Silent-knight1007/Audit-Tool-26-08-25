@@ -13,7 +13,6 @@ import AuditPlanButton from './components/AuditPlan/AuditPlanButtons';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import User from './components/User/User';
-// import Footer from './components/Footer/Footer';
 import ProtectedRoute from './components/Authorization/ProtectedRoutes';
 import PolicyForm from './components/Organisationdocuments/Policies/PolicyForm';
 import PolicyTable from './components/Organisationdocuments/Policies/PolicyTable';
@@ -23,6 +22,8 @@ import TemplateForm from './components/Organisationdocuments/Templates/TemplateF
 import TemplateTable from './components/Organisationdocuments/Templates/TemplateTable';
 import CertificateForm from './components/Organisationdocuments/Certificates/Certificateform';
 import CertificateTable from './components/Organisationdocuments/Certificates/CertificateTable';
+import AdvisoryForm from './components/Organisationdocuments/Advisiories/AdvisoryForm';
+import AdvisoryTable from './components/Organisationdocuments/Advisiories/AdvisoryTable';
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -185,6 +186,24 @@ export default function App() {
               </ProtectedRoute>
             } />
 
+            <Route path="/organisationdocuments/advisories" element={
+              <ProtectedRoute>
+                <AdvisoryTable />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/organisationdocuments/advisories/new" element={
+              <ProtectedRoute>
+                <AdvisoryForm />
+              </ProtectedRoute>
+            } />
+
+            <Route path="/organisationdocuments/advisories/:id" element={
+              <ProtectedRoute>
+                <AdvisoryForm />
+              </ProtectedRoute>
+            } />
+            
             {/* Add any additional protected routes below in the same pattern */}
           </Routes>
         </div>

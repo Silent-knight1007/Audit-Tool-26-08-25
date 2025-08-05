@@ -74,6 +74,13 @@ const PolicyTable = () => {
       alert('Failed to delete selected policies');
     }
   };
+  const handleEditSelected = () => {
+    if (selectedIds.length === 1) {
+       navigate(`/organisationdocuments/advisories/${selectedIds[0]}`);
+    } else {
+    alert("Please select exactly one advisory to edit.");
+    }
+  };
 
   return (
     <div className="p-2 max-w-full">
@@ -83,6 +90,14 @@ const PolicyTable = () => {
           onClick={handleCreateNew}
           className="bg-red-600 hover:bg-blue-dark text-white font-bold text-xs py-2 px-4 rounded-lg mt-5 mb-5 hover:bg-orange-600 transition ease-in-out duration-300">
           Add 
+        </button>
+        <button
+          onClick={handleEditSelected}
+          disabled={selectedIds.length !== 1}
+          className={`px-2 py-2 rounded-lg font-bold text-white text-xs ${
+          selectedIds.length !== 1 ? 'bg-red-600 cursor-not-allowed' : 'bg-red-600 hover:bg-red-500'
+          } transition`}>
+            Edit 
         </button>
         <button
           onClick={handleDeleteSelected}
@@ -103,7 +118,6 @@ const PolicyTable = () => {
                 onChange={toggleSelectAll}
               />
             </th>
-            <th className="border p-2 text-xs text-white">Serial Number</th>
             <th className="border p-2 text-xs text-white">Document ID</th>
             <th className="border p-2 text-xs text-white">Document Name</th>
             <th className="border p-2 text-xs text-white">Description</th>
@@ -129,7 +143,6 @@ const PolicyTable = () => {
                     onChange={() => toggleSelect(policy._id)}
                   />
                 </td>
-                <td className="border p-2">{policy.serialNumber || '—'}</td>
                 <td className="border p-2 text-blue-700 underline cursor-pointer">
                   <button
                     onClick={() => handleEditPolicy(policy._id)}

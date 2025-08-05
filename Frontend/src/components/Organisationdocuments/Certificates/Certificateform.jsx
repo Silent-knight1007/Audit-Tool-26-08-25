@@ -90,22 +90,6 @@ const CertificateForm = () => {
   return (
     <form onSubmit={handleSubmit} className="p-1 max-w-5xl mx-auto pt-20">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-xs">
-        {/* Serial Number */}
-        <div className="flex flex-col">
-          <label>
-            Serial Number <span className="text-red-500">*</span>
-          </label>
-          <input
-            name="serialNumber"
-            value={formData.serialNumber}
-            onChange={handleChange}
-            required
-            className="mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
-            placeholder="Enter Serial Number"
-            inputMode="numeric"
-            pattern="\d*"
-          />
-        </div>
         {/* Document ID */}
         <div className="flex flex-col">
           <label>
