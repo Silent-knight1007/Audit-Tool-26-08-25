@@ -6,9 +6,11 @@ import axios from 'axios';
 const TemplateForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [attachments, setAttachments] = useState([]);
+
 
   const [formData, setFormData] = useState({
-    serialNumber: '',
     documentId: '',
     documentName: '',
     description: '',
@@ -23,6 +25,13 @@ const TemplateForm = () => {
         .then(res => setFormData(res.data))
         .catch(err => console.error(err));
     }
+    if (id) {
+  // Fetch attachments metadata
+  axios.get(`http://localhost:5000/api/templates/${id}/attachments`)
+    .then(res => setAttachments(res.data))
+    .catch(() => setAttachments([]));
+}
+
   }, [id]);
 
   const standardOptions = [
@@ -47,30 +56,44 @@ const TemplateForm = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    const requiredFields = ['serialNumber', 'documentId', 'documentName', 'description', 'versionNumber', 'releaseDate', 'applicableStandard'];
-    for (const field of requiredFields) {
-      if (!formData[field]) {
-        alert(`Please fill the ${field} field.`);
-        return;
-      }
+  const requiredFields = ['documentId', 'documentName', 'description', 'versionNumber', 'releaseDate', 'applicableStandard'];
+  for (const field of requiredFields) {
+    if (!formData[field]) {
+      alert(`Please fill the ${field} field.`);
+      return;
+    }
+  }
+
+  try {
+    let templateId = id;
+    if (id) {
+      await axios.put(`http://localhost:5000/api/templates/${id}`, formData);
+      alert('Template updated successfully!');
+    } else {
+      const res = await axios.post('http://localhost:5000/api/templates', formData);
+      templateId = res.data._id;
+      alert('Template added successfully!');
     }
 
-    try {
-      if (id) {
-        await axios.put(`http://localhost:5000/api/templates/${id}`, formData);
-        alert('Template updated successfully!');
-      } else {
-        await axios.post('http://localhost:5000/api/templates', formData);
-        alert('Template added successfully!');
-      }
-      navigate('/organisationdocuments/templates');
-    } catch (error) {
-      console.error('Failed to save template:', error);
-      alert('Failed to save template. Please try again.');
+    if (selectedFiles.length > 0 && templateId) {
+      const uploadData = new FormData();
+      selectedFiles.forEach(file => uploadData.append('attachments', file));
+      await axios.post(
+        `http://localhost:5000/api/templates/${templateId}/attachments`,
+        uploadData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
     }
-  };
+
+    navigate('/organisationdocuments/templates');
+  } catch (error) {
+    console.error('Failed to save template:', error);
+    alert('Failed to save template. Please try again.');
+  }
+};
+
 
   const handleCancel = () => {
     if (window.confirm('Are you sure you want to cancel?')) {
@@ -81,22 +104,6 @@ const TemplateForm = () => {
   return (
     <form onSubmit={handleSubmit} className="p-1 flex flex-col justify-center max-w-5xl mx-auto pt-20">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-xs">
-        {/* Serial Number */}
-        <div className="flex flex-col">
-          <label className="font-medium text-gray-700">
-            Serial Number <span className="text-red-500">*</span>
-          </label>
-          <input
-            name="serialNumber"
-            value={formData.serialNumber}
-            onChange={handleChange}
-            required
-            className="mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
-            placeholder="Enter Serial Number"
-            inputMode="numeric"
-            pattern="\d*"
-          />
-        </div>
         {/* Document ID */}
         <div className="flex flex-col">
           <label className="font-medium text-gray-700">
@@ -190,7 +197,47 @@ const TemplateForm = () => {
             placeholder="Select Applicable Standard"
           />
         </div>
+        {/* Attachments */}
+        <div className="flex flex-col md:col-span-3 mt-4">
+  <label className="font-medium text-gray-700">
+    Attachments
+  </label>
+  <input
+    type="file"
+    multiple
+    onChange={e => setSelectedFiles([...e.target.files])}
+    className="mt-2 py-2 px-2 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
+  />
+  {selectedFiles.length > 0 && (
+    <ul className="text-sm mt-2">
+      {Array.from(selectedFiles).map((file, index) => (
+        <li key={index}>{file.name}</li>
+      ))}
+    </ul>
+  )}
+  {/* Show existing attachments */}
+  {attachments.length > 0 && (
+    <div className="mt-4">
+      <div className="text-xs font-semibold mb-1">Existing Attachments:</div>
+      <ul>
+        {attachments.map(file => (
+          <li key={file._id}>
+            <a
+              href={file.downloadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-700 underline"
+            >
+              {file.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+        </div>
       </div>
+      {/* buttons*/}
       <div className="flex gap-4 mt-10">
         <button
           type="submit"

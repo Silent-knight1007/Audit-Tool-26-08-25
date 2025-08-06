@@ -6,6 +6,16 @@ const GuidelineTable = () => {
   const [guidelines, setGuidelines] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const navigate = useNavigate();
+  const [modalUrl, setModalUrl] = useState(null);
+
+const openViewer = (guideline) => {
+  if (guideline.attachments && guideline.attachments.length > 0) {
+    setModalUrl(`http://localhost:5000/api/guidelines/${guideline._id}/attachments/${guideline.attachments[0]._id}`);
+  }
+};
+
+const closeViewer = () => setModalUrl(null);
+
 
   useEffect(() => {
     fetchGuidelines();
@@ -61,7 +71,7 @@ const GuidelineTable = () => {
 
   const handleEditSelected = () => {
     if (selectedIds.length === 1) {
-       navigate(`/organisationdocuments/advisories/${selectedIds[0]}`);
+       navigate(`/organisationdocuments/guidelines/${selectedIds[0]}`);
     } else {
     alert("Please select exactly one advisory to edit.");
     }
@@ -97,7 +107,7 @@ const GuidelineTable = () => {
           disabled={selectedIds.length === 0}
           className={`px-2 py-2 rounded-lg font-bold text-white text-xs ${selectedIds.length === 0 ? 'bg-red-600 cursor-not-allowed' : 'hover:bg-orange-600'} transition`}
         >
-          Delete Selected
+          Delete
         </button>
       </div>
 
@@ -136,15 +146,17 @@ const GuidelineTable = () => {
                     onChange={() => toggleSelect(guideline._id)}
                   />
                 </td>
-                <td className="border p-2 text-blue-700 underline cursor-pointer">
-                  <button
-                    onClick={() => handleEditGuideline(guideline._id)}
-                    className="bg-transparent border-0 p-0"
-                  >
-                    {guideline.documentId || '—'}
-                  </button>
+                <td className="border p-2">{guideline.documentId || '—'}</td>
+                <td className="border p-2">
+                  {guideline.attachments && guideline.attachments.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => openViewer(guideline)}
+                      className="text-blue-700 underline cursor-pointer bg-transparent border-0 p-0">
+                      {guideline.documentName}
+                    </button>
+                  ) : (guideline.documentName || '—')}
                 </td>
-                <td className="border p-2">{guideline.documentName || '—'}</td>
                 <td className="border p-2 max-w-xs truncate" title={guideline.description}>{guideline.description || '—'}</td>
                 <td className="border p-2">{guideline.versionNumber || '—'}</td>
                 <td className="border p-2">{formatDate(guideline.releaseDate)}</td>
@@ -154,6 +166,25 @@ const GuidelineTable = () => {
           )}
         </tbody>
       </table>
+      {modalUrl && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+    <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] relative p-4">
+      <button
+        className="absolute top-2 right-3 text-2xl font-bold text-gray-700 hover:text-gray-900"
+        onClick={closeViewer}
+        aria-label="Close modal"
+      >
+        &times;
+      </button>
+      <iframe
+        src={modalUrl}
+        title="Document Viewer"
+        className="w-full h-[80vh] border-none"
+      />
+    </div>
+  </div>
+      )}
+
     </div>
   );
 };

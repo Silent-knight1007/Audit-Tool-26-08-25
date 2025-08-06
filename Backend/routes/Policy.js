@@ -1,7 +1,92 @@
 import express from 'express';
 import Policy from '../models/Policy.js';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 const router = express.Router();
+
+const uploadDir = path.join(path.resolve(), 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename(req, file, cb) {
+    const safeName = file.originalname.replace(/\s+/g, '_');
+    cb(null, `${Date.now()}-${safeName}`);
+  }
+});
+const upload = multer({ storage });
+
+// Upload multiple attachments for a policy
+router.post('/:id/attachments', upload.array('attachments'), async (req, res) => {
+  try {
+    const policy = await Policy.findById(req.params.id);
+    if (!policy) return res.status(404).json({ error: 'Policy not found' });
+
+    const filesMeta = req.files.map(file => ({
+      name: file.filename,
+      originalName: file.originalname,
+      path: file.path,
+      mimeType: file.mimetype,
+      size: file.size,
+    }));
+
+    policy.attachments.push(...filesMeta);
+    await policy.save();
+
+    res.json({ message: 'Files uploaded', attachments: policy.attachments });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to upload attachments', detail: error.message });
+  }
+});
+
+// List attachments metadata for a policy
+router.get('/:id/attachments', async (req, res) => {
+  try {
+    const policy = await Policy.findById(req.params.id);
+    if (!policy) return res.status(404).json({ error: 'Policy not found' });
+
+    const baseUrl = `${req.protocol}://${req.get('host')}/api/policies/${policy._id}/attachments`;
+    const files = policy.attachments.map(file => ({
+      _id: file._id,
+      name: file.originalName,
+      downloadUrl: `${baseUrl}/${file._id}`
+    }));
+
+    res.json(files);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Serve attachment inline or download
+router.get('/:policyId/attachments/:fileId', async (req, res) => {
+  try {
+    const policy = await Policy.findById(req.params.policyId);
+    if (!policy) return res.status(404).json({ error: 'Policy not found' });
+
+    const file = policy.attachments.id(req.params.fileId);
+    if (!file) return res.status(404).json({ error: 'Attachment not found' });
+
+    const filePath = path.resolve(file.path);
+    const mime = file.mimeType || 'application/octet-stream';
+
+    if (mime === 'application/pdf' || mime.startsWith('image/')) {
+      res.setHeader('Content-Type', mime);
+      res.setHeader('Content-Disposition', `inline; filename="${file.originalName}"`);
+      res.sendFile(filePath);
+    } else {
+      res.download(filePath, file.originalName);
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // GET all policies
 router.get('/', async (req, res) => {

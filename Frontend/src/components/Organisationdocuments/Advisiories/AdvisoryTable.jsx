@@ -6,6 +6,17 @@ const AdvisoryTable = () => {
   const [advisories, setAdvisories] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const navigate = useNavigate();
+  // State to control modal visibility and file URL
+  const [modalUrl, setModalUrl] = useState(null);
+  // Handler to open viewer modal
+  const openViewer = (advisory) => {
+    if (advisory.attachments && advisory.attachments.length > 0) {
+      setModalUrl(`http://localhost:5000/api/advisories/${advisory._id}/attachments/${advisory.attachments[0]._id}`);
+    }
+  };
+
+  // Handler to close modal
+  const closeViewer = () => setModalUrl(null);
 
   useEffect(() => {
     fetchAdvisories();
@@ -112,7 +123,7 @@ const AdvisoryTable = () => {
               />
             </th>
             <th className="border p-2 text-xs text-white">Document ID</th>
-            <th className="border p-2 text-xs text-white"> Name</th>
+            <th className="border p-2 text-xs text-white"> Document Name</th>
             <th className="border p-2 text-xs text-white">Description</th>
             <th className="border p-2 text-xs text-white">Version Number</th>
             <th className="border p-2 text-xs text-white">Release Date</th>
@@ -136,26 +147,48 @@ const AdvisoryTable = () => {
                     onChange={() => toggleSelect(advisory._id)}
                   />
                 </td>
-                <td className="border p-2 text-blue-700 underline cursor-pointer">
-                  <button
-                    onClick={() => handleEditAdvisory(advisory._id)}
-                    className="bg-transparent border-0 p-0"
-                  >
-                    {advisory.documentId || '—'}
-                  </button>
+                <td className="border p-2">{advisory.documentId || '—'}</td>
+                <td className="border p-2">
+                  {advisory.attachments && advisory.attachments.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => openViewer(advisory)}
+                      className="text-blue-700 underline cursor-pointer bg-transparent border-0 p-0">
+                      {advisory.documentName}
+                    </button>
+                  ) : (advisory.documentName)}
                 </td>
-                <td className="border p-2">{advisory.documentName || '—'}</td>
                 <td className="border p-2 max-w-xs truncate" title={advisory.description}>{advisory.description || '—'}</td>
                 <td className="border p-2">{advisory.versionNumber || '—'}</td>
                 <td className="border p-2">{formatDate(advisory.releaseDate)}</td>
                 <td className="border p-2">{advisory.applicableStandard || '—'}</td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+                </tr>
+              ))
+            )}
+            </tbody>
+            </table>
+            {modalUrl && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+    <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] relative p-4">
+      <button
+        className="absolute top-2 right-3 text-2xl font-bold text-gray-700 hover:text-gray-900"
+        onClick={closeViewer}
+        aria-label="Close modal"
+      >
+        &times;
+      </button>
+      <iframe
+        src={modalUrl}
+        title="Document Viewer"
+        className="w-full h-[80vh] border-none"
+      />
     </div>
-  );
-};
+  </div>
+)}
 
-export default AdvisoryTable;
+            </div>
+          );
+        };
+        
+        export default AdvisoryTable;
+        

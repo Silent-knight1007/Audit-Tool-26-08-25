@@ -7,7 +7,6 @@ import axios from 'axios';
 export default function PolicyForm() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    serialNumber: '',
     documentId: '',
     documentName: '',
     description: '',
@@ -18,12 +17,21 @@ export default function PolicyForm() {
   
   const { id } = useParams();
   useEffect(() => {
-    if (id) {
-      axios.get(`http://localhost:5000/api/policies/${id}`)
-        .then(res => setFormData(res.data))
-        .catch(err => console.error(err));
-      }
-  }, [id]);
+  if (id) {
+    axios.get(`http://localhost:5000/api/policies/${id}`)
+      .then(res => setFormData(res.data))
+      .catch(err => console.error(err));
+
+    axios.get(`http://localhost:5000/api/policies/${id}/attachments`)
+      .then(res => setAttachments(res.data))
+      .catch(() => setAttachments([]));
+  }
+}, [id]);
+
+
+const [selectedFiles, setSelectedFiles] = useState([]);
+const [attachments, setAttachments] = useState([]);
+
 
   const standardOptions = [
     { value: "ISO 9001 : 2015", label: "ISO 9001 : 2015" },
@@ -69,8 +77,7 @@ export default function PolicyForm() {
   const handleSubmit = async (e) => {
   e.preventDefault();
 
-  // Basic validation same as before
-  const requiredFields = ['serialNumber', 'documentId', 'documentName', 'description', 'versionNumber', 'releaseDate', 'applicableStandard'];
+  const requiredFields = ['documentId', 'documentName', 'description', 'versionNumber', 'releaseDate', 'applicableStandard'];
   for (const field of requiredFields) {
     if (!formData[field]) {
       alert(`Please fill the ${field} field.`);
@@ -79,25 +86,35 @@ export default function PolicyForm() {
   }
 
   try {
+    let policyId = id;
     if (id) {
-      // Editing existing policy - use PUT and include id in URL
       await axios.put(`http://localhost:5000/api/policies/${id}`, formData);
       alert('Policy updated successfully!');
     } else {
-      // Adding new policy - use POST
-      await axios.post('http://localhost:5000/api/policies', formData);
+      const res = await axios.post('http://localhost:5000/api/policies', formData);
+      policyId = res.data._id;
       alert('Policy added successfully!');
     }
 
-    // Redirect to Policy Table page
-    navigate('/organisationdocuments/policies');
+    // Upload selected files
+    if (selectedFiles.length > 0 && policyId) {
+      const uploadData = new FormData();
+      selectedFiles.forEach(file => uploadData.append('attachments', file));
+      await axios.post(
+        `http://localhost:5000/api/policies/${policyId}/attachments`,
+        uploadData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
+    }
 
+    navigate('/organisationdocuments/policies');
   } catch (error) {
+    console.error('Failed to save policy:', error);
     alert('Failed to save policy. Please try again.');
   }
 };
 
-  
+
   const handleCancel = () => {
     if (window.confirm("Are you sure you want to cancel filling the form?")) {
       navigate('/organisationdocuments/policies');
@@ -208,6 +225,45 @@ export default function PolicyForm() {
         placeholder="Select Applicable Standard"
         isClearable
       />
+    </div>
+     {/* Attachments */}
+    <div className="flex flex-col md:col-span-3 mt-4">
+  <label className="font-medium text-gray-700">
+    Attachments
+  </label>
+  <input
+    type="file"
+    multiple
+    onChange={e => setSelectedFiles([...e.target.files])}
+    className="mt-2 py-2 px-2 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
+  />
+  {selectedFiles.length > 0 && (
+    <ul className="text-sm mt-2">
+      {Array.from(selectedFiles).map((file, index) => (
+        <li key={index}>{file.name}</li>
+      ))}
+    </ul>
+  )}
+  {/* Show existing attachments when editing */}
+  {attachments.length > 0 && (
+    <div className="mt-4">
+      <div className="text-xs font-semibold mb-1">Existing Attachments:</div>
+      <ul>
+        {attachments.map(file => (
+          <li key={file._id}>
+            <a
+              href={file.downloadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-700 underline"
+            >
+              {file.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
     </div>
 
   </div>

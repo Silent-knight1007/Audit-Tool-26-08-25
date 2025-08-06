@@ -7,6 +7,16 @@ const PolicyTable = () => {
   const [policies, setPolicies] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const navigate = useNavigate();
+  const [modalUrl, setModalUrl] = useState(null);
+
+const openViewer = (policy) => {
+  if (policy.attachments && policy.attachments.length > 0) {
+    setModalUrl(`http://localhost:5000/api/policies/${policy._id}/attachments/${policy.attachments[0]._id}`);
+  }
+};
+
+const closeViewer = () => setModalUrl(null);
+
 
   // Fetch all policies from the backend (only once)
   useEffect(() => {
@@ -76,7 +86,7 @@ const PolicyTable = () => {
   };
   const handleEditSelected = () => {
     if (selectedIds.length === 1) {
-       navigate(`/organisationdocuments/advisories/${selectedIds[0]}`);
+       navigate(`/organisationdocuments/policies/${selectedIds[0]}`);
     } else {
     alert("Please select exactly one advisory to edit.");
     }
@@ -104,7 +114,7 @@ const PolicyTable = () => {
           disabled={selectedIds.length === 0}
           className={`px-2 py-2 rounded-lg font-bold text-white text-xs ${selectedIds.length === 0 ? 'bg-red-600 cursor-not-allowed' : 'hover:bg-orange-600'} transition`}
         >
-          Delete Selected
+          Delete
         </button>
       </div>
 
@@ -143,15 +153,17 @@ const PolicyTable = () => {
                     onChange={() => toggleSelect(policy._id)}
                   />
                 </td>
-                <td className="border p-2 text-blue-700 underline cursor-pointer">
-                  <button
-                    onClick={() => handleEditPolicy(policy._id)}
-                    className="bg-transparent border-0 p-0"
-                  >
-                    {policy.documentId || '—'}
-                  </button>
+                <td className="border p-2">{policy.documentId || '—'}</td>
+                <td className="border p-2">
+                  {policy.attachments && policy.attachments.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => openViewer(policy)}
+                      className="text-blue-700 underline cursor-pointer bg-transparent border-0 p-0">
+                      {policy.documentName}
+                    </button>
+                  ) : (policy.documentName || '—')}
                 </td>
-                <td className="border p-2">{policy.documentName || '—'}</td>
                 <td className="border p-2 max-w-xs truncate" title={policy.description}>{policy.description || '—'}</td>
                 <td className="border p-2">{policy.versionNumber || '—'}</td>
                 <td className="border p-2">{formatDate(policy.releaseDate)}</td>
@@ -161,6 +173,25 @@ const PolicyTable = () => {
           )}
         </tbody>
       </table>
+      {modalUrl && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+    <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] relative p-4">
+      <button
+        className="absolute top-2 right-3 text-2xl font-bold text-gray-700 hover:text-gray-900"
+        onClick={closeViewer}
+        aria-label="Close modal"
+      >
+        &times;
+      </button>
+      <iframe
+        src={modalUrl}
+        title="Document Viewer"
+        className="w-full h-[80vh] border-none"
+      />
+    </div>
+  </div>
+      )}
+
     </div>
   );
 };

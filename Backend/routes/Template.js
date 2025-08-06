@@ -1,7 +1,92 @@
 import express from 'express';
 import Template from '../models/Template.js';
+import multer from 'multer';
+import path from 'path';
+import fs from 'fs';
 
 const router = express.Router();
+
+const uploadDir = path.join(path.resolve(), 'uploads');
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+const storage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, uploadDir);
+  },
+  filename(req, file, cb) {
+    const safeName = file.originalname.replace(/\s+/g, '_');
+    cb(null, `${Date.now()}-${safeName}`);
+  }
+});
+const upload = multer({ storage });
+
+// Upload multiple attachments for a template
+router.post('/:id/attachments', upload.array('attachments'), async (req, res) => {
+  try {
+    const template = await Template.findById(req.params.id);
+    if (!template) return res.status(404).json({ error: 'Template not found' });
+
+    const filesMeta = req.files.map(file => ({
+      name: file.filename,
+      originalName: file.originalname,
+      path: file.path,
+      mimeType: file.mimetype,
+      size: file.size,
+    }));
+
+    template.attachments.push(...filesMeta);
+    await template.save();
+
+    res.json({ message: 'Files uploaded', attachments: template.attachments });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to upload attachments', detail: error.message });
+  }
+});
+
+// List attachments metadata for a template
+router.get('/:id/attachments', async (req, res) => {
+  try {
+    const template = await Template.findById(req.params.id);
+    if (!template) return res.status(404).json({ error: 'Template not found' });
+
+    const baseUrl = `${req.protocol}://${req.get('host')}/api/templates/${template._id}/attachments`;
+    const files = template.attachments.map(file => ({
+      _id: file._id,
+      name: file.originalName,
+      downloadUrl: `${baseUrl}/${file._id}`
+    }));
+
+    res.json(files);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Serve attachment file inline or download
+router.get('/:templateId/attachments/:fileId', async (req, res) => {
+  try {
+    const template = await Template.findById(req.params.templateId);
+    if (!template) return res.status(404).json({ error: 'Template not found' });
+
+    const file = template.attachments.id(req.params.fileId);
+    if (!file) return res.status(404).json({ error: 'Attachment not found' });
+
+    const filePath = path.resolve(file.path);
+    const mime = file.mimeType || 'application/octet-stream';
+
+    if (mime === 'application/pdf' || mime.startsWith('image/')) {
+      res.setHeader('Content-Type', mime);
+      res.setHeader('Content-Disposition', `inline; filename="${file.originalName}"`);
+      res.sendFile(filePath);
+    } else {
+      res.download(filePath, file.originalName);
+    }
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
 
 // GET all templates
 router.get('/', async (req, res) => {

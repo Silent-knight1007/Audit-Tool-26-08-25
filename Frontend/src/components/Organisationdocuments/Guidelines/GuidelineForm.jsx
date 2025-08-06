@@ -6,9 +6,11 @@ import axios from 'axios';
 const GuidelineForm = () => {
   const navigate = useNavigate();
   const { id } = useParams();
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [attachments, setAttachments] = useState([]);
+
 
   const [formData, setFormData] = useState({
-    serialNumber: '',
     documentId: '',
     documentName: '',
     description: '',
@@ -18,12 +20,16 @@ const GuidelineForm = () => {
   });
 
   useEffect(() => {
-    if (id) {
-      axios.get(`http://localhost:5000/api/guidelines/${id}`)
-        .then(res => setFormData(res.data))
-        .catch(err => console.error(err));
-    }
-  }, [id]);
+  if (id) {
+    axios.get(`http://localhost:5000/api/guidelines/${id}`)
+      .then(res => setFormData(res.data))
+      .catch(err => console.error(err));
+
+    axios.get(`http://localhost:5000/api/guidelines/${id}/attachments`)
+      .then(res => setAttachments(res.data))
+      .catch(() => setAttachments([]));
+  }
+}, [id]);
 
   const standardOptions = [
     { value: "ISO 9001 : 2015", label: "ISO 9001 : 2015" },
@@ -49,38 +55,42 @@ const GuidelineForm = () => {
   const handleSubmit = async (e) => {
   e.preventDefault();
 
-  // your current validation logic...
-
-  // Convert releaseDate to ISO string for backend
-  const payload = {
-    ...formData,
-    releaseDate: formData.releaseDate ? new Date(formData.releaseDate).toISOString() : undefined
-  };
+  const requiredFields = ['documentId', 'documentName', 'description', 'versionNumber', 'releaseDate', 'applicableStandard'];
+  for (const field of requiredFields) {
+    if (!formData[field]) {
+      alert(`Please fill the ${field} field.`);
+      return;
+    }
+  }
 
   try {
+    let guidelineId = id;
     if (id) {
-      await axios.put(
-        `http://localhost:5000/api/guidelines/${id}`,
-        payload
-      );
+      await axios.put(`http://localhost:5000/api/guidelines/${id}`, formData);
       alert('Guideline updated successfully!');
     } else {
-      await axios.post(
-        'http://localhost:5000/api/guidelines',
-        payload
-      );
+      const res = await axios.post('http://localhost:5000/api/guidelines', formData);
+      guidelineId = res.data._id;
       alert('Guideline added successfully!');
     }
+
+    if (selectedFiles.length > 0) {
+      const uploadData = new FormData();
+      selectedFiles.forEach(file => uploadData.append('attachments', file));
+
+      await axios.post(
+        `http://localhost:5000/api/guidelines/${guidelineId}/attachments`,
+        uploadData,
+        { headers: { 'Content-Type': 'multipart/form-data' } }
+      );
+    }
+
     navigate('/organisationdocuments/guidelines');
   } catch (error) {
-    if (error.response && error.response.data && error.response.data.error) {
-      alert('Failed to save guideline: ' + error.response.data.error);
-    } else {
-      alert('Failed to save guideline. Please try again.');
-    }
     console.error('Failed to save guideline:', error);
+    alert('Failed to save guideline. Please try again.');
   }
-};
+  };
 
 
   const handleCancel = () => {
@@ -190,8 +200,49 @@ const GuidelineForm = () => {
             placeholder="Select Applicable Standard"
           />
         </div>
-      </div>
 
+        {/* Attachments */}
+        <div className="flex flex-col md:col-span-3 mt-4">
+  <label className="font-medium text-gray-700">
+    Attachments
+    <span className="text-xs text-gray-500 ml-2">(Select multiple files)</span>
+  </label>
+  <input
+    type="file"
+    multiple
+    onChange={e => setSelectedFiles([...e.target.files])}
+    className="mt-2 py-2 px-2 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
+  />
+  {selectedFiles.length > 0 && (
+    <ul className="text-sm mt-2">
+      {Array.from(selectedFiles).map((file, i) => (
+        <li key={i}>{file.name}</li>
+      ))}
+    </ul>
+  )}
+
+  {attachments.length > 0 && (
+    <div className="mt-4">
+      <div className="text-xs font-semibold mb-1">Existing Attachments:</div>
+      <ul>
+        {attachments.map(file => (
+          <li key={file._id}>
+            <a
+              href={file.downloadUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-700 underline"
+            >
+              {file.name}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  )}
+       </div>
+      </div>
+        {/* Buttons*/}
         <div className="flex gap-4 mt-10">
             <button
                type="submit"

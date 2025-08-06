@@ -6,6 +6,14 @@ const TemplateTable = () => {
   const [templates, setTemplates] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const navigate = useNavigate();
+  const [modalUrl, setModalUrl] = useState(null);
+  const openViewer = (template) => {
+  if (template.attachments && template.attachments.length > 0) {
+    setModalUrl(`http://localhost:5000/api/templates/${template._id}/attachments/${template.attachments[0]._id}`);
+  }
+};
+const closeViewer = () => setModalUrl(null);
+
 
   useEffect(() => {
     fetchTemplates();
@@ -59,6 +67,14 @@ const TemplateTable = () => {
     }
   };
 
+  const handleEditSelected = () => {
+    if (selectedIds.length === 1) {
+       navigate(`/organisationdocuments/templates/${selectedIds[0]}`);
+    } else {
+    alert("Please select exactly one advisory to edit.");
+    }
+  };
+
   const formatDate = (date) => {
     if (!date) return '—';
     const d = new Date(date);
@@ -73,6 +89,14 @@ const TemplateTable = () => {
           onClick={handleCreateNew}
           className="bg-red-600 hover:bg-blue-dark text-white font-bold text-xs py-2 px-4 rounded-lg mt-5 mb-5 hover:bg-orange-600 transition ease-in-out duration-300">
           Add
+        </button>
+        <button
+          onClick={handleEditSelected}
+          disabled={selectedIds.length !== 1}
+          className={`px-2 py-2 rounded-lg font-bold text-white text-xs ${
+          selectedIds.length !== 1 ? 'bg-red-600 cursor-not-allowed' : 'bg-red-600 hover:bg-red-500'
+          } transition`}>
+            Edit 
         </button>
         <button
           onClick={handleDeleteSelected}
@@ -93,7 +117,6 @@ const TemplateTable = () => {
                 onChange={toggleSelectAll}
               />
             </th>
-            <th className="border p-2 text-xs text-white">Serial Number</th>
             <th className="border p-2 text-xs text-white">Document ID</th>
             <th className="border p-2 text-xs text-white">Document Name</th>
             <th className="border p-2 text-xs text-white">Description</th>
@@ -119,16 +142,17 @@ const TemplateTable = () => {
                     onChange={() => toggleSelect(template._id)}
                   />
                 </td>
-                <td className="border p-2">{template.serialNumber || '—'}</td>
-                <td className="border p-2 text-blue-700 underline cursor-pointer">
-                  <button
-                    onClick={() => handleEditTemplate(template._id)}
-                    className="bg-transparent border-0 p-0"
-                  >
-                    {template.documentId || '—'}
-                  </button>
+                <td className="border p-2">{template.documentId || '—'}</td>
+                <td className="border p-2">
+                  {template.attachments && template.attachments.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => openViewer(template)}
+                      className="text-blue-700 underline cursor-pointer bg-transparent border-0 p-0">
+                      {template.documentName}
+                    </button>
+                  ) : (template.documentName || '—')}
                 </td>
-                <td className="border p-2">{template.documentName || '—'}</td>
                 <td className="border p-2 max-w-xs truncate" title={template.description}>{template.description || '—'}</td>
                 <td className="border p-2">{template.versionNumber || '—'}</td>
                 <td className="border p-2">{formatDate(template.releaseDate)}</td>
@@ -138,6 +162,22 @@ const TemplateTable = () => {
           )}
         </tbody>
       </table>
+      {modalUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] relative p-4">
+            <button
+              className="absolute top-2 right-3 text-2xl font-bold text-gray-700 hover:text-gray-900"
+              onClick={closeViewer}
+              aria-label="Close modal">
+              &times;
+            </button>
+            <iframe
+              src={modalUrl}
+              title="Document Viewer"
+              className="w-full h-[80vh] border-none"/>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -6,6 +6,16 @@ const CertificateTable = () => {
   const [certificates, setCertificates] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
   const navigate = useNavigate();
+  const [modalUrl, setModalUrl] = useState(null);
+
+const openViewer = (certificate) => {
+  if (certificate.attachments && certificate.attachments.length > 0) {
+    setModalUrl(`http://localhost:5000/api/certificates/${certificate._id}/attachments/${certificate.attachments[0]._id}`);
+  }
+};
+
+const closeViewer = () => setModalUrl(null);
+
 
   useEffect(() => {
     fetchCertificates();
@@ -61,7 +71,7 @@ const CertificateTable = () => {
 
   const handleEditSelected = () => {
     if (selectedIds.length === 1) {
-       navigate(`/organisationdocuments/advisories/${selectedIds[0]}`);
+       navigate(`/organisationdocuments/certificates/${selectedIds[0]}`);
     } else {
     alert("Please select exactly one advisory to edit.");
     }
@@ -98,7 +108,7 @@ const CertificateTable = () => {
             selectedIds.length === 0 ? 'bg-red-600 cursor-not-allowed' : 'hover:bg-orange-600'
           } transition`}
         >
-          Delete Selected
+          Delete 
         </button>
       </div>
 
@@ -137,15 +147,17 @@ const CertificateTable = () => {
                     onChange={() => toggleSelect(certificate._id)}
                   />
                 </td>
-                <td className="border p-2 text-blue-700 underline cursor-pointer">
-                  <button
-                    onClick={() => handleEditCertificate(certificate._id)}
-                    className="bg-transparent border-0 p-0"
-                  >
-                    {certificate.documentId || '—'}
-                  </button>
+                <td className="border p-2">{certificate.documentId || '—'}</td>
+                <td className="border p-2">
+                  {certificate.attachments && certificate.attachments.length > 0 ? (
+                    <button
+                      type="button"
+                      onClick={() => openViewer(certificate)}
+                      className="text-blue-700 underline cursor-pointer bg-transparent border-0 p-0">
+                      {certificate.documentName}
+                    </button>
+                  ) : (certificate.documentName || '—')}
                 </td>
-                <td className="border p-2">{certificate.documentName || '—'}</td>
                 <td className="border p-2 max-w-xs truncate" title={certificate.description}>
                   {certificate.description || '—'}
                 </td>
@@ -157,6 +169,23 @@ const CertificateTable = () => {
           )}
         </tbody>
       </table>
+      {modalUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+          <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] relative p-4">
+            <button
+              className="absolute top-2 right-3 text-2xl font-bold text-gray-700 hover:text-gray-900"
+              onClick={closeViewer}
+              aria-label="Close modal">
+              &times;
+            </button>
+            <iframe
+              src={modalUrl}
+              title="Document Viewer"
+              className="w-full h-[80vh] border-none"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };

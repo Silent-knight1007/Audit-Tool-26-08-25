@@ -11,7 +11,7 @@ import policyRoutes from './routes/Policy.js';  // Adjust path if needed
 import guidelineRoutes from './routes/Guideline.js';
 import templateRoutes from './routes/Template.js';
 import certificateRoutes from './routes/Certificate.js';
-import advisoryRoutes from './routes/advisory.js';
+import advisoryRoutes from './routes/Advisory.js';
 import NonConformity from './models/NonConformity.js';
 
 dotenv.config();
