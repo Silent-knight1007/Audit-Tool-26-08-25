@@ -56,12 +56,18 @@ const GuidelineForm = () => {
   e.preventDefault();
 
   const requiredFields = ['documentId', 'documentName', 'description', 'versionNumber', 'releaseDate', 'applicableStandard'];
-  for (const field of requiredFields) {
-    if (!formData[field]) {
-      alert(`Please fill the ${field} field.`);
-      return;
-    }
+
+ for (const field of requiredFields) {
+  if (!formData[field]) {
+    alert(`Please fill the ${field} field.`);
+    return;
   }
+}
+// Check attachments manually
+if (!selectedFiles || selectedFiles.length === 0) {
+  alert('Please attach at least one file.');
+  return;
+}
 
   try {
     let guidelineId = id;
@@ -86,12 +92,12 @@ const GuidelineForm = () => {
     }
 
     navigate('/organisationdocuments/guidelines');
+
   } catch (error) {
     console.error('Failed to save guideline:', error);
     alert('Failed to save guideline. Please try again.');
   }
   };
-
 
   const handleCancel = () => {
     if (window.confirm('Are you sure you want to cancel?')) {
@@ -204,12 +210,13 @@ const GuidelineForm = () => {
         {/* Attachments */}
         <div className="flex flex-col md:col-span-3 mt-4">
   <label className="font-medium text-gray-700">
-    Attachments
-    <span className="text-xs text-gray-500 ml-2">(Select multiple files)</span>
+    Attachments<span className="text-red-500">*</span>
+    
   </label>
   <input
     type="file"
     multiple
+    required
     onChange={e => setSelectedFiles([...e.target.files])}
     className="mt-2 py-2 px-2 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
   />

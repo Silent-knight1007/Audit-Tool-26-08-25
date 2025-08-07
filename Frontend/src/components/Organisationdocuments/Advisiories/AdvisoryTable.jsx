@@ -10,10 +10,26 @@ const AdvisoryTable = () => {
   const [modalUrl, setModalUrl] = useState(null);
   // Handler to open viewer modal
   const openViewer = (advisory) => {
-    if (advisory.attachments && advisory.attachments.length > 0) {
-      setModalUrl(`http://localhost:5000/api/advisories/${advisory._id}/attachments/${advisory.attachments[0]._id}`);
+  if (advisory.attachments && advisory.attachments.length > 0) {
+    const file = advisory.attachments[0];
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    // File types to preview inline in modal
+    const inlineViewable = ['pdf', 'png', 'jpg', 'jpeg'];
+
+    const url = `http://localhost:5000/api/advisories/${advisory._id}/attachments/${file._id}`;
+
+    if (inlineViewable.includes(ext)) {
+      setModalUrl(url); // Open modal popup with iframe
+    } else {
+      // Redirect/open new page/tab for other formats
+      window.location.href = url;  // Redirects in the same tab
+      // OR to open in a new tab/window:
+      // window.open(url, '_blank', 'noopener,noreferrer');
     }
-  };
+  }
+};
+
 
   // Handler to close modal
   const closeViewer = () => setModalUrl(null);

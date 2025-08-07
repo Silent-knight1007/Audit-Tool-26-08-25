@@ -46,6 +46,7 @@ router.post('/:id/attachments', upload.array('attachments'), async (req, res) =>
   }
 });
 
+
 // List all attachments metadata for a guideline
 router.get('/:id/attachments', async (req, res) => {
   try {
@@ -113,6 +114,9 @@ router.get('/:id', async (req, res) => {
 // POST create new guideline
 router.post('/', async (req, res) => {
   try {
+    if (!req.body.documentId) {
+  return res.status(400).json({ error: "guidelineId is required and must be unique" });
+}
     const guideline = new Guideline(req.body);
     const savedGuideline = await guideline.save();
     res.status(201).json(savedGuideline);

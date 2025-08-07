@@ -24,13 +24,36 @@ const storage = multer.diskStorage({
     cb(null, `${Date.now()}-${safeName}`);
   }
 });
-const upload = multer({ storage });
+
+// Allowed Extensions
+const allowedExt = ['.jpeg', '.jpg', '.png', '.xls', '.doc', '.docx', '.pdf'];
+// Multer with fileFilter
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    if (allowedExt.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only jpeg, jpg, png, xls, doc, docx, and pdf files are allowed!'), false);
+    }
+  }
+});
 
 // ======= Attachment Routes =======
 
-// Upload multiple attachments for an advisory
-router.post('/:id/attachments', upload.array('attachments'), async (req, res) => {
+// Your attachments upload route, with Multer error handling
+router.post('/:id/attachments', (req, res, next) => {
+  upload.array('attachments')(req, res, function (err) {
+    if (err) {
+      // This will catch Multer file type errors and others
+      return res.status(400).json({ error: err.message });
+    }
+    next();
+  });
+}, async (req, res) => {
   try {
+    // ...the rest of your logic as before
     const advisory = await Advisory.findById(req.params.id);
     if (!advisory) return res.status(404).json({ error: 'Advisory not found' });
 
@@ -50,6 +73,7 @@ router.post('/:id/attachments', upload.array('attachments'), async (req, res) =>
     res.status(500).json({ error: 'Failed to upload attachments', detail: error.message });
   }
 });
+
 
 // List attachments metadata for an advisory
 router.get('/:id/attachments', async (req, res) => {
@@ -95,9 +119,6 @@ router.get('/:advisoryId/attachments/:fileId', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
-
-
-
 
 // ======= Advisory CRUD Routes =======
 

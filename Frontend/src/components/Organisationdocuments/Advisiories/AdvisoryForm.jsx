@@ -17,7 +17,6 @@ const AdvisoryForm = () => {
     versionNumber: '',
     releaseDate: '',
     applicableStandard: '',
-    // attachments:'',
   });
 
   useEffect(() => {
@@ -59,11 +58,17 @@ const AdvisoryForm = () => {
   e.preventDefault();
   const requiredFields = ['documentId', 'documentName', 'description', 'versionNumber', 'releaseDate', 'applicableStandard'];
   for (const field of requiredFields) {
-    if (!formData[field] || formData[field].trim() === '') {
-      alert(`Please fill the ${field} field.`);
-      return;
-    }
+  if (!formData[field]) {
+    alert(`Please fill the ${field} field.`);
+    return;
   }
+}
+
+// Check attachments manually
+if (!selectedFiles || selectedFiles.length === 0) {
+  alert('Please attach at least one file.');
+  return;
+}
   const payload = {
     ...formData,
     releaseDate: formData.releaseDate ? new Date(formData.releaseDate).toISOString() : undefined
@@ -98,12 +103,28 @@ const AdvisoryForm = () => {
   }
   };
 
-
   const handleCancel = () => {
     if (window.confirm('Are you sure you want to cancel?')) {
       navigate('/organisationdocuments/advisories');
     }
   };
+
+  const allowedExtensions = ['jpeg', 'jpg', 'png', 'xls', 'doc', 'docx', 'pdf'];
+
+function handleFilesChange(e) {
+  const files = Array.from(e.target.files);
+  for (let file of files) {
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!allowedExtensions.includes(ext)) {
+      alert(`"${file.name}" is not a supported file type! Allowed: jpeg, jpg, png, xls, doc, docx, pdf`);
+      e.target.value = ''; // Clear the input
+      setSelectedFiles([]);
+      return;
+    }
+  }
+  setSelectedFiles(files);
+}
+
 
   return (
     <form onSubmit={handleSubmit} className="p-1 flex flex-col justify-center max-w-5xl mx-auto pt-20">
@@ -213,7 +234,8 @@ const AdvisoryForm = () => {
           <input
             type="file"
             required
-            onChange={e => setSelectedFiles([...e.target.files])}
+            accept=".jpeg,.jpg,.png,.xls,.doc,.docx,.pdf"
+            onChange={handleFilesChange}
             className="mt-2 py-4 px-4 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
           />
           {/* File preview for uploads */}

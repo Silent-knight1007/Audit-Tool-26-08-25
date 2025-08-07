@@ -10,7 +10,22 @@ const GuidelineTable = () => {
 
 const openViewer = (guideline) => {
   if (guideline.attachments && guideline.attachments.length > 0) {
-    setModalUrl(`http://localhost:5000/api/guidelines/${guideline._id}/attachments/${guideline.attachments[0]._id}`);
+    const file = guideline.attachments[0];
+    const ext = file.name.split('.').pop().toLowerCase();
+
+    // File types to preview inline in modal
+    const inlineViewable = ['pdf', 'png', 'jpg', 'jpeg'];
+
+    const url = `http://localhost:5000/api/guidelines/${guideline._id}/attachments/${file._id}`;
+
+    if (inlineViewable.includes(ext)) {
+      setModalUrl(url); // Open modal popup with iframe
+    } else {
+      // Redirect/open new page/tab for other formats
+      window.location.href = url;  // Redirects in the same tab
+      // OR to open in a new tab/window:
+      // window.open(url, '_blank', 'noopener,noreferrer');
+    }
   }
 };
 
