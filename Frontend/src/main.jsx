@@ -11,28 +11,33 @@ import AuditPlanButton from './components/AuditPlan/AuditPlanButtons.jsx'
 import NonConformityButton from './components/NonConformity/NonConformityButtons.jsx'
 import User from './components/User/User.jsx'
 
+// ✅ Import AuthProvider
+import { AuthProvider } from './context/AuthContext.jsx' // make sure path matches your actual folder/file
+
+// Routes
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path='*' element={<App />}>
-      <Route path='' element={<Home />} />
-      <Route path='Dashboard' element={<Dashboard />} />
-      <Route path='AuditPlan' element={<AuditPlanButton />} />
-      <Route path='NonConformity' element={<NonConformityButton />} />
-      <Route path='user/:userid' element={<User />} />
-      <Route path='xyz' element={<AuditPlan />} />
-      <Route path='abc' element={<NonConformity />} />
-      {/* Add these two: */}
-      <Route path='edit-audit/:id' element={<AuditPlan />} />
-      <Route path='edit-nc/:id' element={<NonConformity />} />
-      
-
+    <Route path="*" element={<App />}>
+      {/* Public */}
+      <Route path="" element={<Home />} />
+      {/* Protected (example, adjust as needed) */}
+      <Route path="dashboard" element={<Dashboard />} />
+      <Route path="auditplan" element={<AuditPlanButton />} />
+      <Route path="nonconformity" element={<NonConformityButton />} />
+      <Route path="user/:userid" element={<User />} />
+      <Route path="xyz" element={<AuditPlan />} />
+      <Route path="abc" element={<NonConformity />} />
+      <Route path="edit-audit/:id" element={<AuditPlan />} />
+      <Route path="edit-nc/:id" element={<NonConformity />} />
     </Route>
   )
 )
 
-
+// ✅ Wrap the whole app with AuthProvider so useContext works
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <RouterProvider router={router} />
-  </React.StrictMode>,
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  </React.StrictMode>
 )
