@@ -177,7 +177,9 @@ const closeViewer = () => setModalUrl(null);
                 <td className="border p-2 max-w-xs truncate" title={template.description}>{template.description || '—'}</td>
                 <td className="border p-2">{template.versionNumber || '—'}</td>
                 <td className="border p-2">{formatDate(template.releaseDate)}</td>
-                <td className="border p-2">{template.applicableStandard || '—'}</td>
+                <td className="border p-2 text-xs">
+                  {Array.isArray(template.applicableStandard) && template.applicableStandard.length > 0 ? template.applicableStandard.join(', '): '—'}
+                </td>
               </tr>
             ))
           )}

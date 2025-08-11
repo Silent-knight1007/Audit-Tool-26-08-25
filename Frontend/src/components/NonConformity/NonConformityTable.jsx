@@ -52,10 +52,12 @@ const NonConformityTable = () => {
   return (
     <div className="p-2">
       <h2 className="text-lg font-bold mb-4">Non-Conformity Records</h2>
+      {/* Scroll wrapper */}
+    <div className="overflow-auto max-h-[500px] max-w-full border border-gray-300">
       <table className="min-w-full table-auto border-collapse border border-red-500 text-xs">
         <thead className="bg-red-500 ">
           <tr>
-            <th className="border p-2 ">
+            <th className="border p-2 sticky top-0 bg-red-500 z-10">
               <input
                 type="checkbox"
                 checked={nc.length > 0 && selectedIds.length === nc.length}
@@ -68,16 +70,16 @@ const NonConformityTable = () => {
                 }}
               />
             </th>
-            <th className="border p-2 text-white">NC ID</th>
-            <th className="border p-2 text-white">Description</th>
-            <th className="border p-2 text-white">Clause No</th>
-            <th className="border p-2 text-white">Type</th>
-            <th className="border p-2 text-white">Reporting Date</th>
-            <th className="border p-2 text-white">Due Date</th>
-            <th className="border p-2 text-white">Department</th>
-            <th className="border p-2 text-white">Responsible Person</th>
-            <th className="border p-2 text-white">Location</th>
-            <th className="border p-2 text-white">Status</th>
+            <th className="border p-2 text-white sticky top-0 bg-red-500 z-10">NC ID</th>
+            <th className="border p-2 text-white sticky top-0 bg-red-500 z-10">Description</th>
+            <th className="border p-2 text-white sticky top-0 bg-red-500 z-10">Clause No</th>
+            <th className="border p-2 text-white sticky top-0 bg-red-500 z-10">Type</th>
+            <th className="border p-2 text-white sticky top-0 bg-red-500 z-10">Reporting Date</th>
+            <th className="border p-2 text-white sticky top-0 bg-red-500 z-10">Due Date</th>
+            <th className="border p-2 text-white sticky top-0 bg-red-500 z-10">Department</th>
+            <th className="border p-2 text-white sticky top-0 bg-red-500 z-10">Responsible Person</th>
+            <th className="border p-2 text-white sticky top-0 bg-red-500 z-10">Location</th>
+            <th className="border p-2 text-white sticky top-0 bg-red-500 z-10">Status</th>
             {/* <th className="border p-2">Responsible Person Email</th> */}
             {/* <th className="border p-2">Corrective Action</th>
             <th className="border p-2">Preventive Action</th>
@@ -152,7 +154,7 @@ const NonConformityTable = () => {
           ))}
         </tbody>
       </table>
-
+      </div>
       <button
         className="bg-red-500 text-xs text-white font-bold px-4 py-2 rounded mt-4 hover:bg-orange-600 transition ease-in-out duration-300"
         onClick={() => handleDeleteSelected()}

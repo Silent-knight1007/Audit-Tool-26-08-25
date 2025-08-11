@@ -175,7 +175,9 @@ const closeViewer = () => setModalUrl(null);
                 <td className="border p-2 max-w-xs truncate" title={guideline.description}>{guideline.description || '—'}</td>
                 <td className="border p-2">{guideline.versionNumber || '—'}</td>
                 <td className="border p-2">{formatDate(guideline.releaseDate)}</td>
-                <td className="border p-2">{guideline.applicableStandard || '—'}</td>
+                <td className="border p-2 text-xs">
+                  {Array.isArray(guideline.applicableStandard) && guideline.applicableStandard.length > 0 ? guideline.applicableStandard.join(', '): '—'}
+                </td>
               </tr>
             ))
           )}

@@ -16,7 +16,7 @@ const TemplateForm = () => {
     description: '',
     versionNumber: '',
     releaseDate: '',
-    applicableStandard: '',
+    applicableStandard: [],
   });
 
   useEffect(() => {
@@ -48,10 +48,10 @@ const TemplateForm = () => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleStandardChange = (selectedOption) => {
+  const handleStandardChange = (selectedOptions) => {
     setFormData(prev => ({
       ...prev,
-      applicableStandard: selectedOption ? selectedOption.value : '',
+     applicableStandard: selectedOptions ? selectedOptions.map(opt => opt.value) : [],
     }));
   };
 
@@ -61,11 +61,12 @@ const TemplateForm = () => {
   const requiredFields = ['documentId', 'documentName', 'description', 'versionNumber', 'releaseDate', 'applicableStandard'];
 
 for (const field of requiredFields) {
-  if (!formData[field]) {
-    alert(`Please fill the ${field} field.`);
+  if (!Array.isArray(formData.applicableStandard) || formData.applicableStandard.length === 0) {
+    alert('Please select at least one Applicable Standard.');
     return;
   }
 }
+
 // Check attachments manually
 if (!selectedFiles || selectedFiles.length === 0) {
   alert('Please attach at least one file.');
@@ -92,14 +93,12 @@ if (!selectedFiles || selectedFiles.length === 0) {
         { headers: { 'Content-Type': 'multipart/form-data' } }
       );
     }
-
     navigate('/organisationdocuments/templates');
   } catch (error) {
     console.error('Failed to save template:', error);
     alert('Failed to save template. Please try again.');
   }
 };
-
 
   const handleCancel = () => {
     if (window.confirm('Are you sure you want to cancel?')) {
@@ -195,8 +194,9 @@ if (!selectedFiles || selectedFiles.length === 0) {
           </label>
           <Select
             options={standardOptions}
-            value={standardOptions.find(opt => opt.value === formData.applicableStandard)}
+            value={standardOptions.filter(opt =>formData.applicableStandard.includes(opt.value))}
             onChange={handleStandardChange}
+            isMulti
             isClearable
             className="mt-2"
             classNamePrefix="select"

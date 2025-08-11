@@ -24,7 +24,7 @@ import CertificateForm from './components/Organisationdocuments/Certificates/Cer
 import CertificateTable from './components/Organisationdocuments/Certificates/CertificateTable';
 import AdvisoryForm from './components/Organisationdocuments/Advisiories/AdvisoryForm';
 import AdvisoryTable from './components/Organisationdocuments/Advisiories/AdvisoryTable';
-import AuthContext from './Context/AuthContext';
+import AuthContext from './context/AuthContext';
 import NotFound from './components/NotFound/NotFound';
 
 export default function App() {

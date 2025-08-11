@@ -177,7 +177,8 @@ const AdvisoryTable = () => {
                 <td className="border p-2 max-w-xs truncate" title={advisory.description}>{advisory.description || '—'}</td>
                 <td className="border p-2">{advisory.versionNumber || '—'}</td>
                 <td className="border p-2">{formatDate(advisory.releaseDate)}</td>
-                <td className="border p-2">{advisory.applicableStandard || '—'}</td>
+                <td className="border p-2">{Array.isArray(advisory.applicableStandard) && advisory.applicableStandard.length > 0
+                ? advisory.applicableStandard.join(', '): '—'}</td>
                 </tr>
               ))
             )}

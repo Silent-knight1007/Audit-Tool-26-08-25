@@ -12,7 +12,7 @@ export default function PolicyForm() {
     description: '',
     versionNumber: '',
     releaseDate: '',
-    applicableStandard: '',
+    applicableStandard: [],
   });
   
   const { id } = useParams();
@@ -67,10 +67,10 @@ const [attachments, setAttachments] = useState([]);
     }));
   };
 
-  const handleStandardChange = (selectedOption) => {
+  const handleStandardChange = (selectedOptions) => {
     setFormData(prev => ({
       ...prev,
-      applicableStandard: selectedOption ? selectedOption.value : '',
+      applicableStandard: selectedOptions ? selectedOptions.map(opt => opt.value): [],
     }));
   };
 
@@ -80,11 +80,11 @@ const [attachments, setAttachments] = useState([]);
   const requiredFields = ['documentId', 'documentName', 'description', 'versionNumber', 'releaseDate', 'applicableStandard'];
 
   for (const field of requiredFields) {
-  if (!formData[field]) {
-    alert(`Please fill the ${field} field.`);
-    return;
+    if (!Array.isArray(formData.applicableStandard) || formData.applicableStandard.length === 0) {
+      alert('Please select at least one Applicable Standard.');
+      return;
+    }
   }
-}
 // Check attachments manually
 if (!selectedFiles || selectedFiles.length === 0) {
   alert('Please attach at least one file.');
@@ -224,8 +224,9 @@ if (!selectedFiles || selectedFiles.length === 0) {
       </label>
       <Select
         options={standardOptions}
-        value={standardOptions.find(opt => opt.value === formData.applicableStandard) || null}
+        value={standardOptions.filter(opt =>formData.applicableStandard.includes(opt.value))}
         onChange={handleStandardChange}
+        isMulti
         className="mt-2"
         classNamePrefix="select"
         placeholder="Select Applicable Standard"

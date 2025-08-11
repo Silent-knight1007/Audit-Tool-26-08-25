@@ -349,6 +349,7 @@
     "uri-js": "^4.4.1",
     "use-isomorphic-layout-effect": "^1.2.1",
     "util-deprecate": "^1.0.2",
+    "uuid": "^11.1.0",
     "vary": "^1.1.2",
     "vite": "^5.4.2",
     "webidl-conversions": "^7.0.0",

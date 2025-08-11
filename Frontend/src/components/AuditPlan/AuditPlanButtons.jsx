@@ -59,18 +59,19 @@ const AuditPlanButton = () => {
 
 
   return (
-        <div>
+        <div> 
+            <h2 className="text-xl font-bold mt-2 ml-2 mb-2">Audit Records</h2>
             <Link to="/xyz" className="inline-block items-center mr-10">
-                <button className=" md:w-25 bg-red-500 hover:bg-blue-dark text-white font-bold text-xs py-3 px-6 rounded-lg mt-5 mb-5 ml-2
+                <button className=" md:w-25 bg-red-500 hover:bg-blue-dark text-white font-bold text-xs py-3 px-6 rounded-lg mt-2 mb-5 ml-2
                     hover:bg-orange-600 transition ease-in-out duration-300">
                        Create New Audit
                 </button>
                 
             </Link>
                 {auditId && <p>Generated ID: {auditId}</p>}
-
+             
            <AuditTable />
-
+            
         </div>
     );
 };

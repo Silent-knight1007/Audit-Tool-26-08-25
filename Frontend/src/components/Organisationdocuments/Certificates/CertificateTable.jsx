@@ -178,7 +178,9 @@ const closeViewer = () => setModalUrl(null);
                 </td>
                 <td className="border p-2">{certificate.versionNumber || '—'}</td>
                 <td className="border p-2">{formatDate(certificate.releaseDate)}</td>
-                <td className="border p-2">{certificate.applicableStandard || '—'}</td>
+                <td className="border p-2 text-xs">
+                  {Array.isArray(certificate.applicableStandard) && certificate.applicableStandard.length > 0 ? certificate.applicableStandard.join(', '): '—'}
+                </td>
               </tr>
             ))
           )}

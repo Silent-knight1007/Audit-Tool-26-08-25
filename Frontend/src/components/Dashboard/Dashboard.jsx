@@ -81,6 +81,10 @@ export default function Dashboard() {
   );
 
   const navigate = useNavigate();
+  const handleBarClick = (data, index) => {
+    const dept = data.department;
+    navigate(`/nonconformity`);
+};
 
   // Fetch audits
   useEffect(() => {
@@ -587,7 +591,7 @@ export default function Dashboard() {
                 <XAxis dataKey="department" tick={{ fontSize: 12, fill: "#222" }} interval={0} angle={-40} textAnchor="end" />
                 <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#222" }} />
                 <Tooltip />
-                <Bar dataKey="count" fill={COLORS.executedInternal} barSize={26} />
+                <Bar dataKey="count" fill={COLORS.executedInternal} barSize={26} onClick={handleBarClick} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -653,7 +657,7 @@ export default function Dashboard() {
                 <XAxis dataKey="department" tick={{ fontSize: 12, fill: "#222" }} interval={0} angle={-40} textAnchor="end" />
                 <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: "#222" }} />
                 <Tooltip />
-                <Bar dataKey="count" fill={COLORS.plannedExternal} barSize={26} />
+                <Bar dataKey="count" fill={COLORS.plannedExternal} barSize={26} onClick={handleBarClick} />
               </BarChart>
             </ResponsiveContainer>
           </div>
