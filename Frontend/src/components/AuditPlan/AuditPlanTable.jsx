@@ -1,31 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FileIcon } from 'react-file-icon';
 
-const AuditTable = () => {
-  const [audits, setAudits] = useState([]);
-  const [selectedIds, setSelectedIds] = useState([]);
+const AuditTable = ({ selectedIds, setSelectedIds, audits, setAudits }) => {
   const navigate = useNavigate();
 
-  useEffect(() => {
-    fetchAudits();
-  }, []);
-  const fetchAudits = async () => {
-    try {
-      const response = await axios.get('http://localhost:5000/api/AuditPlan');
-      setAudits(response.data);
-    } catch (error) {
-      console.error('Error fetching audits:', error.message);
-      if (error.response) {
-        console.error('Response:', error.response.data);
-      } else if (error.request) {
-        console.error('No response received:', error.request);
-      } else {
-        console.error('Axios config error:', error.config);
-      }
-    }
-  };
+  
   const handleClick = (auditId, actualDate) => {
     navigate('/abc', {
       state: {
@@ -39,46 +19,9 @@ const AuditTable = () => {
   const d = new Date(date);
   return isNaN(d.getTime()) ? '—' : d.toLocaleDateString();
 };
-const handleDeleteSelected = async (ids = selectedIds) => {
-  const selectedAudits = audits.filter(audit => ids.includes(audit._id));
-  const nonPlanned = selectedAudits.filter(
-    audit =>
-      typeof audit.status === 'string' &&
-      audit.status.trim().toLowerCase() !== 'planned'
-  );
-
-  if (nonPlanned.length > 0) {
-    alert("Audits with status 'executed' & 'completed' can't be deleted.");
-    return;
-  }
-
-  if (!window.confirm("Are you sure you want to delete?")) return;
-
-  try {
-    const response = await axios.delete('http://localhost:5000/audits', {
-      data: { ids }
-    });
-
-    // Use deletedIds if provided, otherwise fallback to ids sent for deletion
-    const deletedIds = (response.data.deletedIds && response.data.deletedIds.length > 0)
-      ? response.data.deletedIds
-      : ids;
-
-    console.log('Deleted IDs from backend or fallback:', deletedIds);
-
-    setAudits(prevAudits => prevAudits.filter(a => !deletedIds.includes(a._id)));
-    setSelectedIds(prevIds => prevIds.filter(id => !deletedIds.includes(id)));
-
-    alert(response.data.message || "Deleted successfully.");
-  } catch (error) {
-    console.error('Error deleting audits:', error);
-    alert("Error deleting audits");
-  }
-};
 
   return (
     <div className="p-1">
-      {/* <h2 className="text-xl font-bold mb-4">Audit Records</h2> */}
       {/* Scroll wrapper */}
     <div className="overflow-auto max-h-[500px] max-w-full border border-gray-300">
       <table className="min-w-full table-auto border-separate border-spacing-0 border-red-500 text-xs">
@@ -108,9 +51,6 @@ const handleDeleteSelected = async (ids = selectedIds) => {
             <th className="border p-2 text-xs text-white sticky top-0 bg-red-500 z-10">Complete Date</th>
             <th className="border p-2 text-xs text-white sticky top-0 bg-red-500 z-10">Add Non Conformity</th>
             <th className="border p-2 text-xs text-white sticky top-0 bg-red-500 z-10">Attachments</th>
-            {/* <th className="border p-2">Audit Team</th> */}
-            {/* <th className="border p-2">Audit Criteria</th> */}
-            {/* <th className="border p-2">Audit Scope</th> */}
           </tr>
         </thead>
         <tbody>
@@ -145,9 +85,6 @@ const handleDeleteSelected = async (ids = selectedIds) => {
               <td className="border p-2 text-xs">{audit.status}</td>
               <td className="border p-2 text-xs">{new Date(audit.actualDate).toLocaleDateString()}</td>
               <td className="border p-2 text-xs">{formatDate(audit.completeDate)}</td>
-              {/* <td className="border p-2">{audit.auditTeam}</td> */}
-              {/* <td className="border p-2">{audit.criteria}</td> */}
-              {/* <td className="border p-2">{audit.scope}</td> */}
               <td className="border p-2 text-xs">
                 {(audit.status === "Executed" || audit.status === "Completed") && (
                 <button
@@ -191,13 +128,6 @@ const handleDeleteSelected = async (ids = selectedIds) => {
         </tbody>
       </table>
       </div>
-      <button
-        className="bg-red-500 text-white font-bold px-4 py-2 rounded mt-4 text-xs hover:bg-orange-600 transition ease-in-out duration-300"
-        onClick={() => handleDeleteSelected()}
-        disabled={selectedIds.length === 0}
-      >
-        Delete 
-      </button>
     </div>
   );
 };

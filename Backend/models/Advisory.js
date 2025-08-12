@@ -9,12 +9,9 @@ const attachmentSchema = new mongoose.Schema({
 });
 
 const advisorySchema = new mongoose.Schema({
-  documentId: { type: String, required: true, unique: true },
-  documentName: { type: String, required: true },
-  description: { type: String },
-  versionNumber: { type: String },
-  releaseDate: { type: Date },
-  applicableStandard: [{ type: String }],
+  advisoryId: { type: String, required: true, unique: true },
+  advisorytitle: { type: String, required: true },
+  Date: { type: Date },
   attachments: [attachmentSchema],
 }, { timestamps: true });
 

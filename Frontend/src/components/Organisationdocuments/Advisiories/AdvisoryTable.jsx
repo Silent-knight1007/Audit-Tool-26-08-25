@@ -20,17 +20,13 @@ const AdvisoryTable = () => {
     const url = `http://localhost:5000/api/advisories/${advisory._id}/attachments/${file._id}`;
 
     if (inlineViewable.includes(ext)) {
-      setModalUrl(url); // Open modal popup with iframe
+      setModalUrl(url); 
     } else {
-      // Redirect/open new page/tab for other formats
-      window.location.href = url;  // Redirects in the same tab
-      // OR to open in a new tab/window:
-      // window.open(url, '_blank', 'noopener,noreferrer');
+      window.location.href = url;  
+      
     }
   }
 };
-
-
   // Handler to close modal
   const closeViewer = () => setModalUrl(null);
 
@@ -102,8 +98,8 @@ const AdvisoryTable = () => {
 
   return (
     <div className="p-2 max-w-full">
-      <div className="flex justify-between items-center mb-2">
         <h2 className="text-xl font-bold mr-10">Advisories</h2>
+      <div className="flex gap-x-2 justify-left items-center mb-2">
         <button
           onClick={handleCreateNew}
           className="bg-red-600 hover:bg-orange-600 text-white font-bold text-xs py-2 px-4 rounded-lg mt-5 mb-5 transition ease-in-out duration-300">
@@ -112,7 +108,7 @@ const AdvisoryTable = () => {
         <button
           onClick={handleEditSelected}
           disabled={selectedIds.length !== 1}
-          className={`px-2 py-2 rounded-lg font-bold text-white text-xs ${
+          className={`px-4 py-2 rounded-lg font-bold text-white text-xs ${
           selectedIds.length !== 1 ? 'bg-red-600 cursor-not-allowed' : 'bg-red-600 hover:bg-red-500'
           } transition`}>
             Edit 
@@ -120,7 +116,7 @@ const AdvisoryTable = () => {
         <button
           onClick={handleDeleteSelected}
           disabled={selectedIds.length === 0}
-          className={`px-2 py-2 rounded-lg font-bold text-white text-xs ${
+          className={`px-4 py-2 rounded-lg font-bold text-white text-xs ${
             selectedIds.length === 0 ? 'bg-red-600 cursor-not-allowed' : 'hover:bg-orange-600'
           } transition`}
         >
@@ -138,12 +134,9 @@ const AdvisoryTable = () => {
                 onChange={toggleSelectAll}
               />
             </th>
-            <th className="border p-2 text-xs text-white">Document ID</th>
-            <th className="border p-2 text-xs text-white"> Document Name</th>
-            <th className="border p-2 text-xs text-white">Description</th>
-            <th className="border p-2 text-xs text-white">Version Number</th>
-            <th className="border p-2 text-xs text-white">Release Date</th>
-            <th className="border p-2 text-xs text-white">Applicable Standard</th>
+            <th className="border p-2 text-xs text-white">Advisory ID</th>
+            <th className="border p-2 text-xs text-white"> Advisory Title</th>
+            <th className="border p-2 text-xs text-white">Date</th>
           </tr>
         </thead>
         <tbody>
@@ -163,47 +156,41 @@ const AdvisoryTable = () => {
                     onChange={() => toggleSelect(advisory._id)}
                   />
                 </td>
-                <td className="border p-2">{advisory.documentId || '—'}</td>
+                <td className="border p-2">{advisory.advisoryId || '—'}</td>
                 <td className="border p-2">
                   {advisory.attachments && advisory.attachments.length > 0 ? (
                     <button
                       type="button"
                       onClick={() => openViewer(advisory)}
                       className="text-blue-700 underline cursor-pointer bg-transparent border-0 p-0">
-                      {advisory.documentName}
+                      {advisory.advisorytitle}
                     </button>
-                  ) : (advisory.documentName)}
+                  ) : (advisory.advisorytitle)}
                 </td>
-                <td className="border p-2 max-w-xs truncate" title={advisory.description}>{advisory.description || '—'}</td>
-                <td className="border p-2">{advisory.versionNumber || '—'}</td>
-                <td className="border p-2">{formatDate(advisory.releaseDate)}</td>
-                <td className="border p-2">{Array.isArray(advisory.applicableStandard) && advisory.applicableStandard.length > 0
-                ? advisory.applicableStandard.join(', '): '—'}</td>
-                </tr>
-              ))
-            )}
+                <td className="border p-2">{formatDate(advisory.Date)}</td>
+              </tr>
+            ))
+          )}
             </tbody>
             </table>
             {modalUrl && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
-    <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] relative p-4">
-      <button
-        className="absolute top-2 right-3 text-2xl font-bold text-gray-700 hover:text-gray-900"
-        onClick={closeViewer}
-        aria-label="Close modal"
-      >
-        &times;
-      </button>
-      <iframe
-        src={modalUrl}
-        title="Document Viewer"
-        className="w-full h-[80vh] border-none"
-      />
+              <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+                <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full max-h-[90vh] relative p-4">
+                  <button
+                    className="absolute top-2 right-3 text-2xl font-bold text-gray-700 hover:text-gray-900"
+                    onClick={closeViewer}
+                    aria-label="Close modal">
+                    &times;
+                  </button>
+                  <iframe
+                    src={modalUrl}
+                    title="Document Viewer"
+                    className="w-full h-[80vh] border-none"
+                  />
+                </div>
+              </div>
+            )}
     </div>
-  </div>
-)}
-
-            </div>
           );
         };
         

@@ -109,8 +109,8 @@ const closeViewer = () => setModalUrl(null);
 
   return (
     <div className="p-2 max-w-full">
-      <div className="flex justify-between items-center mb-2">
         <h2 className="text-xl font-bold mr-10">Policies</h2>
+      <div className="flex gap-x-2 justify-left items-center mb-2">
         <button
           onClick={handleCreateNew}
           className="bg-red-600 hover:bg-blue-dark text-white font-bold text-xs py-2 px-4 rounded-lg mt-5 mb-5 hover:bg-orange-600 transition ease-in-out duration-300">
@@ -119,7 +119,7 @@ const closeViewer = () => setModalUrl(null);
         <button
           onClick={handleEditSelected}
           disabled={selectedIds.length !== 1}
-          className={`px-2 py-2 rounded-lg font-bold text-white text-xs ${
+          className={`px-4 py-2 rounded-lg font-bold text-white text-xs ${
           selectedIds.length !== 1 ? 'bg-red-600 cursor-not-allowed' : 'bg-red-600 hover:bg-red-500'
           } transition`}>
             Edit 
@@ -127,7 +127,7 @@ const closeViewer = () => setModalUrl(null);
         <button
           onClick={handleDeleteSelected}
           disabled={selectedIds.length === 0}
-          className={`px-2 py-2 rounded-lg font-bold text-white text-xs ${selectedIds.length === 0 ? 'bg-red-600 cursor-not-allowed' : 'hover:bg-orange-600'} transition`}
+          className={`px-4 py-2 rounded-lg font-bold text-white text-xs ${selectedIds.length === 0 ? 'bg-red-600 cursor-not-allowed' : 'hover:bg-orange-600'} transition`}
         >
           Delete
         </button>

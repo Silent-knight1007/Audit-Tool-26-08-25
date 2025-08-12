@@ -1,5 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
+import ParentButton from './components/AuditPlan/ParentButton';
 import Home from './components/Home/Home';
 import AuthPanel from './components/Authorization/AuthPanel';
 import TopNavbar from './components/Navbar/TopNavbar';
@@ -8,8 +9,7 @@ import Dashboard from './components/Dashboard/Dashboard';
 import AuditPlan from './components/AuditPlan/AuditPlan';
 import AuditTable from './components/AuditPlan/AuditPlanTable';
 import NonConformity from './components/NonConformity/NonConformity';
-import NonConformityButton from './components/NonConformity/NonConformityButtons';
-import AuditPlanButton from './components/AuditPlan/AuditPlanButtons';
+import ParentNCButton from './components/NonConformity/ParentNcButton';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import User from './components/User/User';
@@ -65,17 +65,17 @@ export default function App() {
 
             {/* Protected routes */}
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/auditplan" element={<ProtectedRoute><AuditPlanButton /></ProtectedRoute>} />
+            <Route path="/auditplan" element={<ProtectedRoute><ParentButton /></ProtectedRoute>} />
             <Route path="/auditplantable" element={<ProtectedRoute><AuditTable /></ProtectedRoute>} />
-            <Route path="/nonconformity" element={<ProtectedRoute><NonConformityButton /></ProtectedRoute>} />
+            <Route path="/nonconformity"element={<ProtectedRoute><ParentNCButton /></ProtectedRoute>}/>
             <Route path="/user/:userid" element={<ProtectedRoute><User /></ProtectedRoute>} />
-
             {/* Edit routes */}
             <Route path="/edit/:id" element={<ProtectedRoute><AuditPlan /></ProtectedRoute>} />
             <Route path="/edit-audit/:id" element={<ProtectedRoute><AuditPlan /></ProtectedRoute>} />
             <Route path="/edit-nc/:id" element={<ProtectedRoute><NonConformity /></ProtectedRoute>} />
             <Route path="/xyz" element={<ProtectedRoute><AuditPlan /></ProtectedRoute>} />
             <Route path="/abc" element={<ProtectedRoute><NonConformity /></ProtectedRoute>} />
+            {/* <Route path="/auditplan" element={<ProtectedRoute><ParentButton /></ProtectedRoute>} /> */}
 
             {/* Protected document forms */}
             <Route path="/organisationdocuments/policies/new" element={<ProtectedRoute><PolicyForm /></ProtectedRoute>} />

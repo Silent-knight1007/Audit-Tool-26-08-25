@@ -13,8 +13,6 @@ const certificateSchema = new mongoose.Schema({
   documentName: { type: String, required: true },
   description: { type: String },
   versionNumber: { type: String },
-  releaseDate: { type: Date },
-  applicableStandard: [{ type: String }],
   attachments: [attachmentSchema],
 }, { timestamps: true });
 

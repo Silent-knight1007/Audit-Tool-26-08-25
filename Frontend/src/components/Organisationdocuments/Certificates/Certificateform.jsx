@@ -14,8 +14,6 @@ const CertificateForm = () => {
     documentName: '',
     description: '',
     versionNumber: '',
-    releaseDate: '',
-    applicableStandard: [],
   });
 
   useEffect(() => {
@@ -33,47 +31,20 @@ const CertificateForm = () => {
   }
 }, [id]);
 
-
-  const standardOptions = [
-    { value: 'ISO 9001 : 2015', label: 'ISO 9001 : 2015' },
-    { value: 'ISO 27001 : 2023', label: 'ISO 27001 : 2023' },
-    { value: 'ISO 27701 : 2019', label: 'ISO 27701 : 2019' },
-    { value: 'ISO 22301 : 2019', label: 'ISO 22301 : 2019' },
-    { value: 'ISO 27017 : 2015', label: 'ISO 27017 : 2015' },
-    { value: 'ISO 27018 : 2015', label: 'ISO 27018 : 2015' },
-  ];
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleStandardChange = (selectedOptions) => {
-    setFormData((prev) => ({
-      ...prev,
-          applicableStandard: selectedOptions ? selectedOptions.map(opt => opt.value) : [],
-    }));
-  };
-
   const handleSubmit = async (e) => {
   e.preventDefault();
-
-  const requiredFields = [
-    'documentId',
-    'documentName',
-    'description',
-    'versionNumber',
-    'releaseDate',
-    'applicableStandard',
-  ];
-
+  const requiredFields = ['documentId','documentName','description','versionNumber'];
   for (const field of requiredFields) {
-    if (!Array.isArray(formData.applicableStandard) || formData.applicableStandard.length === 0) {
-      alert('Please select at least one Applicable Standard.');
-      return;
-    }
+    if (!formData[field]) {
+    alert(`Please fill the ${field} field.`);
+    return;
   }
-
+  }
   try {
     let certificateId = id;
     if (id) {
@@ -175,36 +146,6 @@ const CertificateForm = () => {
             pattern="[a-zA-Z0-9]+"
             title="Only alphanumeric characters allowed"
             autoComplete="off"
-          />
-        </div>
-        {/* Release Date */}
-        <div className="flex flex-col">
-          <label>
-            Release Date <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="date"
-            name="releaseDate"
-            value={formData.releaseDate ? formData.releaseDate.substring(0, 10) : ''}
-            onChange={handleChange}
-            required
-            className="mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
-          />
-        </div>
-        {/* Applicable Standard */}
-        <div className="flex flex-col">
-          <label>
-            Applicable Standard <span className="text-red-500">*</span>
-          </label>
-          <Select
-            options={standardOptions}
-            value={standardOptions.filter(opt => formData.applicableStandard.includes(opt.value))}
-            onChange={handleStandardChange}
-            isMulti
-            isClearable
-            className="mt-2"
-            classNamePrefix="select"
-            placeholder="Select Applicable Standard"
           />
         </div>
         {/* Attachments */}
