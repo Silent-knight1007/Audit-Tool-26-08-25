@@ -120,6 +120,37 @@ router.get('/:advisoryId/attachments/:fileId', async (req, res) => {
   }
 });
 
+// DELETE a single attachment from an advisory
+router.delete('/:advisoryId/attachments/:fileId', async (req, res) => {
+  try {
+    const advisory = await Advisory.findById(req.params.advisoryId);
+    if (!advisory) return res.status(404).json({ error: 'Advisory not found' });
+
+    // Find index of the attachment to remove
+    const index = advisory.attachments.findIndex(file => file._id.toString() === req.params.fileId);
+    if (index === -1) return res.status(404).json({ error: 'Attachment not found' });
+
+    const file = advisory.attachments[index];
+
+    // Delete the physical file from disk
+    const fs = await import('fs');
+    if (fs.existsSync(file.path)) {
+      fs.unlinkSync(file.path);
+    }
+
+    // Remove attachment from the array
+    advisory.attachments.splice(index, 1);
+
+    // Save the updated advisory document
+    await advisory.save();
+
+    res.json({ message: 'Attachment deleted successfully', attachmentId: req.params.fileId });
+  } catch (error) {
+    console.error('Delete attachment error:', error);
+    res.status(500).json({ error: 'Failed to delete attachment', detail: error.message });
+  }
+});
+
 // ======= Advisory CRUD Routes =======
 
 // Get all advisories
@@ -155,18 +186,35 @@ router.post('/', async (req, res) => {
 }
 });
 
-// Update advisory by ID
+// Update advisory by ID (only certain fields allowed)
 router.put('/:id', async (req, res) => {
   try {
-    const updatedAdvisory = await Advisory.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!updatedAdvisory) return res.status(404).json({ error: 'Advisory not found' });
-    res.json(updatedAdvisory);
+    const advisory = await Advisory.findById(req.params.id);
+    if (!advisory) {
+      return res.status(404).json({ error: 'Advisory not found' });
+    }
+
+    // Only update specific fields — advisoryId stays the same
+    if (req.body.advisorytitle !== undefined) {
+      advisory.advisorytitle = req.body.advisorytitle;
+    }
+    if (req.body.Date !== undefined) {
+      const parsedDate = new Date(req.body.Date);
+      if (isNaN(parsedDate.getTime())) {
+        return res.status(400).json({ error: 'Invalid date format' });
+      }
+      advisory.Date = parsedDate;
+    }
+
+    // If you want to allow editing attachments *within this PUT*, you could also handle them here,
+    // but normally attachments have their own upload routes.
+
+    const updated = await advisory.save();
+    res.json(updated);
+
   } catch (err) {
-    res.status(400).json({ error: 'Failed to update advisory' });
+    console.error('Error updating advisory:', err);
+    res.status(400).json({ error: 'Failed to update advisory', detail: err.message });
   }
 });
 

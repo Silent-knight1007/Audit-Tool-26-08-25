@@ -88,7 +88,7 @@ const closeViewer = () => setModalUrl(null);
     if (selectedIds.length === 1) {
        navigate(`/organisationdocuments/guidelines/${selectedIds[0]}`);
     } else {
-    alert("Please select exactly one advisory to edit.");
+    alert("Please select exactly one guideline to edit.");
     }
   };
 

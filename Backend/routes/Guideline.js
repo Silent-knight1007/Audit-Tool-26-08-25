@@ -19,9 +19,13 @@ const storage = multer.diskStorage({
   filename(req, file, cb) {
     const safeName = file.originalname.replace(/\s+/g, '_');
     cb(null, `${Date.now()}-${safeName}`);
-  }
+  },
 });
 const upload = multer({ storage });
+
+/* =====================================================
+   ATTACHMENTS
+===================================================== */
 
 // Upload attachments
 router.post('/:id/attachments', upload.array('attachments'), async (req, res) => {
@@ -42,12 +46,12 @@ router.post('/:id/attachments', upload.array('attachments'), async (req, res) =>
 
     res.json({ message: 'Files uploaded', attachments: guideline.attachments });
   } catch (error) {
+    console.error('Upload attachment error:', error);
     res.status(500).json({ error: 'Failed to upload attachments', detail: error.message });
   }
 });
 
-
-// List all attachments metadata for a guideline
+// List attachments
 router.get('/:id/attachments', async (req, res) => {
   try {
     const guideline = await Guideline.findById(req.params.id);
@@ -66,7 +70,7 @@ router.get('/:id/attachments', async (req, res) => {
   }
 });
 
-// Serve attachment inline or download
+// Serve attachment
 router.get('/:guidelineId/attachments/:fileId', async (req, res) => {
   try {
     const guideline = await Guideline.findById(req.params.guidelineId);
@@ -90,6 +94,35 @@ router.get('/:guidelineId/attachments/:fileId', async (req, res) => {
   }
 });
 
+// Delete an attachment
+router.delete('/:guidelineId/attachments/:fileId', async (req, res) => {
+  try {
+    const guideline = await Guideline.findById(req.params.guidelineId);
+    if (!guideline) return res.status(404).json({ error: 'Guideline not found' });
+
+    const fileIndex = guideline.attachments.findIndex(f => f._id.toString() === req.params.fileId);
+    if (fileIndex === -1) return res.status(404).json({ error: 'Attachment not found' });
+
+    const file = guideline.attachments[fileIndex];
+
+    if (file.path && fs.existsSync(file.path)) {
+      fs.unlinkSync(file.path);
+    }
+
+    guideline.attachments.splice(fileIndex, 1);
+    await guideline.save();
+
+    res.json({ message: 'Attachment deleted successfully', attachmentId: req.params.fileId });
+  } catch (error) {
+    console.error('Delete guideline attachment error:', error);
+    res.status(500).json({ error: 'Failed to delete attachment', detail: error.message });
+  }
+});
+
+/* =====================================================
+   GUIDELINES CRUD
+===================================================== */
+
 // GET all guidelines
 router.get('/', async (req, res) => {
   try {
@@ -100,7 +133,7 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET a single guideline by ID
+// GET a single guideline
 router.get('/:id', async (req, res) => {
   try {
     const guideline = await Guideline.findById(req.params.id);
@@ -111,38 +144,42 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// POST create new guideline
+// POST create guideline
 router.post('/', async (req, res) => {
   try {
     if (!req.body.documentId) {
-  return res.status(400).json({ error: "guidelineId is required and must be unique" });
-}
+      return res.status(400).json({ error: "documentId is required and must be unique" });
+    }
     const guideline = new Guideline(req.body);
     const savedGuideline = await guideline.save();
     res.status(201).json(savedGuideline);
   } catch (err) {
-  console.error('Guideline validation error:', err);
-  res.status(400).json({ error: err.message }); // pass through real error for debugging
-}
+    console.error('Guideline validation error:', err);
+    res.status(400).json({ error: err.message });
+  }
 });
 
-// PUT update a guideline by ID
+// PUT update guideline (documentId immutable, attachments handled separately)
 router.put('/:id', async (req, res) => {
   try {
+    const { documentId, attachments, ...updatableFields } = req.body;
+
     const updatedGuideline = await Guideline.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true }
+      { $set: updatableFields },
+      { new: true, runValidators: true }
     );
+
     if (!updatedGuideline) return res.status(404).json({ error: 'Guideline not found' });
+
     res.json(updatedGuideline);
   } catch (err) {
-  console.error('Guideline validation error:', err);
-  res.status(400).json({ error: err.message }); // pass through real error for debugging
-}
+    console.error('Guideline update error:', err);
+    res.status(400).json({ error: err.message });
+  }
 });
 
-// DELETE multiple guidelines (by ids array in req.body.ids)
+// DELETE multiple guidelines
 router.delete('/', async (req, res) => {
   try {
     const { ids } = req.body;

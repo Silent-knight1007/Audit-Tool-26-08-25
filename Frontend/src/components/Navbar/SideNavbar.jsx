@@ -119,11 +119,11 @@ export default function SidebarNavbar({ open, onClose }) {
             {isOrgDocsOpen && (
               <ul className="ml-4 mt-1 space-y-1 transition-all duration-200">
                 {[
-                  { to: '/organisationdocuments/policies', label: 'Policies' },
-                  { to: '/organisationdocuments/guidelines', label: 'Guidelines' },
-                  { to: '/organisationdocuments/templates', label: 'Templates' },
+                  { to: '/organisationdocuments/advisories', label: 'Advisories' },
                   { to: '/organisationdocuments/certificates', label: 'Certificates' },
-                  { to: '/organisationdocuments/advisories', label: 'Advisories' }
+                  { to: '/organisationdocuments/guidelines', label: 'Guidelines' },
+                  { to: '/organisationdocuments/policies', label: 'Policies' },
+                  { to: '/organisationdocuments/templates', label: 'Templates' },
                 ].map(subLink => (
                   <li key={subLink.to}>
                     <NavLink
