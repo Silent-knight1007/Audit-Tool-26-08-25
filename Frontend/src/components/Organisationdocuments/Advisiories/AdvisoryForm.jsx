@@ -71,8 +71,8 @@ const AdvisoryForm = () => {
     }
 
     const payload = {
-      advisoryTitle: formData.advisoryTitle,
-      date: formData.date ? new Date(formData.date).toISOString() : undefined,
+      advisorytitle: formData.advisorytitle,
+      Date: formData.Date ? new Date(formData.Date).toISOString() : undefined,
     };
 
     // Only include advisoryId in CREATE mode
@@ -158,7 +158,7 @@ const AdvisoryForm = () => {
             Advisory Title <span className="text-red-500">*</span>
           </label>
           <input
-            name="advisoryTitle"
+            name="advisorytitle"
             value={formData.advisorytitle}
             onChange={handleChange}
             required
@@ -174,7 +174,7 @@ const AdvisoryForm = () => {
           </label>
           <input
             type="date"
-            name="date"
+            name="Date"
             value={formData.Date}
             onChange={handleChange}
             required

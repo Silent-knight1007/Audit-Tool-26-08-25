@@ -88,6 +88,36 @@ router.get('/:templateId/attachments/:fileId', async (req, res) => {
   }
 });
 
+// DELETE attachment by ID for template
+router.delete('/:templateId/attachments/:attachmentId', async (req, res) => {
+  try {
+    const { templateId, attachmentId } = req.params;
+
+    const template = await Template.findById(templateId);
+    if (!template) return res.status(404).json({ error: 'Template not found' });
+
+    const attachment = template.attachments.id(attachmentId);
+    if (!attachment) return res.status(404).json({ error: 'Attachment not found' });
+
+    const filePath = path.resolve(attachment.path);
+
+    // Delete file from filesystem
+    fs.unlink(filePath, (err) => {
+      if (err && err.code !== 'ENOENT') {
+        console.error('Error deleting file:', err);
+      }
+    });
+
+    // Remove attachment from DB array
+    template.attachments.pull(attachmentId);
+    await template.save();
+
+    res.json({ message: 'Attachment deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete attachment', detail: error.message });
+  }
+});
+
 // GET all templates
 router.get('/', async (req, res) => {
   try {
@@ -123,15 +153,22 @@ router.post('/', async (req, res) => {
 // PUT update a template by ID
 router.put('/:id', async (req, res) => {
   try {
-    const updatedTemplate = await Template.findByIdAndUpdate(
-      req.params.id,
-      req.body,
-      { new: true }
-    );
-    if (!updatedTemplate) return res.status(404).json({ error: 'Template not found' });
-    res.json(updatedTemplate);
+    const { attachments, ...otherData } = req.body;
+
+    const template = await Template.findById(req.params.id);
+    if (!template) return res.status(404).json({ error: 'Template not found' });
+
+    // Update attachments array if present
+    if (attachments) {
+      template.attachments = attachments;
+    }
+
+    Object.assign(template, otherData);
+
+    await template.save();
+    res.json(template);
   } catch (err) {
-    res.status(400).json({ error: 'Failed to update template' });
+    res.status(400).json({ error: 'Failed to update template', detail: err.message });
   }
 });
 

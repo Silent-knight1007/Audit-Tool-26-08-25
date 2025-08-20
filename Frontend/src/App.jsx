@@ -26,6 +26,8 @@ import AdvisoryForm from './components/Organisationdocuments/Advisiories/Advisor
 import AdvisoryTable from './components/Organisationdocuments/Advisiories/AdvisoryTable';
 import AuthContext from './context/AuthContext';
 import NotFound from './components/NotFound/NotFound';
+import ResetPassword from './components/Authorization/ResetPassword.jsx';
+
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -88,6 +90,8 @@ export default function App() {
             <Route path="/organisationdocuments/certificates/:id" element={<ProtectedRoute><CertificateForm /></ProtectedRoute>} />
             <Route path="/organisationdocuments/advisories/new" element={<ProtectedRoute><AdvisoryForm /></ProtectedRoute>} />
             <Route path="/organisationdocuments/advisories/:id" element={<ProtectedRoute><AdvisoryForm /></ProtectedRoute>} />
+           <Route path="/profile/reset-password" element={<ProtectedRoute><ResetPassword /></ProtectedRoute>} />
+
           </Routes>
         </div>
       </div>

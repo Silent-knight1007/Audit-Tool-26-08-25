@@ -19,7 +19,25 @@ export default function PolicyForm() {
   useEffect(() => {
   if (id) {
     axios.get(`http://localhost:5000/api/policies/${id}`)
-      .then(res => setFormData(res.data))
+      .then(res => {
+        const data = res.data;
+
+        // Format releaseDate to YYYY-MM-DD
+        const formatDate = (dateStr) => {
+          if (!dateStr) return '';
+          const d = new Date(dateStr);
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+
+        setFormData(prev => ({
+          ...prev,
+          ...data,
+          releaseDate: formatDate(data.releaseDate)
+        }));
+      })
       .catch(err => console.error(err));
 
     axios.get(`http://localhost:5000/api/policies/${id}/attachments`)
@@ -57,7 +75,6 @@ const [attachments, setAttachments] = useState([]);
       setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
-
   // Normal text change handler
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -66,14 +83,12 @@ const [attachments, setAttachments] = useState([]);
       [name]: value,
     }));
   };
-
   const handleStandardChange = (selectedOptions) => {
     setFormData(prev => ({
       ...prev,
       applicableStandard: selectedOptions ? selectedOptions.map(opt => opt.value): [],
     }));
   };
-
   const handleSubmit = async (e) => {
   e.preventDefault();
 
@@ -86,15 +101,15 @@ const [attachments, setAttachments] = useState([]);
     }
   }
 // Check attachments manually
-if (!selectedFiles || selectedFiles.length === 0) {
+if ((!attachments || attachments.length === 0) && (!selectedFiles || selectedFiles.length === 0)) {
   alert('Please attach at least one file.');
   return;
 }
-
   try {
     let policyId = id;
     if (id) {
-      await axios.put(`http://localhost:5000/api/policies/${id}`, formData);
+      const updateData = { ...formData, attachments }; // Attach current attachments
+      await axios.put(`http://localhost:5000/api/policies/${id}`, updateData);
       alert('Policy updated successfully!');
     } else {
       const res = await axios.post('http://localhost:5000/api/policies', formData);
@@ -114,17 +129,38 @@ if (!selectedFiles || selectedFiles.length === 0) {
     }
 
     navigate('/organisationdocuments/policies');
-  } catch (error) {
-    console.error('Failed to save policy:', error);
+  }catch (error) {
+  console.error('Failed to save policy:', error);
+  if (error.response) {
+    console.error('Full response:', error.response);
+    console.error('Response data:', error.response.data);
+    alert(`Failed to save policy: ${JSON.stringify(error.response.data) || 'Unknown error'}`);
+  } else if (error.request) {
+    console.error('No response received:', error.request);
+    alert('No response from server. Please try again.');
+  } else {
     alert('Failed to save policy. Please try again.');
   }
+}
+
+
 };
-
-
   const handleCancel = () => {
     if (window.confirm("Are you sure you want to cancel filling the form?")) {
       navigate('/organisationdocuments/policies');
     }
+  };
+const handleDeleteAttachment = async (attachmentId) => {
+  if (!window.confirm('Are you sure you want to delete this attachment?')) return;
+
+  try {
+    await axios.delete(`http://localhost:5000/api/policies/${id}/attachments/${attachmentId}`);
+    setAttachments(prev => prev.filter(att => att._id !== attachmentId));
+    alert('Attachment deleted successfully!');
+  } catch (error) {
+    console.error('Failed to delete attachment:', error);
+    alert('Failed to delete attachment. Please try again.');
+  }
   };
 
   return (
@@ -142,7 +178,8 @@ if (!selectedFiles || selectedFiles.length === 0) {
         value={formData.documentId}
         onChange={handleAlphanumericChange}
         required
-        className="mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
+        readOnly={!!id} // disable editing if id exists (edit mode)
+        className={`mt-2 py-3 px-3 rounded-lg border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none ${id ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
         placeholder="Enter Document ID"
         pattern="[a-zA-Z0-9]+"
         title="Only alphanumeric characters allowed"
@@ -241,7 +278,7 @@ if (!selectedFiles || selectedFiles.length === 0) {
   <input
     type="file"
     multiple
-    required
+    // required
     onChange={e => setSelectedFiles([...e.target.files])}
     className="mt-2 py-2 px-2 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
   />
@@ -258,15 +295,22 @@ if (!selectedFiles || selectedFiles.length === 0) {
       <div className="text-xs font-semibold mb-1">Existing Attachments:</div>
       <ul>
         {attachments.map(file => (
-          <li key={file._id}>
+          <li key={file._id} className="flex items-center justify-between">
             <a
               href={file.downloadUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-blue-700 underline"
             >
-              {file.name}
+              {file.name || file.originalName}
             </a>
+            <button
+              type="button"
+              onClick={() => handleDeleteAttachment(file._id)}
+              className="text-red-600 ml-4 hover:text-red-800"
+              title="Delete attachment">
+              Delete
+            </button>
           </li>
         ))}
       </ul>

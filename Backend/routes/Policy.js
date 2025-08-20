@@ -88,6 +88,38 @@ router.get('/:policyId/attachments/:fileId', async (req, res) => {
   }
 });
 
+// DELETE attachment by ID for a policy
+router.delete('/:policyId/attachments/:attachmentId', async (req, res) => {
+  try {
+    const { policyId, attachmentId } = req.params;
+
+    const policy = await Policy.findById(policyId);
+    if (!policy) return res.status(404).json({ error: 'Policy not found' });
+
+    const attachment = policy.attachments.id(attachmentId);
+    if (!attachment) return res.status(404).json({ error: 'Attachment not found' });
+
+    const filePath = path.resolve(attachment.path);
+
+    // Delete file from filesystem
+    fs.unlink(filePath, (err) => {
+      if (err && err.code !== 'ENOENT') {
+        console.error('Error deleting file:', err);
+      } else if (err && err.code === 'ENOENT') {
+        console.warn('File already missing, skipping file delete:', filePath);
+      }
+    });
+
+    // Remove the attachment from MongoDB array
+    policy.attachments.pull(attachmentId);
+    await policy.save();
+
+    res.json({ message: 'Attachment deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to delete attachment', detail: error.message });
+  }
+});
+
 // GET all policies
 router.get('/', async (req, res) => {
   try {
@@ -123,17 +155,23 @@ router.post('/', async (req, res) => {
 // PUT update a policy by ID
 router.put('/:id', async (req, res) => {
   try {
+    const { attachments, ...otherData } = req.body;
+
     const updatedPolicy = await Policy.findByIdAndUpdate(
       req.params.id,
-      req.body,
-      { new: true }
+      { ...otherData, attachments },
+      { new: true, runValidators: true }
     );
+
     if (!updatedPolicy) return res.status(404).json({ error: 'Policy not found' });
     res.json(updatedPolicy);
   } catch (err) {
-    res.status(400).json({ error: 'Failed to update policy' });
+    console.error('Failed to update policy:', err);
+    res.status(400).json({ error: 'Failed to update policy', detail: err.message });
   }
 });
+
+
 
 // DELETE multiple policies (by ids array in req.body.ids)
 router.delete('/', async (req, res) => {

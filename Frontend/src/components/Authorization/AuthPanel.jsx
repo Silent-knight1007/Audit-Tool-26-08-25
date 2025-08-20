@@ -70,8 +70,8 @@ export default function AuthPanel() {
         <form
           className="bg-white border-2 border-red-800 p-8 rounded-2xl shadow-xl w-full animate-fade-in relative"
           onSubmit={handleLoginSubmit}
-          autoComplete="off"
-        >
+          autoComplete="off">
+            
           <h2 className="text-3xl font-bold text-center mb-6 text-red-700">Sign In</h2>
 
           {/* Email */}

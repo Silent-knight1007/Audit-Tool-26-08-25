@@ -66,17 +66,16 @@ for (const field of requiredFields) {
     return;
   }
 }
-
 // Check attachments manually
-if (!selectedFiles || selectedFiles.length === 0) {
+if ((!attachments || attachments.length === 0) && (!selectedFiles || selectedFiles.length === 0)) {
   alert('Please attach at least one file.');
   return;
 }
-
   try {
     let templateId = id;
     if (id) {
-      await axios.put(`http://localhost:5000/api/templates/${id}`, formData);
+      const updateData = { ...formData, attachments };
+      await axios.put(`http://localhost:5000/api/templates/${id}`, updateData);
       alert('Template updated successfully!');
     } else {
       const res = await axios.post('http://localhost:5000/api/templates', formData);
@@ -105,6 +104,18 @@ if (!selectedFiles || selectedFiles.length === 0) {
       navigate('/organisationdocuments/templates');
     }
   };
+  const handleDeleteAttachment = async (attachmentId) => {
+  if (!window.confirm("Are you sure you want to delete this attachment?")) return;
+
+  try {
+    await axios.delete(`http://localhost:5000/api/templates/${id}/attachments/${attachmentId}`);
+    setAttachments((prev) => prev.filter((att) => att._id !== attachmentId));
+    alert("Attachment deleted successfully!");
+  } catch (error) {
+    console.error("Failed to delete attachment:", error);
+    alert("Failed to delete attachment. Please try again.");
+  }
+};
 
   return (
     <form onSubmit={handleSubmit} className="p-1 flex flex-col justify-center max-w-5xl mx-auto pt-20">
@@ -119,7 +130,8 @@ if (!selectedFiles || selectedFiles.length === 0) {
             value={formData.documentId}
             onChange={handleChange}
             required
-            className="mt-2 py-3 px-3 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
+            readOnly={!!id} 
+            className={`mt-2 py-3 px-3 rounded-lg border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none ${id ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'}`}
             placeholder="Enter Document ID"
             pattern="[a-zA-Z0-9]+"
             title="Only alphanumeric characters allowed"
@@ -205,43 +217,47 @@ if (!selectedFiles || selectedFiles.length === 0) {
         </div>
         {/* Attachments */}
         <div className="flex flex-col md:col-span-3 mt-4">
-  <label className="font-medium text-gray-700">
-    Attachments
-  </label>
-  <input
-    type="file"
-    multiple
-    required
-    onChange={e => setSelectedFiles([...e.target.files])}
-    className="mt-2 py-2 px-2 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"
-  />
-  {selectedFiles.length > 0 && (
-    <ul className="text-sm mt-2">
-      {Array.from(selectedFiles).map((file, index) => (
-        <li key={index}>{file.name}</li>
-      ))}
-    </ul>
-  )}
-  {/* Show existing attachments */}
-  {attachments.length > 0 && (
-    <div className="mt-4">
-      <div className="text-xs font-semibold mb-1">Existing Attachments:</div>
-      <ul>
-        {attachments.map(file => (
-          <li key={file._id}>
-            <a
-              href={file.downloadUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-700 underline"
-            >
-              {file.name}
-            </a>
-          </li>
-        ))}
-      </ul>
-    </div>
-  )}
+          <label className="font-medium text-gray-700">
+            Attachments
+          </label>
+          <input
+            type="file"
+            multiple
+            onChange={e => setSelectedFiles([...e.target.files])}
+            className="mt-2 py-2 px-2 rounded-lg bg-white border border-gray-400 text-gray-800 font-semibold focus:border-orange-500 focus:outline-none"/>
+            {selectedFiles.length > 0 && (
+              <ul className="text-sm mt-2">
+                {Array.from(selectedFiles).map((file, index) => (
+                  <li key={index}>{file.name}</li>
+                ))}
+              </ul>
+            )}
+          {/* Show existing attachments */}
+          {attachments.length > 0 && (
+          <div className="mt-4">
+            <div className="text-xs font-semibold mb-1">Existing Attachments:</div>
+            <ul>
+              {attachments.map(file => (
+                <li key={file._id}>
+                  <a
+                    href={file.downloadUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-700 underline">
+                    {file.name}
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteAttachment(file._id)}
+                    className="text-red-600 ml-4 hover:text-red-800"
+                    title="Delete attachment">
+                    Delete
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+          )}
         </div>
       </div>
       {/* buttons*/}
