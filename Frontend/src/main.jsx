@@ -10,7 +10,7 @@ import NonConformity from './components/NonConformity/NonConformity.jsx'
 import ParentNCButton from './components/NonConformity/ParentNcButton.jsx'
 import User from './components/User/User.jsx'
 import ParentButton from './components/AuditPlan/ParentButton.jsx'
-import { AuthProvider } from './context/AuthContext.jsx'
+import { AuthProvider } from './Context/AuthContext.jsx'
 
 const router = createBrowserRouter(
   createRoutesFromElements(

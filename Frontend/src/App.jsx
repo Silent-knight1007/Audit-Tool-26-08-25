@@ -24,10 +24,9 @@ import CertificateForm from './components/Organisationdocuments/Certificates/Cer
 import CertificateTable from './components/Organisationdocuments/Certificates/CertificateTable';
 import AdvisoryForm from './components/Organisationdocuments/Advisiories/AdvisoryForm';
 import AdvisoryTable from './components/Organisationdocuments/Advisiories/AdvisoryTable';
-import AuthContext from './context/AuthContext';
+import AuthContext from './Context/AuthContext';
 import NotFound from './components/NotFound/NotFound';
-import ResetPassword from './components/Authorization/ResetPassword.jsx';
-
+import ResetPassword from './components/Authorization/Resetpassword.jsx';
 
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -59,39 +58,50 @@ export default function App() {
             <Route
               path="/login"
               element={
-                isAuthenticated
-                  ? <Navigate to="/home" replace />
-                  : <AuthPanel />
+                isAuthenticated ? <Navigate to="/home" replace /> : <AuthPanel />
               }
             />
 
             {/* Protected routes */}
-            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/auditplan" element={<ProtectedRoute><ParentButton /></ProtectedRoute>} />
-            <Route path="/auditplantable" element={<ProtectedRoute><AuditTable /></ProtectedRoute>} />
-            <Route path="/nonconformity"element={<ProtectedRoute><ParentNCButton /></ProtectedRoute>}/>
-            <Route path="/user/:userid" element={<ProtectedRoute><User /></ProtectedRoute>} />
-            {/* Edit routes */}
-            <Route path="/edit/:id" element={<ProtectedRoute><AuditPlan /></ProtectedRoute>} />
-            <Route path="/edit-audit/:id" element={<ProtectedRoute><AuditPlan /></ProtectedRoute>} />
-            <Route path="/edit-nc/:id" element={<ProtectedRoute><NonConformity /></ProtectedRoute>} />
-            <Route path="/xyz" element={<ProtectedRoute><AuditPlan /></ProtectedRoute>} />
-            <Route path="/abc" element={<ProtectedRoute><NonConformity /></ProtectedRoute>} />
-            {/* <Route path="/auditplan" element={<ProtectedRoute><ParentButton /></ProtectedRoute>} /> */}
+            <Route
+              path="/dashboard"
+              element={<ProtectedRoute allowedRoles={['admin','auditor','user']}><Dashboard /></ProtectedRoute>}
+            />
+            <Route
+              path="/auditplan"
+              element={<ProtectedRoute allowedRoles={['admin','auditor']}><ParentButton /></ProtectedRoute>}
+            />
+            <Route
+              path="/auditplantable"
+              element={<ProtectedRoute allowedRoles={['admin','auditor']}><AuditTable /></ProtectedRoute>}
+            />
+            <Route
+              path="/nonconformity"
+              element={<ProtectedRoute allowedRoles={['admin','auditor','user']}><ParentNCButton /></ProtectedRoute>}
+            />
+            <Route
+              path="/user/:userid"
+              element={<ProtectedRoute allowedRoles={['admin']}><User /></ProtectedRoute>}
+            />
 
-            {/* Protected document forms */}
-            <Route path="/organisationdocuments/policies/new" element={<ProtectedRoute><PolicyForm /></ProtectedRoute>} />
-            <Route path="/organisationdocuments/policies/:id" element={<ProtectedRoute><PolicyForm /></ProtectedRoute>} />
-            <Route path="/organisationdocuments/guidelines/new" element={<ProtectedRoute><GuidelineForm /></ProtectedRoute>} />
-            <Route path="/organisationdocuments/guidelines/:id" element={<ProtectedRoute><GuidelineForm /></ProtectedRoute>} />
-            <Route path="/organisationdocuments/templates/new" element={<ProtectedRoute><TemplateForm /></ProtectedRoute>} />
-            <Route path="/organisationdocuments/templates/:id" element={<ProtectedRoute><TemplateForm /></ProtectedRoute>} />
-            <Route path="/organisationdocuments/certificates/new" element={<ProtectedRoute><CertificateForm /></ProtectedRoute>} />
-            <Route path="/organisationdocuments/certificates/:id" element={<ProtectedRoute><CertificateForm /></ProtectedRoute>} />
-            <Route path="/organisationdocuments/advisories/new" element={<ProtectedRoute><AdvisoryForm /></ProtectedRoute>} />
-            <Route path="/organisationdocuments/advisories/:id" element={<ProtectedRoute><AdvisoryForm /></ProtectedRoute>} />
-           <Route path="/profile/reset-password" element={<ProtectedRoute><ResetPassword /></ProtectedRoute>} />
+            {/* Edit routes (Admin only) */}
+            <Route path="/edit/:id" element={<ProtectedRoute allowedRoles={['admin']}><AuditPlan /></ProtectedRoute>} />
+            <Route path="/edit-audit/:id" element={<ProtectedRoute allowedRoles={['admin']}><AuditPlan /></ProtectedRoute>} />
+            <Route path="/edit-nc/:id" element={<ProtectedRoute allowedRoles={['admin']}><NonConformity /></ProtectedRoute>} />
 
+            {/* Document forms (Admin only) */}
+            <Route path="/organisationdocuments/policies/new" element={<ProtectedRoute allowedRoles={['admin']}><PolicyForm /></ProtectedRoute>} />
+            <Route path="/organisationdocuments/policies/:id" element={<ProtectedRoute allowedRoles={['admin']}><PolicyForm /></ProtectedRoute>} />
+            <Route path="/organisationdocuments/guidelines/new" element={<ProtectedRoute allowedRoles={['admin']}><GuidelineForm /></ProtectedRoute>} />
+            <Route path="/organisationdocuments/guidelines/:id" element={<ProtectedRoute allowedRoles={['admin']}><GuidelineForm /></ProtectedRoute>} />
+            <Route path="/organisationdocuments/templates/new" element={<ProtectedRoute allowedRoles={['admin']}><TemplateForm /></ProtectedRoute>} />
+            <Route path="/organisationdocuments/templates/:id" element={<ProtectedRoute allowedRoles={['admin']}><TemplateForm /></ProtectedRoute>} />
+            <Route path="/organisationdocuments/certificates/new" element={<ProtectedRoute allowedRoles={['admin']}><CertificateForm /></ProtectedRoute>} />
+            <Route path="/organisationdocuments/certificates/:id" element={<ProtectedRoute allowedRoles={['admin']}><CertificateForm /></ProtectedRoute>} />
+            <Route path="/organisationdocuments/advisories/new" element={<ProtectedRoute allowedRoles={['admin']}><AdvisoryForm /></ProtectedRoute>} />
+            <Route path="/organisationdocuments/advisories/:id" element={<ProtectedRoute allowedRoles={['admin']}><AdvisoryForm /></ProtectedRoute>} />
+
+            <Route path="/profile/reset-password" element={<ProtectedRoute allowedRoles={['admin','auditor','user']}><ResetPassword /></ProtectedRoute>} />
           </Routes>
         </div>
       </div>

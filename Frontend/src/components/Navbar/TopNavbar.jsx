@@ -3,7 +3,7 @@ import CompanyLogo from '../../assets/CompanyLogo.png';
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
 import { FaUserCircle } from 'react-icons/fa'; // Profile icon
-import AuthContext from '../../context/AuthContext';
+import AuthContext from '../../Context/AuthContext';
 
 export default function TopNavbar({ onMenuClick }) {
   const navigate = useNavigate();
