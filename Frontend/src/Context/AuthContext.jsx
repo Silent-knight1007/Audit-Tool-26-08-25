@@ -1,44 +1,40 @@
 import React, { createContext, useState, useEffect } from "react";
 
-// Create the Auth Context
 const AuthContext = createContext();
 
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [role, setRole] = useState(null);
+  const [user, setUser] = useState(null);  // store full user object or null
 
-  // On component mount, check localStorage for auth state & role
   useEffect(() => {
-    const auth = localStorage.getItem("isAuthenticated") === "true";
-    const storedRole = localStorage.getItem("role");
-    setIsAuthenticated(auth);
-    if (storedRole) {
-      setRole(storedRole);
+    // Example: read user data from localStorage or API on mount
+    const storedAuth = localStorage.getItem("isAuthenticated") === "true";
+    const storedUser = JSON.parse(localStorage.getItem("user"));
+    setIsAuthenticated(storedAuth);
+    if (storedUser) {
+      setUser(storedUser);
     }
   }, []);
 
-  // Function to log in
-  function login(userRole) {
+  function login(userData) {
     localStorage.setItem("isAuthenticated", "true");
-    localStorage.setItem("role", userRole);
+    localStorage.setItem("user", JSON.stringify(userData));
     setIsAuthenticated(true);
-    setRole(userRole);
+    setUser(userData);
   }
 
-  // Function to log out
   function logout() {
     localStorage.setItem("isAuthenticated", "false");
-    localStorage.removeItem("role");
+    localStorage.removeItem("user");
     setIsAuthenticated(false);
-    setRole(null);
+    setUser(null);
   }
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, role, login, logout }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
 export default AuthContext;
-

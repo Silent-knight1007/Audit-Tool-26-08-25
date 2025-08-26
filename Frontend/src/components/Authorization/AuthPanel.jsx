@@ -41,7 +41,7 @@ export default function AuthPanel() {
       const response = await fetch("http://localhost:5000/auth/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: loginEmail, password, role }),
+        body: JSON.stringify({ email: loginEmail, password }),
       });
 
       const data = await response.json();
@@ -49,7 +49,7 @@ export default function AuthPanel() {
 
       if (response.ok) {
         // ✅ Save role in context + localStorage
-        login(data.role);
+        login(data);
 
         toast.success(`Access granted as ${data.role},because your role is ${data.role}`, {
           position: "top-center",
@@ -61,7 +61,7 @@ export default function AuthPanel() {
           if (data.role === "admin") {
             navigate("/dashboard");
           } else if (data.role === "auditor") {
-            navigate("/nonconformity");
+            navigate("/auditplan");
           } else {
             navigate("/home");
           }

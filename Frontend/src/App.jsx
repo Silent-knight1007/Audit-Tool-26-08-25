@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, createContext } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import ParentButton from './components/AuditPlan/ParentButton';
 import Home from './components/Home/Home';
@@ -31,6 +31,7 @@ import ResetPassword from './components/Authorization/Resetpassword.jsx';
 export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { isAuthenticated } = useContext(AuthContext);
+  
 
   return (
     <>
@@ -83,11 +84,14 @@ export default function App() {
               path="/user/:userid"
               element={<ProtectedRoute allowedRoles={['admin']}><User /></ProtectedRoute>}
             />
-
+            <Route path="/xyz" element={<ProtectedRoute allowedRoles={['admin','auditor']}><AuditPlan /></ProtectedRoute>} />
+            <Route path="/abc" element={<ProtectedRoute allowedRoles={['admin','auditor','user']}><NonConformity /></ProtectedRoute>} />
+            
             {/* Edit routes (Admin only) */}
             <Route path="/edit/:id" element={<ProtectedRoute allowedRoles={['admin']}><AuditPlan /></ProtectedRoute>} />
-            <Route path="/edit-audit/:id" element={<ProtectedRoute allowedRoles={['admin']}><AuditPlan /></ProtectedRoute>} />
-            <Route path="/edit-nc/:id" element={<ProtectedRoute allowedRoles={['admin']}><NonConformity /></ProtectedRoute>} />
+
+            <Route path="/edit-audit/:id" element={<ProtectedRoute allowedRoles={['admin','auditor']}><AuditPlan /></ProtectedRoute>} />
+            <Route path="/edit-nc/:id" element={<ProtectedRoute allowedRoles={['admin','auditor','user']}><NonConformity /></ProtectedRoute>} />
 
             {/* Document forms (Admin only) */}
             <Route path="/organisationdocuments/policies/new" element={<ProtectedRoute allowedRoles={['admin']}><PolicyForm /></ProtectedRoute>} />

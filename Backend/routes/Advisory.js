@@ -221,18 +221,26 @@ router.put('/:id', async (req, res) => {
 // Delete multiple advisories by IDs
 router.delete('/', async (req, res) => {
   try {
-    const { ids } = req.body;
+    const { ids, role } = req.body; // get role from request body
+
     if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({ error: 'No advisory IDs provided' });
     }
+
+    if (role === 'user') {
+      return res.status(403).json({ error: 'Forbidden: Users cannot delete organisational documents' });
+    }
+
     await Advisory.deleteMany({ _id: { $in: ids } });
     res.json({
       message: 'Advisories deleted successfully',
       deletedIds: ids
     });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to delete advisories' });
+    console.error('Delete advisories error:', err);
+    res.status(500).json({ error: 'Failed to delete advisories', details: err.message });
   }
 });
+
 
 export default router;

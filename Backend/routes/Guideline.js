@@ -186,6 +186,9 @@ router.delete('/', async (req, res) => {
     if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({ error: 'No guideline IDs provided' });
     }
+    if (role === 'user') {
+      return res.status(403).json({ error: 'Forbidden: Users cannot delete guidelines' });
+    }
     await Guideline.deleteMany({ _id: { $in: ids } });
     res.json({
       message: 'Guidelines deleted successfully',

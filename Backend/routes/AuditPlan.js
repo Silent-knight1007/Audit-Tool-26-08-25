@@ -128,11 +128,11 @@ router.delete('/audits', async (req, res) => {
 
     // Filter only audits with status = 'planned'
     const allowedIds = auditsToDelete
-     .filter(
-      audit =>
-      typeof audit.status === "string" &&
-      audit.status.trim().toLowerCase() === "planned"
-    )
+      .filter(
+        audit =>
+          typeof audit.status === "string" &&
+          audit.status.trim().toLowerCase() === "planned"
+      )
       .map(audit => audit._id.toString()); // Convert ObjectId to string
 
     if (allowedIds.length === 0) {
@@ -141,8 +141,8 @@ router.delete('/audits', async (req, res) => {
 
     const result = await AuditPlan.deleteMany({ _id: { $in: allowedIds } });
     res.status(200).json({
-    message: `${result.deletedCount} audit(s) deleted.`,
-    deletedIds: allowedIds.map(id => id.toString())
+      message: `${result.deletedCount} audit(s) deleted.`,
+      deletedIds: allowedIds.map(id => id.toString())
     });
 
   } catch (error) {
@@ -150,5 +150,6 @@ router.delete('/audits', async (req, res) => {
     res.status(500).json({ message: 'Server error during delete.', error: error.message });
   }
 });
+
 
 export default router;

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { toast } from "react-toastify";
+import { useNavigate} from 'react-router-dom';
 
 export default function ResetPassword() {
   const [email, setEmail] = useState("");
@@ -7,6 +8,7 @@ export default function ResetPassword() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   const handleResetSubmit = async (e) => {
     e.preventDefault();
@@ -30,12 +32,12 @@ export default function ResetPassword() {
         toast.success(data.message || "Password reset successful. Please log in again.", {
           position: "top-center",
           autoClose: 3000,
-        });
+        }); navigate('/home');
         // Clear form or redirect as needed
-        setEmail("");
-        setOldPassword("");
-        setNewPassword("");
-        setConfirmNewPassword("");
+        // setEmail("");
+        // setOldPassword("");
+        // setNewPassword("");
+        // setConfirmNewPassword("");
       } else {
         toast.error(data.message || "Password reset failed.", { position: "top-center", autoClose: 3000 });
       }

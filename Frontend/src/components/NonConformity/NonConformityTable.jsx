@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 
 const NonConformityTable = ({ nc, selectedIds, setSelectedIds }) => {
   const navigate = useNavigate();
+  const userRole = 'user';
 
   const formatDate = (date) => {
     if (!date) return '—';

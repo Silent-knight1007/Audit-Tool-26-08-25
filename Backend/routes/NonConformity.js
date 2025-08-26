@@ -31,6 +31,11 @@ const upload = multer({
 // UPDATE a NonConformity by ID
 router.put('/:id', upload.array('attachments'), async (req, res) => {
   try {
+    const nc = await NonConformity.findById(req.params.id);
+    if (!nc) {
+      return res.status(404).json({ message: 'NonConformity not found' });
+    }
+
     let attachments = [];
     if (req.files && req.files.length > 0) {
       attachments = req.files.map(file => ({
@@ -86,7 +91,7 @@ router.post('/', upload.array('attachments'), async (req, res) => {
         originalname: file.originalname,
         mimetype: file.mimetype,
         size: file.size,
-        path: file.path // or `uploads/${file.filename}`
+        path: file.path
       }));
     }
 
@@ -125,7 +130,6 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ message: err.message });
   }
 });
-
 
 // DELETE multiple non-conformities
 router.delete('/', async (req, res) => {

@@ -180,32 +180,6 @@ const submitNCForm = async (ncData) => {
       ]);
     }, []);
 
-//     // If editing, fetch existing NonConformity and its attachments
-//     useEffect(() => {
-//   if (id) {
-//     fetch(`http://localhost:5000/api/NonConformity/${id}`)
-//       .then(res => res.json())
-//       .then(data => {
-//         setAuditId(data.auditId || '');
-//         setNcId(data.ncId || '');
-//         setNcDescription(data.ncDescription || '');
-//         setNcClauseNo(data.ncClauseNo || '');
-//         setNcType(data.ncType || '');
-//         setReportingDate(data.reportingDate ? data.reportingDate.slice(0,10) : '');
-//         setDueDate(data.dueDate ? data.dueDate.slice(0,10) : ''); // <-- FIXED LINE
-//         setDepartment(data.department || '');
-//         setResponsibleperson(data.responsibleperson || '');
-//         setResponsiblepersonmail(data.responsiblepersonmail || '');
-//         setNclocation(data.nclocation || []);
-//         setNcCorrectiveAction(data.ncCorrectiveAction || '');
-//         setNcPreventiveAction(data.ncPreventiveAction || '');
-//         setNcRootCause(data.ncRootCause || '');
-//         setNcstatus(data.ncstatus || '');
-//         setExistingAttachments(data.attachments || []);
-//       });
-//   }
-// }, [id]);
-
     useEffect(() => {
     console.log('✅ actualdate received via navigate:', actualdate);
     }, [actualdate]);
@@ -343,6 +317,7 @@ const submitNCForm = async (ncData) => {
         setNcPreventiveAction('');
         setNcRootCause('');
         setNcstatus('');
+        navigate('/NonConformity');
       }
     };
 

@@ -261,6 +261,7 @@ export default function AuditPlan() {
       setCompleteDate('');
       setCriteria('');
       setScope('');
+      navigate('/AuditPlan')
     }
   };
 

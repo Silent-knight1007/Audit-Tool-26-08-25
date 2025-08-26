@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useContext, useState, useEffect } from 'react';
+import AuthContext from '../../Context/AuthContext';
 import { Link } from "react-router-dom";
 import axios from "axios";
 import NonConformityTable from "./NonConformityTable";
@@ -7,6 +8,8 @@ import DeleteNonConformityButton from "./DeleteNonConformityButton";
 export default function ParentNCButton() {
   const [nc, setNc] = useState([]);
   const [selectedIds, setSelectedIds] = useState([]);
+  const { user } = useContext(AuthContext);
+  const userRole = user?.role;
 
   // Fetch nonconformity data from API
   const fetchNonConformities = async () => {
@@ -33,7 +36,12 @@ export default function ParentNCButton() {
     if (!window.confirm("Are you sure you want to delete selected items?")) return;
 
     try {
-      await axios.delete("http://localhost:5000/api/NonConformity", { data: { ids } });
+      await axios.delete("http://localhost:5000/api/NonConformity", { 
+        data: { ids,
+           role: userRole,
+          } 
+        });
+
       // Update local state after deletion
       setNc(prev => prev.filter(item => !ids.includes(item._id)));
       setSelectedIds(prev => prev.filter(id => !ids.includes(id)));
@@ -49,15 +57,11 @@ export default function ParentNCButton() {
         <h1 className="mb-8 font-bold text-xl ml-2">Non-Conformity Records</h1>
       {/* Buttons Row */}
       <div className="flex gap-x-2 mb-4">
-        <Link to="/create-nonconformity">
-          <button className="bg-red-500 hover:bg-orange-600 text-white ml-1 font-bold text-xs py-2 px-7 rounded-lg">
-            Add
-          </button>
-        </Link>
 
         <DeleteNonConformityButton
           onDelete={() => handleDeleteSelected()}
-          disabled={selectedIds.length === 0}
+          selectedIds={selectedIds}
+          userRole={userRole}
         />
       </div>
 

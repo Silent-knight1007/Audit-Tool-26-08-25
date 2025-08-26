@@ -246,17 +246,22 @@ router.put('/:id', async (req, res) => {
 // DELETE multiple certificates
 router.delete('/', async (req, res) => {
   try {
-    const { ids } = req.body;
+    const { ids, role } = req.body;
     if (!Array.isArray(ids) || ids.length === 0) {
       return res.status(400).json({ error: 'No certificate IDs provided' });
     }
+    if (role === 'user') {
+      return res.status(403).json({ error: 'Forbidden: Users cannot delete certificates' });
+    }
+
     await Certificate.deleteMany({ _id: { $in: ids } });
     res.json({
       message: 'Certificates deleted successfully',
       deletedIds: ids
     });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to delete certificates' });
+    console.error('Delete certificates error:', err);
+    res.status(500).json({ error: 'Failed to delete certificates', details: err.message });
   }
 });
 

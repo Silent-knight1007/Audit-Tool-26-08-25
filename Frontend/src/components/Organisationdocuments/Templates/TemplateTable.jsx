@@ -7,6 +7,7 @@ const TemplateTable = () => {
   const [selectedIds, setSelectedIds] = useState([]);
   const navigate = useNavigate();
   const [modalUrl, setModalUrl] = useState(null);
+  const userRole = 'user';
 //   const openViewer = (template) => {
 //   if (template.attachments && template.attachments.length > 0) {
 //     setModalUrl(`http://localhost:5000/api/templates/${template._id}/attachments/${template.attachments[0]._id}`);
@@ -77,7 +78,12 @@ const closeViewer = () => setModalUrl(null);
     if (selectedIds.length === 0) return;
     if (!window.confirm(`Are you sure you want to delete ${selectedIds.length} selected template(s)?`)) return;
     try {
-      const response = await axios.delete('http://localhost:5000/api/templates', { data: { ids: selectedIds } });
+      const response = await axios.delete('http://localhost:5000/api/templates', { 
+        data: { 
+          ids: selectedIds,
+          role: userRole,
+         }
+         });
       const deletedIds = response.data.deletedIds || selectedIds;
       setTemplates(prev => prev.filter(t => !deletedIds.includes(t._id)));
       setSelectedIds([]);
@@ -121,9 +127,11 @@ const closeViewer = () => setModalUrl(null);
         </button>
         <button
           onClick={handleDeleteSelected}
-          disabled={selectedIds.length === 0}
-          className={`px-4 py-2 rounded-lg font-bold text-white text-xs ${selectedIds.length === 0 ? 'bg-red-600 cursor-not-allowed' : 'hover:bg-orange-600'} transition`}
-        >
+          title={userRole !== 'admin' ? 'You do not have permission to delete Template' : ''}
+          disabled={selectedIds.length === 0 || userRole === 'user'}
+          className={`px-4 py-2 rounded-lg font-bold text-white text-xs ${
+          selectedIds.length === 0 || userRole === 'user' ? 'bg-red-600 cursor-not-allowed' : 'hover:bg-orange-600'
+          } transition`}>
           Delete 
         </button>
       </div>
